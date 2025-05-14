@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.grpc";
+option java_outer_classname = "DeviceProto";
+
+package device;
+
+// Common service for all devices
+service DeviceService {
+  // Generic device operations
+  rpc GetStatus (StatusRequest) returns (StatusResponse) {}
+  rpc UpdateState (StateUpdateRequest) returns (StateUpdateResponse) {}
+  rpc RegisterDevice (RegistrationRequest) returns (RegistrationResponse) {}
+  
+  // Device-specific operations
+  rpc ExecuteCommand (CommandRequest) returns (CommandResponse) {}
+}
+
+// Common message types
+message StatusRequest {
+  string device_id = 1;
+  string device_type = 2;
+}
+
+message StatusResponse {
+  string device_id = 1;
+  string device_type = 2;
+  bool is_online = 3;
+  map<string, string> properties = 4;
+  string error_message = 5;
+}
+
+message StateUpdateRequest {
+  string device_id = 1;
+  string device_type = 2;
+  map<string, string> properties = 3;
+}
+
+message StateUpdateResponse {
+  string device_id = 1;
+  bool success = 2;
+  string error_message = 3;
+}
+
+message RegistrationRequest {
+  string device_id = 1;
+  string device_type = 2;
+  string ip_address = 3;
+  int32 port = 4;
+  map<string, string> metadata = 5;
+}
+
+message RegistrationResponse {
+  string device_id = 1;
+  bool success = 2;
+  string registration_token = 3;
+  string error_message = 4;
+}
+
+message CommandRequest {
+  string device_id = 1;
+  string device_type = 2;
+  string command = 3;
+  map<string, string> parameters = 4;
+}
+
+message CommandResponse {
+  string device_id = 1;
+  bool success = 2;
+  map<string, string> result = 3;
+  string error_message = 4;
+}
