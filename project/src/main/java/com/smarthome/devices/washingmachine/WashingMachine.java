@@ -14,14 +14,14 @@ import java.util.concurrent.TimeUnit;
 public class WashingMachine extends AbstractDevice {
     private static final Logger logger = LoggerFactory.getLogger(WashingMachine.class);
     private static final String DEVICE_TYPE = "WASHING_MACHINE";
-    
+
     private ScheduledExecutorService executor;
     private final Random random = new Random();
-    
+
     public WashingMachine(String deviceManagerHost, int deviceManagerPort) {
         super(DEVICE_TYPE, deviceManagerHost, deviceManagerPort);
     }
-    
+
     public WashingMachine(String deviceId, String deviceManagerHost, int deviceManagerPort) {
         super(deviceId, DEVICE_TYPE, deviceManagerHost, deviceManagerPort);
     }
@@ -44,29 +44,29 @@ public class WashingMachine extends AbstractDevice {
         for (Map.Entry<String, String> entry : newProperties.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            
+
             switch (key) {
                 case "power":
                     if (!value.equals("ON") && !value.equals("OFF")) {
                         throw new IllegalArgumentException("Power must be 'ON' or 'OFF'");
                     }
                     break;
-                    
+
                 case "status":
-                    if (!value.equals("IDLE") && !value.equals("WASHING") && 
-                        !value.equals("RINSING") && !value.equals("SPINNING") && 
-                        !value.equals("FINISHED")) {
+                    if (!value.equals("IDLE") && !value.equals("WASHING") &&
+                            !value.equals("RINSING") && !value.equals("SPINNING") &&
+                            !value.equals("FINISHED")) {
                         throw new IllegalArgumentException("Invalid status value");
                     }
                     break;
-                    
+
                 case "program":
-                    if (!value.equals("NORMAL") && !value.equals("DELICATE") && 
-                        !value.equals("HEAVY_DUTY") && !value.equals("QUICK_WASH")) {
+                    if (!value.equals("NORMAL") && !value.equals("DELICATE") &&
+                            !value.equals("HEAVY_DUTY") && !value.equals("QUICK_WASH")) {
                         throw new IllegalArgumentException("Invalid program value");
                     }
                     break;
-                    
+
                 case "temperature":
                     try {
                         int temp = Integer.parseInt(value);
@@ -77,7 +77,7 @@ public class WashingMachine extends AbstractDevice {
                         throw new IllegalArgumentException("Temperature must be a valid number");
                     }
                     break;
-                    
+
                 case "spinSpeed":
                     try {
                         int speed = Integer.parseInt(value);
@@ -88,7 +88,7 @@ public class WashingMachine extends AbstractDevice {
                         throw new IllegalArgumentException("Spin speed must be a valid number");
                     }
                     break;
-                    
+
                 case "timeRemaining":
                     try {
                         int time = Integer.parseInt(value);
@@ -99,13 +99,13 @@ public class WashingMachine extends AbstractDevice {
                         throw new IllegalArgumentException("Time remaining must be a valid number");
                     }
                     break;
-                    
+
                 case "doorLocked":
                     if (!value.equals("true") && !value.equals("false")) {
                         throw new IllegalArgumentException("Door locked must be 'true' or 'false'");
                     }
                     break;
-                    
+
                 case "waterLevel":
                 case "detergentLevel":
                     try {
@@ -117,7 +117,7 @@ public class WashingMachine extends AbstractDevice {
                         throw new IllegalArgumentException(key + " must be a valid number");
                     }
                     break;
-                    
+
                 default:
                     throw new IllegalArgumentException("Unknown property: " + key);
             }
@@ -129,30 +129,30 @@ public class WashingMachine extends AbstractDevice {
         String status = properties.get("status");
         String program = properties.get("program");
         String timeRemaining = properties.get("timeRemaining");
-        logger.debug("Washing Machine {} state updated: status={}, program={}, timeRemaining={}min", 
+        logger.debug("Washing Machine {} state updated: status={}, program={}, timeRemaining={}min",
                 getDeviceId(), status, program, timeRemaining);
     }
 
     @Override
     public Map<String, String> executeCommand(String command, Map<String, String> parameters) {
         Map<String, String> result = new HashMap<>();
-        
+
         switch (command) {
             case "START_WASH":
                 if (properties.get("power").equals("OFF")) {
                     result.put("error", "Machine is powered off");
                     break;
                 }
-                
+
                 Map<String, String> startUpdate = new HashMap<>();
                 startUpdate.put("status", "WASHING");
                 startUpdate.put("doorLocked", "true");
                 startUpdate.put("waterLevel", "50");
-                
+
                 // Set time based on program
-                String program = properties.get("program");
+                String selectedProgram = properties.get("program");
                 int washTime;
-                switch (program) {
+                switch (selectedProgram) {
                     case "QUICK_WASH":
                         washTime = 30;
                         break;
@@ -167,14 +167,14 @@ public class WashingMachine extends AbstractDevice {
                         break;
                 }
                 startUpdate.put("timeRemaining", String.valueOf(washTime));
-                
+
                 if (updateState(startUpdate)) {
                     result.putAll(startUpdate);
                 } else {
                     result.put("error", "Failed to start wash cycle");
                 }
                 break;
-                
+
             case "SET_PROGRAM":
                 if (parameters.containsKey("value")) {
                     String program = parameters.get("value");
@@ -189,7 +189,7 @@ public class WashingMachine extends AbstractDevice {
                     result.put("error", "Missing program value");
                 }
                 break;
-                
+
             case "SET_TEMPERATURE":
                 if (parameters.containsKey("value")) {
                     String temperature = parameters.get("value");
@@ -204,7 +204,7 @@ public class WashingMachine extends AbstractDevice {
                     result.put("error", "Missing temperature value");
                 }
                 break;
-                
+
             case "SET_SPIN_SPEED":
                 if (parameters.containsKey("value")) {
                     String speed = parameters.get("value");
@@ -219,11 +219,11 @@ public class WashingMachine extends AbstractDevice {
                     result.put("error", "Missing spin speed value");
                 }
                 break;
-                
+
             case "PAUSE":
-                if (properties.get("status").equals("WASHING") || 
-                    properties.get("status").equals("RINSING") || 
-                    properties.get("status").equals("SPINNING")) {
+                if (properties.get("status").equals("WASHING") ||
+                        properties.get("status").equals("RINSING") ||
+                        properties.get("status").equals("SPINNING")) {
                     Map<String, String> pauseUpdate = new HashMap<>();
                     pauseUpdate.put("status", "IDLE");
                     if (updateState(pauseUpdate)) {
@@ -235,7 +235,7 @@ public class WashingMachine extends AbstractDevice {
                     result.put("error", "Cannot pause: machine is not running");
                 }
                 break;
-                
+
             case "TOGGLE_POWER":
                 String currentPower = properties.get("power");
                 String newPower = "ON".equals(currentPower) ? "OFF" : "ON";
@@ -253,29 +253,29 @@ public class WashingMachine extends AbstractDevice {
                     result.put("error", "Failed to toggle power");
                 }
                 break;
-                
+
             default:
                 result.put("error", "Unknown command: " + command);
                 break;
         }
-        
+
         return result;
     }
 
     @Override
     protected void onStart() {
         executor = Executors.newScheduledThreadPool(2);
-        
+
         // Send status updates
         executor.scheduleAtFixedRate(() -> {
             if (isOnline()) {
                 getDeviceClient().sendStatusUpdate();
             }
         }, 5, 10, TimeUnit.SECONDS);
-        
+
         // Simulate wash cycle progress
         executor.scheduleAtFixedRate(this::updateWashCycle, 60, 60, TimeUnit.SECONDS);
-        
+
         logger.info("Washing Machine {} started and sending periodic updates", getDeviceId());
     }
 
@@ -283,19 +283,19 @@ public class WashingMachine extends AbstractDevice {
         if (!isOnline() || properties.get("power").equals("OFF")) {
             return;
         }
-        
+
         String status = properties.get("status");
         if (status.equals("IDLE") || status.equals("FINISHED")) {
             return;
         }
-        
+
         try {
             int timeRemaining = Integer.parseInt(properties.get("timeRemaining"));
             if (timeRemaining > 0) {
                 timeRemaining--;
                 Map<String, String> update = new HashMap<>();
                 update.put("timeRemaining", String.valueOf(timeRemaining));
-                
+
                 // Update status based on time remaining
                 if (timeRemaining == 0) {
                     update.put("status", "FINISHED");
@@ -306,7 +306,7 @@ public class WashingMachine extends AbstractDevice {
                 } else if (timeRemaining <= 15) {
                     update.put("status", "RINSING");
                 }
-                
+
                 updateState(update);
             }
         } catch (NumberFormatException e) {
@@ -327,18 +327,18 @@ public class WashingMachine extends AbstractDevice {
                 Thread.currentThread().interrupt();
             }
         }
-        
+
         logger.info("Washing Machine {} stopped", getDeviceId());
     }
-    
+
     public static void main(String[] args) {
         String host = "localhost";
         int port = 9000;
-        
+
         if (args.length >= 1) {
             host = args[0];
         }
-        
+
         if (args.length >= 2) {
             try {
                 port = Integer.parseInt(args[1]);
@@ -347,12 +347,12 @@ public class WashingMachine extends AbstractDevice {
                 System.exit(1);
             }
         }
-        
+
         WashingMachine washingMachine = new WashingMachine(host, port);
         washingMachine.start();
-        
+
         Runtime.getRuntime().addShutdownHook(new Thread(washingMachine::stop));
-        
+
         logger.info("Washing Machine device running. Press Ctrl+C to stop.");
     }
 }
