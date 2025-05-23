@@ -25,23 +25,23 @@ To run the complete simulation with multiple devices:
 
 ```bash
 mvn clean package
-java -cp target/smart-home-simulation-1.0.0-jar-with-dependencies.jar com.smarthome.SimulationMain
+java -cp target/smart-home-simulation-1.0.0.jar com.smarthome.SimulationMain
 ```
 
 To run just the device manager:
 
 ```bash
-java -cp target/smart-home-simulation-1.0.0-jar-with-dependencies.jar com.smarthome.DeviceManagerMain [PORT]
+java -cp target/smart-home-simulation-1.0.0.jar com.smarthome.DeviceManagerMain [PORT]
 ```
 
 To run individual devices (which will connect to a running device manager):
 
 ```bash
 # Run a light device
-java -cp target/smart-home-simulation-1.0.0-jar-with-dependencies.jar com.smarthome.devices.light.Light [HOST] [PORT]
+java -cp target/smart-home-simulation-1.0.0.jar com.smarthome.devices.light.Light [HOST] [PORT]
 
 # Run a thermostat device
-java -cp target/smart-home-simulation-1.0.0-jar-with-dependencies.jar com.smarthome.devices.thermostat.Thermostat [HOST] [PORT]
+java -cp target/smart-home-simulation-1.0.0.jar com.smarthome.devices.thermostat.Thermostat [HOST] [PORT]
 ```
 
 ## Adding New Device Types
