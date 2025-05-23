@@ -188,7 +188,7 @@ public class Light extends AbstractDevice {
      */
     public static void main(String[] args) {
         // Parse command line arguments for device manager host/port
-        String host = "localhost";
+        String host = "127.0.0.1";  // invece di localhost
         int port = 9000;
         
         if (args.length >= 1) {
