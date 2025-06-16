@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "DeviceManagerProto";
+
+// Device Manager Service
+service DeviceManagerService {
+  rpc RegisterDevice(RegisterDeviceRequest) returns (RegisterDeviceResponse);
+  rpc UnregisterDevice(UnregisterDeviceRequest) returns (UnregisterDeviceResponse);
+  rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
+  rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
+}
+
+message RegisterDeviceRequest {
+  string device_id = 1;
+  string device_type = 2;
+  string address = 3;
+  int32 port = 4;
+}
+
+message RegisterDeviceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UnregisterDeviceRequest {
+  string device_id = 1;
+}
+
+message UnregisterDeviceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListDevicesRequest {}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message Device {
+  string device_id = 1;
+  string device_type = 2;
+  string address = 3;
+  int32 port = 4;
+  bool online = 5;
+}
+
+message SendCommandRequest {
+  string device_id = 1;
+  string command = 2;
+  map<string, string> parameters = 3;
+}
+
+message SendCommandResponse {
+  bool success = 1;
+  string message = 2;
+  map<string, string> result = 3;
+}
