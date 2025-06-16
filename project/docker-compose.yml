@@ -105,8 +105,7 @@ services:
     build:
       context: .
       dockerfile: devices/washingmachine/Dockerfile
-    ports:
-      - "50060:50060"
+    
     container_name: washingmachine
     networks:
       - smart-home-network
