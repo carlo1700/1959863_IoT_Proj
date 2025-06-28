@@ -8,12 +8,12 @@ option java_outer_classname = "LightProto";
 
 // Light Service
 service LightService {
-  rpc TurnOn(TurnOnRequest) returns (TurnOnResponse);
-  rpc TurnOff(TurnOffRequest) returns (TurnOffResponse);
-  rpc SetBrightness(SetBrightnessRequest) returns (SetBrightnessResponse);
-  rpc SetColor(SetColorRequest) returns (SetColorResponse);
-  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+  rpc TurnOn (TurnOnRequest) returns (TurnOnResponse);
+  rpc TurnOff (TurnOffRequest) returns (TurnOffResponse);
+  rpc GetStatus (GetStatusRequest) returns (GetStatusResponse);
 }
+
+// ---- REQUEST / RESPONSE Messages ----
 
 message TurnOnRequest {}
 
@@ -29,32 +29,8 @@ message TurnOffResponse {
   string message = 2;
 }
 
-message SetBrightnessRequest {
-  int32 brightness = 1; // 0-100
-}
-
-message SetBrightnessResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-message SetColorRequest {
-  int32 red = 1;   // 0-255
-  int32 green = 2; // 0-255
-  int32 blue = 3;  // 0-255
-}
-
-message SetColorResponse {
-  bool success = 1;
-  string message = 2;
-}
-
 message GetStatusRequest {}
 
 message GetStatusResponse {
   bool is_on = 1;
-  int32 brightness = 2;
-  int32 red = 3;
-  int32 green = 4;
-  int32 blue = 5;
 }

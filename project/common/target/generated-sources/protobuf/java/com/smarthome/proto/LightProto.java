@@ -35,26 +35,6 @@ public final class LightProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_smarthome_TurnOffResponse_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SetBrightnessRequest_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SetBrightnessRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SetBrightnessResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SetBrightnessResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SetColorRequest_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SetColorRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SetColorResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SetColorResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_smarthome_GetStatusRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -77,25 +57,15 @@ public final class LightProto {
       "t\"2\n\016TurnOnResponse\022\017\n\007success\030\001 \001(\010\022\017\n\007" +
       "message\030\002 \001(\t\"\020\n\016TurnOffRequest\"3\n\017TurnO" +
       "ffResponse\022\017\n\007success\030\001 \001(\010\022\017\n\007message\030\002" +
-      " \001(\t\"*\n\024SetBrightnessRequest\022\022\n\nbrightne" +
-      "ss\030\001 \001(\005\"9\n\025SetBrightnessResponse\022\017\n\007suc" +
-      "cess\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\";\n\017SetColorR" +
-      "equest\022\013\n\003red\030\001 \001(\005\022\r\n\005green\030\002 \001(\005\022\014\n\004bl" +
-      "ue\030\003 \001(\005\"4\n\020SetColorResponse\022\017\n\007success\030" +
-      "\001 \001(\010\022\017\n\007message\030\002 \001(\t\"\022\n\020GetStatusReque" +
-      "st\"`\n\021GetStatusResponse\022\r\n\005is_on\030\001 \001(\010\022\022" +
-      "\n\nbrightness\030\002 \001(\005\022\013\n\003red\030\003 \001(\005\022\r\n\005green" +
-      "\030\004 \001(\005\022\014\n\004blue\030\005 \001(\0052\360\002\n\014LightService\022=\n" +
+      " \001(\t\"\022\n\020GetStatusRequest\"\"\n\021GetStatusRes" +
+      "ponse\022\r\n\005is_on\030\001 \001(\0102\327\001\n\014LightService\022=\n" +
       "\006TurnOn\022\030.smarthome.TurnOnRequest\032\031.smar" +
       "thome.TurnOnResponse\022@\n\007TurnOff\022\031.smarth" +
       "ome.TurnOffRequest\032\032.smarthome.TurnOffRe" +
-      "sponse\022R\n\rSetBrightness\022\037.smarthome.SetB" +
-      "rightnessRequest\032 .smarthome.SetBrightne" +
-      "ssResponse\022C\n\010SetColor\022\032.smarthome.SetCo" +
-      "lorRequest\032\033.smarthome.SetColorResponse\022" +
-      "F\n\tGetStatus\022\033.smarthome.GetStatusReques" +
-      "t\032\034.smarthome.GetStatusResponseB#\n\023com.s" +
-      "marthome.protoB\nLightProtoP\001b\006proto3"
+      "sponse\022F\n\tGetStatus\022\033.smarthome.GetStatu" +
+      "sRequest\032\034.smarthome.GetStatusResponseB#" +
+      "\n\023com.smarthome.protoB\nLightProtoP\001b\006pro" +
+      "to3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -125,42 +95,18 @@ public final class LightProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_TurnOffResponse_descriptor,
         new java.lang.String[] { "Success", "Message", });
-    internal_static_smarthome_SetBrightnessRequest_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_smarthome_SetBrightnessRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SetBrightnessRequest_descriptor,
-        new java.lang.String[] { "Brightness", });
-    internal_static_smarthome_SetBrightnessResponse_descriptor =
-      getDescriptor().getMessageTypes().get(5);
-    internal_static_smarthome_SetBrightnessResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SetBrightnessResponse_descriptor,
-        new java.lang.String[] { "Success", "Message", });
-    internal_static_smarthome_SetColorRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_smarthome_SetColorRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SetColorRequest_descriptor,
-        new java.lang.String[] { "Red", "Green", "Blue", });
-    internal_static_smarthome_SetColorResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
-    internal_static_smarthome_SetColorResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SetColorResponse_descriptor,
-        new java.lang.String[] { "Success", "Message", });
     internal_static_smarthome_GetStatusRequest_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_smarthome_GetStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_GetStatusRequest_descriptor,
         new java.lang.String[] { });
     internal_static_smarthome_GetStatusResponse_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_smarthome_GetStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_GetStatusResponse_descriptor,
-        new java.lang.String[] { "IsOn", "Brightness", "Red", "Green", "Blue", });
+        new java.lang.String[] { "IsOn", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -49,50 +49,6 @@ private static final long serialVersionUID = 0L;
     return isOn_;
   }
 
-  public static final int BRIGHTNESS_FIELD_NUMBER = 2;
-  private int brightness_ = 0;
-  /**
-   * <code>int32 brightness = 2;</code>
-   * @return The brightness.
-   */
-  @java.lang.Override
-  public int getBrightness() {
-    return brightness_;
-  }
-
-  public static final int RED_FIELD_NUMBER = 3;
-  private int red_ = 0;
-  /**
-   * <code>int32 red = 3;</code>
-   * @return The red.
-   */
-  @java.lang.Override
-  public int getRed() {
-    return red_;
-  }
-
-  public static final int GREEN_FIELD_NUMBER = 4;
-  private int green_ = 0;
-  /**
-   * <code>int32 green = 4;</code>
-   * @return The green.
-   */
-  @java.lang.Override
-  public int getGreen() {
-    return green_;
-  }
-
-  public static final int BLUE_FIELD_NUMBER = 5;
-  private int blue_ = 0;
-  /**
-   * <code>int32 blue = 5;</code>
-   * @return The blue.
-   */
-  @java.lang.Override
-  public int getBlue() {
-    return blue_;
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -110,18 +66,6 @@ private static final long serialVersionUID = 0L;
     if (isOn_ != false) {
       output.writeBool(1, isOn_);
     }
-    if (brightness_ != 0) {
-      output.writeInt32(2, brightness_);
-    }
-    if (red_ != 0) {
-      output.writeInt32(3, red_);
-    }
-    if (green_ != 0) {
-      output.writeInt32(4, green_);
-    }
-    if (blue_ != 0) {
-      output.writeInt32(5, blue_);
-    }
     getUnknownFields().writeTo(output);
   }
 
@@ -134,22 +78,6 @@ private static final long serialVersionUID = 0L;
     if (isOn_ != false) {
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(1, isOn_);
-    }
-    if (brightness_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(2, brightness_);
-    }
-    if (red_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(3, red_);
-    }
-    if (green_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(4, green_);
-    }
-    if (blue_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(5, blue_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -168,14 +96,6 @@ private static final long serialVersionUID = 0L;
 
     if (getIsOn()
         != other.getIsOn()) return false;
-    if (getBrightness()
-        != other.getBrightness()) return false;
-    if (getRed()
-        != other.getRed()) return false;
-    if (getGreen()
-        != other.getGreen()) return false;
-    if (getBlue()
-        != other.getBlue()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -190,14 +110,6 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + IS_ON_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getIsOn());
-    hash = (37 * hash) + BRIGHTNESS_FIELD_NUMBER;
-    hash = (53 * hash) + getBrightness();
-    hash = (37 * hash) + RED_FIELD_NUMBER;
-    hash = (53 * hash) + getRed();
-    hash = (37 * hash) + GREEN_FIELD_NUMBER;
-    hash = (53 * hash) + getGreen();
-    hash = (37 * hash) + BLUE_FIELD_NUMBER;
-    hash = (53 * hash) + getBlue();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -330,10 +242,6 @@ private static final long serialVersionUID = 0L;
       super.clear();
       bitField0_ = 0;
       isOn_ = false;
-      brightness_ = 0;
-      red_ = 0;
-      green_ = 0;
-      blue_ = 0;
       return this;
     }
 
@@ -369,18 +277,6 @@ private static final long serialVersionUID = 0L;
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
         result.isOn_ = isOn_;
-      }
-      if (((from_bitField0_ & 0x00000002) != 0)) {
-        result.brightness_ = brightness_;
-      }
-      if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.red_ = red_;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        result.green_ = green_;
-      }
-      if (((from_bitField0_ & 0x00000010) != 0)) {
-        result.blue_ = blue_;
       }
     }
 
@@ -431,18 +327,6 @@ private static final long serialVersionUID = 0L;
       if (other.getIsOn() != false) {
         setIsOn(other.getIsOn());
       }
-      if (other.getBrightness() != 0) {
-        setBrightness(other.getBrightness());
-      }
-      if (other.getRed() != 0) {
-        setRed(other.getRed());
-      }
-      if (other.getGreen() != 0) {
-        setGreen(other.getGreen());
-      }
-      if (other.getBlue() != 0) {
-        setBlue(other.getBlue());
-      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -474,26 +358,6 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000001;
               break;
             } // case 8
-            case 16: {
-              brightness_ = input.readInt32();
-              bitField0_ |= 0x00000002;
-              break;
-            } // case 16
-            case 24: {
-              red_ = input.readInt32();
-              bitField0_ |= 0x00000004;
-              break;
-            } // case 24
-            case 32: {
-              green_ = input.readInt32();
-              bitField0_ |= 0x00000008;
-              break;
-            } // case 32
-            case 40: {
-              blue_ = input.readInt32();
-              bitField0_ |= 0x00000010;
-              break;
-            } // case 40
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -539,134 +403,6 @@ private static final long serialVersionUID = 0L;
     public Builder clearIsOn() {
       bitField0_ = (bitField0_ & ~0x00000001);
       isOn_ = false;
-      onChanged();
-      return this;
-    }
-
-    private int brightness_ ;
-    /**
-     * <code>int32 brightness = 2;</code>
-     * @return The brightness.
-     */
-    @java.lang.Override
-    public int getBrightness() {
-      return brightness_;
-    }
-    /**
-     * <code>int32 brightness = 2;</code>
-     * @param value The brightness to set.
-     * @return This builder for chaining.
-     */
-    public Builder setBrightness(int value) {
-
-      brightness_ = value;
-      bitField0_ |= 0x00000002;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 brightness = 2;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearBrightness() {
-      bitField0_ = (bitField0_ & ~0x00000002);
-      brightness_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private int red_ ;
-    /**
-     * <code>int32 red = 3;</code>
-     * @return The red.
-     */
-    @java.lang.Override
-    public int getRed() {
-      return red_;
-    }
-    /**
-     * <code>int32 red = 3;</code>
-     * @param value The red to set.
-     * @return This builder for chaining.
-     */
-    public Builder setRed(int value) {
-
-      red_ = value;
-      bitField0_ |= 0x00000004;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 red = 3;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearRed() {
-      bitField0_ = (bitField0_ & ~0x00000004);
-      red_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private int green_ ;
-    /**
-     * <code>int32 green = 4;</code>
-     * @return The green.
-     */
-    @java.lang.Override
-    public int getGreen() {
-      return green_;
-    }
-    /**
-     * <code>int32 green = 4;</code>
-     * @param value The green to set.
-     * @return This builder for chaining.
-     */
-    public Builder setGreen(int value) {
-
-      green_ = value;
-      bitField0_ |= 0x00000008;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 green = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearGreen() {
-      bitField0_ = (bitField0_ & ~0x00000008);
-      green_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private int blue_ ;
-    /**
-     * <code>int32 blue = 5;</code>
-     * @return The blue.
-     */
-    @java.lang.Override
-    public int getBlue() {
-      return blue_;
-    }
-    /**
-     * <code>int32 blue = 5;</code>
-     * @param value The blue to set.
-     * @return This builder for chaining.
-     */
-    public Builder setBlue(int value) {
-
-      blue_ = value;
-      bitField0_ |= 0x00000010;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 blue = 5;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearBlue() {
-      bitField0_ = (bitField0_ & ~0x00000010);
-      blue_ = 0;
       onChanged();
       return this;
     }

@@ -80,68 +80,6 @@ public final class LightServiceGrpc {
     return getTurnOffMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.SetBrightnessRequest,
-      com.smarthome.proto.SetBrightnessResponse> getSetBrightnessMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "SetBrightness",
-      requestType = com.smarthome.proto.SetBrightnessRequest.class,
-      responseType = com.smarthome.proto.SetBrightnessResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.smarthome.proto.SetBrightnessRequest,
-      com.smarthome.proto.SetBrightnessResponse> getSetBrightnessMethod() {
-    io.grpc.MethodDescriptor<com.smarthome.proto.SetBrightnessRequest, com.smarthome.proto.SetBrightnessResponse> getSetBrightnessMethod;
-    if ((getSetBrightnessMethod = LightServiceGrpc.getSetBrightnessMethod) == null) {
-      synchronized (LightServiceGrpc.class) {
-        if ((getSetBrightnessMethod = LightServiceGrpc.getSetBrightnessMethod) == null) {
-          LightServiceGrpc.getSetBrightnessMethod = getSetBrightnessMethod =
-              io.grpc.MethodDescriptor.<com.smarthome.proto.SetBrightnessRequest, com.smarthome.proto.SetBrightnessResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetBrightness"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetBrightnessRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetBrightnessResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new LightServiceMethodDescriptorSupplier("SetBrightness"))
-              .build();
-        }
-      }
-    }
-    return getSetBrightnessMethod;
-  }
-
-  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.SetColorRequest,
-      com.smarthome.proto.SetColorResponse> getSetColorMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "SetColor",
-      requestType = com.smarthome.proto.SetColorRequest.class,
-      responseType = com.smarthome.proto.SetColorResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.smarthome.proto.SetColorRequest,
-      com.smarthome.proto.SetColorResponse> getSetColorMethod() {
-    io.grpc.MethodDescriptor<com.smarthome.proto.SetColorRequest, com.smarthome.proto.SetColorResponse> getSetColorMethod;
-    if ((getSetColorMethod = LightServiceGrpc.getSetColorMethod) == null) {
-      synchronized (LightServiceGrpc.class) {
-        if ((getSetColorMethod = LightServiceGrpc.getSetColorMethod) == null) {
-          LightServiceGrpc.getSetColorMethod = getSetColorMethod =
-              io.grpc.MethodDescriptor.<com.smarthome.proto.SetColorRequest, com.smarthome.proto.SetColorResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetColor"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetColorRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetColorResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new LightServiceMethodDescriptorSupplier("SetColor"))
-              .build();
-        }
-      }
-    }
-    return getSetColorMethod;
-  }
-
   private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.GetStatusRequest,
       com.smarthome.proto.GetStatusResponse> getGetStatusMethod;
 
@@ -240,20 +178,6 @@ public final class LightServiceGrpc {
 
     /**
      */
-    default void setBrightness(com.smarthome.proto.SetBrightnessRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetBrightnessResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetBrightnessMethod(), responseObserver);
-    }
-
-    /**
-     */
-    default void setColor(com.smarthome.proto.SetColorRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetColorResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetColorMethod(), responseObserver);
-    }
-
-    /**
-     */
     default void getStatus(com.smarthome.proto.GetStatusRequest request,
         io.grpc.stub.StreamObserver<com.smarthome.proto.GetStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetStatusMethod(), responseObserver);
@@ -311,22 +235,6 @@ public final class LightServiceGrpc {
 
     /**
      */
-    public void setBrightness(com.smarthome.proto.SetBrightnessRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetBrightnessResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getSetBrightnessMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
-    public void setColor(com.smarthome.proto.SetColorRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetColorResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getSetColorMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
     public void getStatus(com.smarthome.proto.GetStatusRequest request,
         io.grpc.stub.StreamObserver<com.smarthome.proto.GetStatusResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
@@ -365,20 +273,6 @@ public final class LightServiceGrpc {
     public com.smarthome.proto.TurnOffResponse turnOff(com.smarthome.proto.TurnOffRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getTurnOffMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public com.smarthome.proto.SetBrightnessResponse setBrightness(com.smarthome.proto.SetBrightnessRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getSetBrightnessMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public com.smarthome.proto.SetColorResponse setColor(com.smarthome.proto.SetColorRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getSetColorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -426,22 +320,6 @@ public final class LightServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.SetBrightnessResponse> setBrightness(
-        com.smarthome.proto.SetBrightnessRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getSetBrightnessMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.SetColorResponse> setColor(
-        com.smarthome.proto.SetColorRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getSetColorMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
     public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.GetStatusResponse> getStatus(
         com.smarthome.proto.GetStatusRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
@@ -451,9 +329,7 @@ public final class LightServiceGrpc {
 
   private static final int METHODID_TURN_ON = 0;
   private static final int METHODID_TURN_OFF = 1;
-  private static final int METHODID_SET_BRIGHTNESS = 2;
-  private static final int METHODID_SET_COLOR = 3;
-  private static final int METHODID_GET_STATUS = 4;
+  private static final int METHODID_GET_STATUS = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -479,14 +355,6 @@ public final class LightServiceGrpc {
         case METHODID_TURN_OFF:
           serviceImpl.turnOff((com.smarthome.proto.TurnOffRequest) request,
               (io.grpc.stub.StreamObserver<com.smarthome.proto.TurnOffResponse>) responseObserver);
-          break;
-        case METHODID_SET_BRIGHTNESS:
-          serviceImpl.setBrightness((com.smarthome.proto.SetBrightnessRequest) request,
-              (io.grpc.stub.StreamObserver<com.smarthome.proto.SetBrightnessResponse>) responseObserver);
-          break;
-        case METHODID_SET_COLOR:
-          serviceImpl.setColor((com.smarthome.proto.SetColorRequest) request,
-              (io.grpc.stub.StreamObserver<com.smarthome.proto.SetColorResponse>) responseObserver);
           break;
         case METHODID_GET_STATUS:
           serviceImpl.getStatus((com.smarthome.proto.GetStatusRequest) request,
@@ -524,20 +392,6 @@ public final class LightServiceGrpc {
               com.smarthome.proto.TurnOffRequest,
               com.smarthome.proto.TurnOffResponse>(
                 service, METHODID_TURN_OFF)))
-        .addMethod(
-          getSetBrightnessMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.smarthome.proto.SetBrightnessRequest,
-              com.smarthome.proto.SetBrightnessResponse>(
-                service, METHODID_SET_BRIGHTNESS)))
-        .addMethod(
-          getSetColorMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.smarthome.proto.SetColorRequest,
-              com.smarthome.proto.SetColorResponse>(
-                service, METHODID_SET_COLOR)))
         .addMethod(
           getGetStatusMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -595,8 +449,6 @@ public final class LightServiceGrpc {
               .setSchemaDescriptor(new LightServiceFileDescriptorSupplier())
               .addMethod(getTurnOnMethod())
               .addMethod(getTurnOffMethod())
-              .addMethod(getSetBrightnessMethod())
-              .addMethod(getSetColorMethod())
               .addMethod(getGetStatusMethod())
               .build();
         }

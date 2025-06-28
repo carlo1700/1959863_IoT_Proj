@@ -12,28 +12,4 @@ public interface GetStatusResponseOrBuilder extends
    * @return The isOn.
    */
   boolean getIsOn();
-
-  /**
-   * <code>int32 brightness = 2;</code>
-   * @return The brightness.
-   */
-  int getBrightness();
-
-  /**
-   * <code>int32 red = 3;</code>
-   * @return The red.
-   */
-  int getRed();
-
-  /**
-   * <code>int32 green = 4;</code>
-   * @return The green.
-   */
-  int getGreen();
-
-  /**
-   * <code>int32 blue = 5;</code>
-   * @return The blue.
-   */
-  int getBlue();
 }
