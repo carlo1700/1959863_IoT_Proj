@@ -6,49 +6,23 @@ option java_multiple_files = true;
 option java_package = "com.smarthome.proto";
 option java_outer_classname = "BlindProto";
 
-// Blind Service
+// Blind Service - SOLO SetUp e SetDown
 service BlindService {
-  rpc TurnOn(BlindTurnOnRequest) returns (BlindTurnOnResponse);
-  rpc TurnOff(BlindTurnOffRequest) returns (BlindTurnOffResponse);
-  rpc Open(BlindOpenRequest) returns (BlindOpenResponse);
-  rpc Close(BlindCloseRequest) returns (BlindCloseResponse);
-  rpc SetPosition(SetPositionRequest) returns (SetPositionResponse);
+  rpc SetUp(BlindSetUpRequest) returns (BlindSetUpResponse);
+  rpc SetDown(BlindSetDownRequest) returns (BlindSetDownResponse);
   rpc GetStatus(BlindGetStatusRequest) returns (BlindGetStatusResponse);
 }
 
-message BlindTurnOnRequest {}
+message BlindSetUpRequest {}
 
-message BlindTurnOnResponse {
+message BlindSetUpResponse {
   bool success = 1;
   string message = 2;
 }
 
-message BlindTurnOffRequest {}
+message BlindSetDownRequest {}
 
-message BlindTurnOffResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-message BlindOpenRequest {}
-
-message BlindOpenResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-message BlindCloseRequest {}
-
-message BlindCloseResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-message SetPositionRequest {
-  int32 position = 1; // 0-100 (0=closed, 100=open)
-}
-
-message SetPositionResponse {
+message BlindSetDownResponse {
   bool success = 1;
   string message = 2;
 }
@@ -56,6 +30,5 @@ message SetPositionResponse {
 message BlindGetStatusRequest {}
 
 message BlindGetStatusResponse {
-  int32 position = 1; // 0-100
-  bool is_moving = 2;
+  bool is_up = 1; // true = up, false = down
 }

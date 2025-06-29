@@ -31,6 +31,11 @@ public class DeviceApiController {
         return service.getDevices().size();
     }
 
+    @PostMapping("/turnOnDevice/{deviceId}")
+    public String turnOnDevice(@PathVariable String deviceId) {
+        return service.turnOnDevice(deviceId);
+    }
+
     @PostMapping("/turnOnLight/{deviceId}")
     public String turnOnLight(@PathVariable String deviceId) {
         return service.turnOnLight(deviceId);
