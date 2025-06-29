@@ -38,6 +38,8 @@ C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\pro
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\DishwasherStartRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\ThermostatTurnOnResponse.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineSetProgramResponse.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\DeviceManagerServiceGrpc.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\MotionSensorServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\MotionSensorTurnOffRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineGetStatusRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\DishwasherStopRequestOrBuilder.java
@@ -94,17 +96,20 @@ C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\pro
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineStartRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineTurnOffRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\SetTemperatureResponseOrBuilder.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\WashingMachineServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\MotionSensorGetStatusRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\SolarPanelGetStatusRequest.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\EnergyReadingOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\ThermostatMode.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\DishwasherStartResponseOrBuilder.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\DishwasherServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\TurnOffResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\UnregisterDeviceResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\GetStatusRequest.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\DishwasherGetStatusResponse.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\CoilGetStatusRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\Device.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\CoilServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\SetTargetTemperatureRequest.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\CoilGetStatusResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\BlindSetUpRequestOrBuilder.java
@@ -115,6 +120,7 @@ C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\pro
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\SolarPanelTurnOnRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineStartRequest.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineTurnOnRequestOrBuilder.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\SolarPanelServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\CoilTurnOnResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\TurnOffResponse.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineSetProgramResponseOrBuilder.java
@@ -145,6 +151,7 @@ C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\pro
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\TurnOnRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\DishwasherTurnOnResponse.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\BlindGetStatusResponse.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\BlindServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\SolarPanelGetStatusRequestOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\DishwasherTurnOnResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\ListDevicesResponseOrBuilder.java
@@ -158,6 +165,7 @@ C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\pro
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\BlindSetUpResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\BlindProto.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineTurnOffResponseOrBuilder.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\LightServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\SetModeResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\MotionSensorTurnOnResponse.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineStopRequestOrBuilder.java
@@ -184,6 +192,8 @@ C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\pro
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\MotionSensorGetStatusRequest.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\BlindSetUpResponse.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\SolarPanelTurnOffResponse.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\ThermostatServiceGrpc.java
+C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\grpc-java\com\smarthome\proto\OvenServiceGrpc.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\OvenTurnOnResponseOrBuilder.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\WashingMachineTurnOffResponse.java
 C:\Users\saral\Desktop\proj_soft_eng\project\common\target\generated-sources\protobuf\java\com\smarthome\proto\MotionSensorTurnOffRequest.java
