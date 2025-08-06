@@ -1,12 +1,14 @@
 package com.smarthome.dishwasher;
 
 import com.smarthome.proto.*;
+import com.smarthome.proto.DeviceManagerServiceGrpc.DeviceManagerServiceBlockingStub;
 
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.StatusRuntimeException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -40,61 +42,45 @@ public class Main {
 
     private static void registerWithDeviceManager() {
         final int maxAttempts = 20;
-        final int delayMillis = 2000;
+        long delayMillis = 500; // backoff esponenziale
+
+        ManagedChannel channel = ManagedChannelBuilder
+                .forAddress("smart-home-devicemanager", 50051)
+                .usePlaintext()
+                .enableRetry()
+                .build();
+        DeviceManagerServiceBlockingStub stub = DeviceManagerServiceGrpc
+                .newBlockingStub(channel)
+                .withWaitForReady();
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-            ManagedChannel channel = null;
             try {
-                channel = ManagedChannelBuilder
-                        .forAddress("devicemanager", 50051)
-                        .usePlaintext()
-                        .build();
-
-                // Attendi fino a 10 secondi o finché il canale diventa READY
-                boolean isReady = false;
-                for (int i = 0; i < 10; i++) {
-                    ConnectivityState state = channel.getState(true);
-                    if (state == ConnectivityState.READY) {
-                        isReady = true;
-                        break;
-                    }
-                    Thread.sleep(1000);
-                }
-
-                if (!isReady) {
-                    throw new IllegalStateException("Channel not ready");
-                }
-
-                DeviceManagerServiceGrpc.DeviceManagerServiceBlockingStub stub = DeviceManagerServiceGrpc
-                        .newBlockingStub(channel);
-
                 RegisterDeviceRequest request = RegisterDeviceRequest.newBuilder()
                         .setDeviceId("dishwasher1")
-                        .setDeviceType("dishwasher")
+                        .setDeviceType("DISHWASHER")
                         .setAddress("dishwasher")
                         .setPort(PORT)
                         .build();
 
                 RegisterDeviceResponse response = stub.registerDevice(request);
                 System.out.println("Device registered: " + response.getMessage());
-                return;
+                return; // registrazione riuscita
 
-            } catch (Exception e) {
-                System.err.println("Attempt " + attempt + " failed: " + e.getMessage());
-            } finally {
-                if (channel != null) {
-                    channel.shutdown();
-                }
+            } catch (StatusRuntimeException e) {
+                System.err.println("Attempt " + attempt + " failed: " + e.getStatus());
             }
 
             try {
                 Thread.sleep(delayMillis);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
+                break;
             }
+            delayMillis = Math.min(delayMillis * 2, 5000);
         }
 
         System.err.println("Device registration failed after " + maxAttempts + " attempts.");
+        channel.shutdown();
     }
 
 }
