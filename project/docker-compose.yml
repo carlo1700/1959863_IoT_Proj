@@ -9,6 +9,11 @@ services:
     container_name: smart-home-devicemanager
     networks:
       - smart-home-network
+    healthcheck:
+      test: ["CMD", "grpc-health-probe", "-addr=:50051"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
 
   light:
     build:
@@ -104,7 +109,8 @@ services:
     networks:
       - smart-home-network
     depends_on:
-      - devicemanager
+      devicemanager:
+        condition: service_healthy
 
   washingmachine:
     build:

@@ -1,3 +1,10 @@
+FROM python:3.10
+
+# Install grpc-health-probe
+ADD https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.11/grpc_health_probe-linux-amd64 /bin/grpc_health_probe
+RUN chmod +x /bin/grpc_health_probe
+
+
 # Build stage
 FROM maven:3.9.4-eclipse-temurin-17 AS build
 WORKDIR /app

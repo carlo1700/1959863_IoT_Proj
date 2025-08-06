@@ -9,25 +9,32 @@ import io.grpc.ServerBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import io.grpc.protobuf.services.HealthStatusManager;
+
 
 @SpringBootApplication
 public class Main {
     private static final int PORT = 50051;
 
     public static void main(String[] args) throws IOException, InterruptedException {
+
         // Avvio dell'app Spring Boot per le REST API
         ConfigurableApplicationContext context = SpringApplication.run(Main.class, args);
-
+        
         // Ottieni il bean gestito da Spring
         DeviceManagerServiceImpl grpcService = context.getBean(DeviceManagerServiceImpl.class);
+        HealthStatusManager healthStatusManager = new HealthStatusManager();
 
         // Avvio del server gRPC in un thread separato
         new Thread(() -> {
             try {
                 Server server = ServerBuilder.forPort(PORT)
                         .addService(grpcService) // bean Spring
+                        .addService(healthStatusManager.getHealthService())  // aggiunge il servizio health
                         .build()
                         .start();
+
+                healthStatusManager.setStatus("", io.grpc.health.v1.HealthCheckResponse.ServingStatus.SERVING);
 
                 System.out.println("Device Manager gRPC server started on port " + PORT);
 

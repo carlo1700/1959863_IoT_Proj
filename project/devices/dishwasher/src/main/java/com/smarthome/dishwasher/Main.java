@@ -42,19 +42,23 @@ public class Main {
 
     private static void registerWithDeviceManager() {
         final int maxAttempts = 20;
-        long delayMillis = 500; // backoff esponenziale
+        long delayMillis = 500;
 
         ManagedChannel channel = ManagedChannelBuilder
-                .forAddress("smart-home-devicemanager", 50051)
+                .forAddress("devicemanager", 50051) // usa il service name
                 .usePlaintext()
                 .enableRetry()
                 .build();
+
         DeviceManagerServiceBlockingStub stub = DeviceManagerServiceGrpc
                 .newBlockingStub(channel)
-                .withWaitForReady();
+                .withWaitForReady()
+                .withDeadlineAfter(5, TimeUnit.SECONDS);
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
+                System.out.println("Attempt " + attempt + " to register with Device Manager...");
+
                 RegisterDeviceRequest request = RegisterDeviceRequest.newBuilder()
                         .setDeviceId("dishwasher1")
                         .setDeviceType("DISHWASHER")
@@ -64,10 +68,12 @@ public class Main {
 
                 RegisterDeviceResponse response = stub.registerDevice(request);
                 System.out.println("Device registered: " + response.getMessage());
-                return; // registrazione riuscita
+                return;
 
-            } catch (StatusRuntimeException e) {
-                System.err.println("Attempt " + attempt + " failed: " + e.getStatus());
+            } catch (Exception e) {
+                System.err.println(
+                        "Attempt " + attempt + " failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                e.printStackTrace();
             }
 
             try {
