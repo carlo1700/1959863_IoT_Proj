@@ -2,8 +2,8 @@
 
 FROM maven:3.9.4-eclipse-temurin-17 AS build
 
-ADD https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.17/grpc-health-probe-linux-amd64 /bin/grpc-health-probe
-RUN chmod +x /bin/grpc-health-probe
+RUN curl -L -o /bin/grpc-health-probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.39/grpc-health-probe-linux-amd64 \
+    && chmod +x /bin/grpc-health-probe
 
 WORKDIR /app
 
