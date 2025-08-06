@@ -22,7 +22,7 @@ smart-home-root/
     ├── blind/
     ├── motionsensor/
     ├── solarpanel/
-    ├── coil/
+    ├── airconditioner/
     ├── dishwasher/
     └── washingmachine/
 ```
@@ -41,7 +41,7 @@ smart-home-root/
 - **Blind** (Port 50055): Motorized blind position control
 - **Motion Sensor** (Port 50056): Motion detection and sensitivity settings
 - **Solar Panel** (Port 50057): Energy production monitoring
-- **Coil** (Port 50058): Heating/cooling coil power control
+- **airconditioner** (Port 50058): Heating/cooling airconditioner power control
 - **Dishwasher** (Port 50059): Dishwasher program and cycle control
 - **Washing Machine** (Port 50060): Washing machine program control
 

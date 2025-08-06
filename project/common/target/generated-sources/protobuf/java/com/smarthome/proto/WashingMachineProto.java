@@ -99,30 +99,27 @@ public final class WashingMachineProto {
       " \001(\005\022\022\n\nspin_speed\030\003 \001(\005\"D\n WashingMachi" +
       "neSetProgramResponse\022\017\n\007success\030\001 \001(\010\022\017\n" +
       "\007message\030\002 \001(\t\" \n\036WashingMachineGetStatu" +
-      "sRequest\"\272\001\n\037WashingMachineGetStatusResp" +
-      "onse\022\022\n\nis_running\030\001 \001(\010\0229\n\017current_prog" +
-      "ram\030\002 \001(\0162 .smarthome.WashingMachineProg" +
-      "ram\022\026\n\016remaining_time\030\003 \001(\005\022\023\n\013door_lock" +
-      "ed\030\004 \001(\010\022\033\n\023current_temperature\030\005 \001(\005*Z\n" +
-      "\025WashingMachineProgram\022\n\n\006COTTON\020\000\022\r\n\tSY" +
-      "NTHETIC\020\001\022\014\n\010DELICATE\020\002\022\010\n\004WOOL\020\003\022\016\n\nQUI" +
-      "CK_WASH\020\0042\310\004\n\025WashingMachineService\022Y\n\006T" +
-      "urnOn\022&.smarthome.WashingMachineTurnOnRe" +
-      "quest\032\'.smarthome.WashingMachineTurnOnRe" +
-      "sponse\022\\\n\007TurnOff\022\'.smarthome.WashingMac" +
-      "hineTurnOffRequest\032(.smarthome.WashingMa" +
-      "chineTurnOffResponse\022V\n\005Start\022%.smarthom" +
-      "e.WashingMachineStartRequest\032&.smarthome" +
-      ".WashingMachineStartResponse\022S\n\004Stop\022$.s" +
-      "marthome.WashingMachineStopRequest\032%.sma" +
-      "rthome.WashingMachineStopResponse\022e\n\nSet" +
-      "Program\022*.smarthome.WashingMachineSetPro" +
-      "gramRequest\032+.smarthome.WashingMachineSe" +
-      "tProgramResponse\022b\n\tGetStatus\022).smarthom" +
-      "e.WashingMachineGetStatusRequest\032*.smart" +
-      "home.WashingMachineGetStatusResponseB,\n\023" +
-      "com.smarthome.protoB\023WashingMachineProto" +
-      "P\001b\006proto3"
+      "sRequest\"\177\n\037WashingMachineGetStatusRespo" +
+      "nse\022\022\n\nis_running\030\001 \001(\010\0229\n\017current_progr" +
+      "am\030\002 \001(\0162 .smarthome.WashingMachineProgr" +
+      "am\022\r\n\005is_on\030\003 \001(\010*5\n\025WashingMachineProgr" +
+      "am\022\014\n\010DELICATE\020\000\022\016\n\nQUICK_WASH\020\0012\310\004\n\025Was" +
+      "hingMachineService\022Y\n\006TurnOn\022&.smarthome" +
+      ".WashingMachineTurnOnRequest\032\'.smarthome" +
+      ".WashingMachineTurnOnResponse\022\\\n\007TurnOff" +
+      "\022\'.smarthome.WashingMachineTurnOffReques" +
+      "t\032(.smarthome.WashingMachineTurnOffRespo" +
+      "nse\022V\n\005Start\022%.smarthome.WashingMachineS" +
+      "tartRequest\032&.smarthome.WashingMachineSt" +
+      "artResponse\022S\n\004Stop\022$.smarthome.WashingM" +
+      "achineStopRequest\032%.smarthome.WashingMac" +
+      "hineStopResponse\022e\n\nSetProgram\022*.smartho" +
+      "me.WashingMachineSetProgramRequest\032+.sma" +
+      "rthome.WashingMachineSetProgramResponse\022" +
+      "b\n\tGetStatus\022).smarthome.WashingMachineG" +
+      "etStatusRequest\032*.smarthome.WashingMachi" +
+      "neGetStatusResponseB,\n\023com.smarthome.pro" +
+      "toB\023WashingMachineProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -199,7 +196,7 @@ public final class WashingMachineProto {
     internal_static_smarthome_WashingMachineGetStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_WashingMachineGetStatusResponse_descriptor,
-        new java.lang.String[] { "IsRunning", "CurrentProgram", "RemainingTime", "DoorLocked", "CurrentTemperature", });
+        new java.lang.String[] { "IsRunning", "CurrentProgram", "IsOn", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

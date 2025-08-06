@@ -12,33 +12,4 @@ public interface ThermostatGetStatusResponseOrBuilder extends
    * @return The currentTemperature.
    */
   double getCurrentTemperature();
-
-  /**
-   * <code>double target_temperature = 2;</code>
-   * @return The targetTemperature.
-   */
-  double getTargetTemperature();
-
-  /**
-   * <code>.smarthome.ThermostatMode mode = 3;</code>
-   * @return The enum numeric value on the wire for mode.
-   */
-  int getModeValue();
-  /**
-   * <code>.smarthome.ThermostatMode mode = 3;</code>
-   * @return The mode.
-   */
-  com.smarthome.proto.ThermostatMode getMode();
-
-  /**
-   * <code>bool heating = 4;</code>
-   * @return The heating.
-   */
-  boolean getHeating();
-
-  /**
-   * <code>bool cooling = 5;</code>
-   * @return The cooling.
-   */
-  boolean getCooling();
 }

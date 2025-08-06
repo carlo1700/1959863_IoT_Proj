@@ -30,7 +30,7 @@
         <module>devices/blind</module>
         <module>devices/motionsensor</module>
         <module>devices/solarpanel</module>
-        <module>devices/coil</module>
+        <module>devices/airconditioner</module>
         <module>devices/dishwasher</module>
         <module>devices/washingmachine</module>
     </modules>

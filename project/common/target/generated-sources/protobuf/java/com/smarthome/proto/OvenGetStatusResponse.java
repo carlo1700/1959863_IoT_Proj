@@ -16,6 +16,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private OvenGetStatusResponse() {
+    currentProgram_ = 0;
   }
 
   @java.lang.Override
@@ -60,19 +61,30 @@ private static final long serialVersionUID = 0L;
     return temperature_;
   }
 
-  public static final int REMAINING_TIME_FIELD_NUMBER = 3;
-  private int remainingTime_ = 0;
+  public static final int CURRENT_PROGRAM_FIELD_NUMBER = 3;
+  private int currentProgram_ = 0;
   /**
    * <pre>
-   * in minutes
+   * modalità attiva: statico o ventilato
    * </pre>
    *
-   * <code>int32 remaining_time = 3;</code>
-   * @return The remainingTime.
+   * <code>.smarthome.OvenProgram current_program = 3;</code>
+   * @return The enum numeric value on the wire for currentProgram.
    */
-  @java.lang.Override
-  public int getRemainingTime() {
-    return remainingTime_;
+  @java.lang.Override public int getCurrentProgramValue() {
+    return currentProgram_;
+  }
+  /**
+   * <pre>
+   * modalità attiva: statico o ventilato
+   * </pre>
+   *
+   * <code>.smarthome.OvenProgram current_program = 3;</code>
+   * @return The currentProgram.
+   */
+  @java.lang.Override public com.smarthome.proto.OvenProgram getCurrentProgram() {
+    com.smarthome.proto.OvenProgram result = com.smarthome.proto.OvenProgram.forNumber(currentProgram_);
+    return result == null ? com.smarthome.proto.OvenProgram.UNRECOGNIZED : result;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -95,8 +107,8 @@ private static final long serialVersionUID = 0L;
     if (temperature_ != 0) {
       output.writeInt32(2, temperature_);
     }
-    if (remainingTime_ != 0) {
-      output.writeInt32(3, remainingTime_);
+    if (currentProgram_ != com.smarthome.proto.OvenProgram.OVEN_PROGRAM_UNSPECIFIED.getNumber()) {
+      output.writeEnum(3, currentProgram_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -115,9 +127,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt32Size(2, temperature_);
     }
-    if (remainingTime_ != 0) {
+    if (currentProgram_ != com.smarthome.proto.OvenProgram.OVEN_PROGRAM_UNSPECIFIED.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(3, remainingTime_);
+        .computeEnumSize(3, currentProgram_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -138,8 +150,7 @@ private static final long serialVersionUID = 0L;
         != other.getIsOn()) return false;
     if (getTemperature()
         != other.getTemperature()) return false;
-    if (getRemainingTime()
-        != other.getRemainingTime()) return false;
+    if (currentProgram_ != other.currentProgram_) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -156,8 +167,8 @@ private static final long serialVersionUID = 0L;
         getIsOn());
     hash = (37 * hash) + TEMPERATURE_FIELD_NUMBER;
     hash = (53 * hash) + getTemperature();
-    hash = (37 * hash) + REMAINING_TIME_FIELD_NUMBER;
-    hash = (53 * hash) + getRemainingTime();
+    hash = (37 * hash) + CURRENT_PROGRAM_FIELD_NUMBER;
+    hash = (53 * hash) + currentProgram_;
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -291,7 +302,7 @@ private static final long serialVersionUID = 0L;
       bitField0_ = 0;
       isOn_ = false;
       temperature_ = 0;
-      remainingTime_ = 0;
+      currentProgram_ = 0;
       return this;
     }
 
@@ -332,7 +343,7 @@ private static final long serialVersionUID = 0L;
         result.temperature_ = temperature_;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.remainingTime_ = remainingTime_;
+        result.currentProgram_ = currentProgram_;
       }
     }
 
@@ -386,8 +397,8 @@ private static final long serialVersionUID = 0L;
       if (other.getTemperature() != 0) {
         setTemperature(other.getTemperature());
       }
-      if (other.getRemainingTime() != 0) {
-        setRemainingTime(other.getRemainingTime());
+      if (other.currentProgram_ != 0) {
+        setCurrentProgramValue(other.getCurrentProgramValue());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -426,7 +437,7 @@ private static final long serialVersionUID = 0L;
               break;
             } // case 16
             case 24: {
-              remainingTime_ = input.readInt32();
+              currentProgram_ = input.readEnum();
               bitField0_ |= 0x00000004;
               break;
             } // case 24
@@ -511,46 +522,75 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private int remainingTime_ ;
+    private int currentProgram_ = 0;
     /**
      * <pre>
-     * in minutes
+     * modalità attiva: statico o ventilato
      * </pre>
      *
-     * <code>int32 remaining_time = 3;</code>
-     * @return The remainingTime.
+     * <code>.smarthome.OvenProgram current_program = 3;</code>
+     * @return The enum numeric value on the wire for currentProgram.
      */
-    @java.lang.Override
-    public int getRemainingTime() {
-      return remainingTime_;
+    @java.lang.Override public int getCurrentProgramValue() {
+      return currentProgram_;
     }
     /**
      * <pre>
-     * in minutes
+     * modalità attiva: statico o ventilato
      * </pre>
      *
-     * <code>int32 remaining_time = 3;</code>
-     * @param value The remainingTime to set.
+     * <code>.smarthome.OvenProgram current_program = 3;</code>
+     * @param value The enum numeric value on the wire for currentProgram to set.
      * @return This builder for chaining.
      */
-    public Builder setRemainingTime(int value) {
-
-      remainingTime_ = value;
+    public Builder setCurrentProgramValue(int value) {
+      currentProgram_ = value;
       bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
      * <pre>
-     * in minutes
+     * modalità attiva: statico o ventilato
      * </pre>
      *
-     * <code>int32 remaining_time = 3;</code>
+     * <code>.smarthome.OvenProgram current_program = 3;</code>
+     * @return The currentProgram.
+     */
+    @java.lang.Override
+    public com.smarthome.proto.OvenProgram getCurrentProgram() {
+      com.smarthome.proto.OvenProgram result = com.smarthome.proto.OvenProgram.forNumber(currentProgram_);
+      return result == null ? com.smarthome.proto.OvenProgram.UNRECOGNIZED : result;
+    }
+    /**
+     * <pre>
+     * modalità attiva: statico o ventilato
+     * </pre>
+     *
+     * <code>.smarthome.OvenProgram current_program = 3;</code>
+     * @param value The currentProgram to set.
      * @return This builder for chaining.
      */
-    public Builder clearRemainingTime() {
+    public Builder setCurrentProgram(com.smarthome.proto.OvenProgram value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      bitField0_ |= 0x00000004;
+      currentProgram_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * modalità attiva: statico o ventilato
+     * </pre>
+     *
+     * <code>.smarthome.OvenProgram current_program = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearCurrentProgram() {
       bitField0_ = (bitField0_ & ~0x00000004);
-      remainingTime_ = 0;
+      currentProgram_ = 0;
       onChanged();
       return this;
     }

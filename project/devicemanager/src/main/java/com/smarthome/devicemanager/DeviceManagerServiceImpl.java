@@ -11,7 +11,10 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import org.springframework.stereotype.Service;
 
+
+@Service
 public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceManagerServiceImplBase {
 
     private final Map<String, Device> devices = new ConcurrentHashMap<>();
@@ -123,21 +126,14 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             ? "Light turned on: " + lightResp.getMessage()
                             : "Failed to turn on light: " + lightResp.getMessage();
 
-                case "THERMOSTAT":
-                    ThermostatServiceGrpc.ThermostatServiceBlockingStub thermostatStub = ThermostatServiceGrpc
+                case "AIRCONDITIONER":
+                    AirConditionerServiceGrpc.AirConditionerServiceBlockingStub airconditionerStub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
-                    ThermostatTurnOnResponse heatResp = thermostatStub
-                            .turnOn(ThermostatTurnOnRequest.newBuilder().build());
-                    return heatResp.getSuccess()
-                            ? "Thermostat heating started: " + heatResp.getMessage()
-                            : "Failed to start thermostat: " + heatResp.getMessage();
-
-                case "COIL":
-                    CoilServiceGrpc.CoilServiceBlockingStub coilStub = CoilServiceGrpc.newBlockingStub(channel);
-                    CoilTurnOnResponse coilResp = coilStub.turnOn(CoilTurnOnRequest.newBuilder().build());
-                    return coilResp.getSuccess()
-                            ? "Coil activated: " + coilResp.getMessage()
-                            : "Failed to activate coil: " + coilResp.getMessage();
+                    AirConditionerTurnOnResponse airconditionerResp = airconditionerStub
+                            .turnOn(AirConditionerTurnOnRequest.newBuilder().build());
+                    return airconditionerResp.getSuccess()
+                            ? "airconditioner activated: " + airconditionerResp.getMessage()
+                            : "Failed to activate airconditioner: " + airconditionerResp.getMessage();
 
                 case "DISHWASHER":
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub dishwasherStub = DishwasherServiceGrpc
@@ -163,15 +159,6 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     return ovenResp.getSuccess()
                             ? "Oven preheating: " + ovenResp.getMessage()
                             : "Failed to preheat oven: " + ovenResp.getMessage();
-
-                case "SOLARPANEL":
-                    SolarPanelServiceGrpc.SolarPanelServiceBlockingStub solarStub = SolarPanelServiceGrpc
-                            .newBlockingStub(channel);
-                    SolarPanelTurnOnResponse solarResp = solarStub
-                            .turnOn(SolarPanelTurnOnRequest.newBuilder().build());
-                    return solarResp.getSuccess()
-                            ? "Solar panel activated: " + solarResp.getMessage()
-                            : "Failed to activate solar panel: " + solarResp.getMessage();
 
                 case "WASHINGMACHINE":
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub washStub = WashingMachineServiceGrpc
@@ -249,21 +236,14 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             ? "Light turned off: " + lightResp.getMessage()
                             : "Failed to turn off light: " + lightResp.getMessage();
 
-                case "THERMOSTAT":
-                    ThermostatServiceGrpc.ThermostatServiceBlockingStub thermostatStub = ThermostatServiceGrpc
+                case "AIRCONDITIONER":
+                    AirConditionerServiceGrpc.AirConditionerServiceBlockingStub airconditionerStub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
-                    ThermostatTurnOffResponse thermoResp = thermostatStub
-                            .turnOff(ThermostatTurnOffRequest.newBuilder().build());
-                    return thermoResp.getSuccess()
-                            ? "Thermostat turned off: " + thermoResp.getMessage()
-                            : "Failed to turn off thermostat: " + thermoResp.getMessage();
-
-                case "COIL":
-                    CoilServiceGrpc.CoilServiceBlockingStub coilStub = CoilServiceGrpc.newBlockingStub(channel);
-                    CoilTurnOffResponse coilResp = coilStub.turnOff(CoilTurnOffRequest.newBuilder().build());
-                    return coilResp.getSuccess()
-                            ? "Coil deactivated: " + coilResp.getMessage()
-                            : "Failed to deactivate coil: " + coilResp.getMessage();
+                    AirConditionerTurnOffResponse airconditionerResp = airconditionerStub
+                            .turnOff(AirConditionerTurnOffRequest.newBuilder().build());
+                    return airconditionerResp.getSuccess()
+                            ? "airconditioner deactivated: " + airconditionerResp.getMessage()
+                            : "Failed to deactivate airconditioner: " + airconditionerResp.getMessage();
 
                 case "DISHWASHER":
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub dishwasherStub = DishwasherServiceGrpc
@@ -290,15 +270,6 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             ? "Oven turned off: " + ovenResp.getMessage()
                             : "Failed to turn off oven: " + ovenResp.getMessage();
 
-                case "SOLARPANEL":
-                    SolarPanelServiceGrpc.SolarPanelServiceBlockingStub solarStub = SolarPanelServiceGrpc
-                            .newBlockingStub(channel);
-                    SolarPanelTurnOffResponse solarResp = solarStub
-                            .turnOff(SolarPanelTurnOffRequest.newBuilder().build());
-                    return solarResp.getSuccess()
-                            ? "Solar panel deactivated: " + solarResp.getMessage()
-                            : "Failed to deactivate solar panel: " + solarResp.getMessage();
-
                 case "WASHINGMACHINE":
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub washStub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
@@ -317,38 +288,6 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         }
     }
 
-    public String turnOnLight(String deviceId) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
-            return "Device not found: " + deviceId;
-        }
-
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
-
-        // 2. Crea lo stub blocking per LightService
-        LightServiceGrpc.LightServiceBlockingStub lightStub = LightServiceGrpc.newBlockingStub(channel);
-
-        // 3. Costruisci la richiesta TurnOn
-        TurnOnRequest request = TurnOnRequest.newBuilder().build();
-
-        // 4. Invia il comando e gestisci eventuali errori
-        try {
-            TurnOnResponse resp = lightStub.turnOn(request);
-            if (resp.getSuccess()) {
-                // 5. Restituisci il messaggio di conferma
-                return "Light turned on for device " + deviceId + ": " + resp.getMessage();
-            } else {
-                return "Failed to turn on light for device " + deviceId + ": " + resp.getMessage();
-            }
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on turnOn for device " + deviceId + ": " + e.getStatus().getDescription();
-        }
-
-    }
-
     public String getStatusDevice(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
@@ -364,12 +303,15 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
         try {
             switch (deviceType.toUpperCase()) {
-                case "COIL": {
-                    CoilServiceGrpc.CoilServiceBlockingStub stub = CoilServiceGrpc.newBlockingStub(channel);
-                    CoilGetStatusResponse resp = stub.getStatus(CoilGetStatusRequest.newBuilder().build());
-                    return "Coil status: powerLevel=" + resp.getPowerLevel() + ", temp=" + resp.getCurrentTemperature()
-                            + ", consumption=" + resp.getPowerConsumption();
+                case "AIRCONDITIONER": {
+                    AirConditionerServiceGrpc.AirConditionerServiceBlockingStub stub = AirConditionerServiceGrpc
+                            .newBlockingStub(channel);
+                    AirConditionerGetStatusResponse resp = stub
+                            .getStatus(AirConditionerGetStatusRequest.newBuilder().build());
+                    return "Air conditioner status: is_on=" + resp.getIsOn() + ", current_program="
+                            + resp.getCurrentProgram();
                 }
+
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
@@ -388,30 +330,36 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "OVEN": {
                     OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
                     OvenGetStatusResponse resp = stub.getStatus(OvenGetStatusRequest.newBuilder().build());
-                    return "Oven status: temp=" + resp.getTemperature() + ", setTemp=" + resp.getTemperature();
+
+                    return "Oven status: isOn=" + resp.getIsOn()
+                            + ", temp=" + resp.getTemperature()
+                            + ", mode=" + resp.getCurrentProgram().name();
                 }
                 case "SOLARPANEL": {
                     SolarPanelServiceGrpc.SolarPanelServiceBlockingStub stub = SolarPanelServiceGrpc
                             .newBlockingStub(channel);
                     SolarPanelGetStatusResponse resp = stub.getStatus(SolarPanelGetStatusRequest.newBuilder().build());
-                    return "SolarPanel status: powerOutput=" + resp.getCurrentPowerOutput() + ", dailyProduction="
-                            + resp.getDailyEnergyProduction();
+                    return "SolarPanel status: powerOutput=" + resp.getCurrentPowerOutput()
+                            + ", batteryStatus=" + resp.getBatteryStatus();
                 }
+
                 case "THERMOSTAT": {
                     ThermostatServiceGrpc.ThermostatServiceBlockingStub stub = ThermostatServiceGrpc
                             .newBlockingStub(channel);
                     ThermostatGetStatusResponse resp = stub.getStatus(ThermostatGetStatusRequest.newBuilder().build());
-                    return "Thermostat status: temp=" + resp.getCurrentTemperature() + ", targetTemp="
-                            + resp.getTargetTemperature();
+                    return "Thermostat status: temp=" + resp.getCurrentTemperature();
                 }
+
                 case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub stub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
                     WashingMachineGetStatusResponse resp = stub
                             .getStatus(WashingMachineGetStatusRequest.newBuilder().build());
-                    return "WashingMachine status: program=" + resp.getCurrentProgram() + ", remainingTime="
-                            + resp.getRemainingTime();
+
+                    return "WashingMachine status: program=" + resp.getCurrentProgram() + ", is_running="
+                            + resp.getIsRunning() + ", is_on=" + resp.getIsOn();
                 }
+
                 default:
                     return "Device type not supported: " + deviceType;
             }
@@ -517,34 +465,18 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     return resp.getSuccess() ? "Dishwasher program set: " + resp.getMessage()
                             : "Failed to set program: " + resp.getMessage();
                 }
+                case "OVEN": {
+                    OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
+                    OvenSetProgramRequest req = OvenSetProgramRequest.newBuilder().setProgramValue(program).build();
+                    OvenSetProgramResponse resp = stub.setProgram(req);
+                    return resp.getSuccess() ? "Oven program set: " + resp.getMessage()
+                            : "Failed to set oven program: " + resp.getMessage();
+                }
                 default:
                     return "Set program not supported for device type: " + deviceType;
             }
         } catch (StatusRuntimeException e) {
             return "gRPC error on setProgram for device " + deviceId + ": " + e.getStatus().getDescription();
-        }
-    }
-
-    public String setPowerLevelCoil(String deviceId, int powerLevel) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
-            return "Device not found: " + deviceId;
-        }
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
-        if (!device.getDeviceType().equalsIgnoreCase("COIL")) {
-            return "Device is not a coil: " + deviceId;
-        }
-        try {
-            CoilServiceGrpc.CoilServiceBlockingStub stub = CoilServiceGrpc.newBlockingStub(channel);
-            SetPowerLevelRequest req = SetPowerLevelRequest.newBuilder().setPowerLevel(powerLevel).build();
-            SetPowerLevelResponse resp = stub.setPowerLevel(req);
-            return resp.getSuccess() ? "Coil power level set: " + resp.getMessage()
-                    : "Failed to set coil power level: " + resp.getMessage();
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on setPowerLevel for device " + deviceId + ": " + e.getStatus().getDescription();
         }
     }
 
@@ -592,125 +524,6 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     : "Failed to set oven temperature: " + resp.getMessage();
         } catch (StatusRuntimeException e) {
             return "gRPC error on setTemperature for device " + deviceId + ": " + e.getStatus().getDescription();
-        }
-    }
-
-    public String setTimerOven(String deviceId, int minutes) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
-            return "Device not found: " + deviceId;
-        }
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
-        if (!device.getDeviceType().equalsIgnoreCase("OVEN")) {
-            return "Device is not an oven: " + deviceId;
-        }
-        try {
-            OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
-            SetTimerRequest req = SetTimerRequest.newBuilder().setMinutes(minutes).build();
-            SetTimerResponse resp = stub.setTimer(req);
-            return resp.getSuccess() ? "Oven timer set: " + resp.getMessage()
-                    : "Failed to set oven timer: " + resp.getMessage();
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on setTimer for device " + deviceId + ": " + e.getStatus().getDescription();
-        }
-    }
-
-    public String getEnergyProductionSolarPanel(String deviceId) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
-            return "Device not found: " + deviceId;
-        }
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
-        if (!device.getDeviceType().equalsIgnoreCase("SOLARPANEL")) {
-            return "Device is not a solar panel: " + deviceId;
-        }
-
-        try {
-            SolarPanelServiceGrpc.SolarPanelServiceBlockingStub stub = SolarPanelServiceGrpc.newBlockingStub(channel);
-
-            // Creiamo la request per ottenere tutti i dati (start_time e end_time a 0)
-            GetEnergyProductionRequest req = GetEnergyProductionRequest.newBuilder()
-                    .setStartTime(0)
-                    .setEndTime(0)
-                    .build();
-
-            GetEnergyProductionResponse resp = stub.getEnergyProduction(req);
-
-            // Costruiamo la risposta dettagliata
-            StringBuilder result = new StringBuilder();
-            result.append("Total: ").append(resp.getTotalEnergy()).append(" kWh\n");
-            result.append("Readings:\n");
-
-            // Aggiungiamo ogni singola lettura
-            for (EnergyReading reading : resp.getReadingsList()) {
-                // Convertiamo il timestamp in una data leggibile
-                java.time.Instant instant = java.time.Instant.ofEpochSecond(reading.getTimestamp());
-                java.time.LocalDateTime dateTime = java.time.LocalDateTime.ofInstant(instant,
-                        java.time.ZoneId.systemDefault());
-                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
-                        .ofPattern("yyyy-MM-dd HH:mm:ss");
-
-                result.append("- ").append(dateTime.format(formatter))
-                        .append(": ").append(reading.getPowerOutput()).append("W\n");
-            }
-
-            return result.toString();
-
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on getEnergyProduction for device " + deviceId + ": " + e.getStatus().getDescription();
-        }
-    }
-
-    public String setTargetTemperatureThermostat(String deviceId, int targetTemperature) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
-            return "Device not found: " + deviceId;
-        }
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
-        if (!device.getDeviceType().equalsIgnoreCase("THERMOSTAT")) {
-            return "Device is not a thermostat: " + deviceId;
-        }
-        try {
-            ThermostatServiceGrpc.ThermostatServiceBlockingStub stub = ThermostatServiceGrpc.newBlockingStub(channel);
-            SetTargetTemperatureRequest req = SetTargetTemperatureRequest.newBuilder().setTargetTemperature(targetTemperature).build();
-            SetTargetTemperatureResponse resp = stub.setTargetTemperature(req);
-            return resp.getSuccess() ? "Thermostat target temperature set: " + resp.getMessage()
-                    : "Failed to set target temperature: " + resp.getMessage();
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on setTargetTemperature for device " + deviceId + ": " + e.getStatus().getDescription();
-        }
-    }
-
-    public String setModeThermostat(String deviceId, String mode) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
-            return "Device not found: " + deviceId;
-        }
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
-        if (!device.getDeviceType().equalsIgnoreCase("THERMOSTAT")) {
-            return "Device is not a thermostat: " + deviceId;
-        }
-        try {
-            ThermostatServiceGrpc.ThermostatServiceBlockingStub stub = ThermostatServiceGrpc.newBlockingStub(channel);
-            ThermostatMode thermostatMode = ThermostatMode.valueOf(mode.toUpperCase());
-            SetModeRequest req = SetModeRequest.newBuilder().setMode(thermostatMode).build();
-            SetModeResponse resp = stub.setMode(req);
-            return resp.getSuccess() ? "Thermostat mode set: " + resp.getMessage()
-                    : "Failed to set mode: " + resp.getMessage();
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on setMode for device " + deviceId + ": " + e.getStatus().getDescription();
         }
     }
 

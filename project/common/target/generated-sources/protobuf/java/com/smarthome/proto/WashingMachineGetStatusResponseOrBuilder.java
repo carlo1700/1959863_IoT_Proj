@@ -25,24 +25,8 @@ public interface WashingMachineGetStatusResponseOrBuilder extends
   com.smarthome.proto.WashingMachineProgram getCurrentProgram();
 
   /**
-   * <pre>
-   * in minutes
-   * </pre>
-   *
-   * <code>int32 remaining_time = 3;</code>
-   * @return The remainingTime.
+   * <code>bool is_on = 3;</code>
+   * @return The isOn.
    */
-  int getRemainingTime();
-
-  /**
-   * <code>bool door_locked = 4;</code>
-   * @return The doorLocked.
-   */
-  boolean getDoorLocked();
-
-  /**
-   * <code>int32 current_temperature = 5;</code>
-   * @return The currentTemperature.
-   */
-  int getCurrentTemperature();
+  boolean getIsOn();
 }

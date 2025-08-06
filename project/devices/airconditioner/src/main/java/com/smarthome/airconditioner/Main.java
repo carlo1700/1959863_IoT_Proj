@@ -1,0 +1,31 @@
+package com.smarthome.airconditioner;
+
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+public class Main {
+    private static final int PORT = 50058;
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Server server = ServerBuilder.forPort(PORT)
+                .addService(new AirConditionerServiceImpl())
+                .build()
+                .start();
+
+        System.out.println("AirConditioner gRPC server started on port " + PORT);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.err.println("*** Shutting down gRPC server since JVM is shutting down");
+            try {
+                server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace(System.err);
+            }
+            System.err.println("*** Server shut down");
+        }));
+
+        server.awaitTermination();
+    }
+}

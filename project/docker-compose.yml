@@ -1,26 +1,14 @@
-version: '3.8'
-
 services:
   devicemanager:
     build:
       context: .
       dockerfile: devicemanager/Dockerfile
     ports:
-        - "50051:50051"
-        - "8080:8080"
+      - "50051:50051"
+      - "8080:8080"
     container_name: smart-home-devicemanager
     networks:
       - smart-home-network
-    depends_on:
-      - light
-      - oven
-      - thermostat
-      - blind
-      - motionsensor
-      - solarpanel
-      - coil
-      - dishwasher
-      - washingmachine
 
   light:
     build:
@@ -31,6 +19,8 @@ services:
     container_name: light
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
   oven:
     build:
@@ -41,6 +31,8 @@ services:
     container_name: oven
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
   thermostat:
     build:
@@ -51,6 +43,8 @@ services:
     container_name: thermostat
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
   blind:
     build:
@@ -61,6 +55,8 @@ services:
     container_name: blind
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
   motionsensor:
     build:
@@ -71,6 +67,8 @@ services:
     container_name: motionsensor
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
   solarpanel:
     build:
@@ -81,16 +79,20 @@ services:
     container_name: solarpanel
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
-  coil:
+  airconditioner:
     build:
       context: .
-      dockerfile: devices/coil/Dockerfile
+      dockerfile: devices/airconditioner/Dockerfile
     ports:
       - "50058:50058"
-    container_name: coil
+    container_name: airconditioner
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
   dishwasher:
     build:
@@ -101,15 +103,18 @@ services:
     container_name: dishwasher
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
   washingmachine:
     build:
       context: .
       dockerfile: devices/washingmachine/Dockerfile
-    
     container_name: washingmachine
     networks:
       - smart-home-network
+    depends_on:
+      - devicemanager
 
 networks:
   smart-home-network:

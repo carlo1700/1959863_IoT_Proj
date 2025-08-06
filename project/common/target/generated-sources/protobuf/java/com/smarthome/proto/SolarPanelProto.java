@@ -15,26 +15,6 @@ public final class SolarPanelProto {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SolarPanelTurnOnRequest_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SolarPanelTurnOnRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SolarPanelTurnOnResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SolarPanelTurnOnResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SolarPanelTurnOffRequest_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SolarPanelTurnOffRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SolarPanelTurnOffResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SolarPanelTurnOffResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_smarthome_SolarPanelGetStatusRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -44,21 +24,6 @@ public final class SolarPanelProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_smarthome_SolarPanelGetStatusResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_GetEnergyProductionRequest_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_GetEnergyProductionRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_GetEnergyProductionResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_GetEnergyProductionResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_EnergyReading_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_EnergyReading_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -68,91 +33,32 @@ public final class SolarPanelProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020solarpanel.proto\022\tsmarthome\"\031\n\027SolarPa" +
-      "nelTurnOnRequest\"<\n\030SolarPanelTurnOnResp" +
-      "onse\022\017\n\007success\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\"\032" +
-      "\n\030SolarPanelTurnOffRequest\"=\n\031SolarPanel" +
-      "TurnOffResponse\022\017\n\007success\030\001 \001(\010\022\017\n\007mess" +
-      "age\030\002 \001(\t\"\034\n\032SolarPanelGetStatusRequest\"" +
-      "\203\001\n\033SolarPanelGetStatusResponse\022\021\n\tis_on" +
-      "line\030\001 \001(\010\022\034\n\024current_power_output\030\002 \001(\001" +
-      "\022\037\n\027daily_energy_production\030\003 \001(\001\022\022\n\neff" +
-      "iciency\030\004 \001(\001\"B\n\032GetEnergyProductionRequ" +
-      "est\022\022\n\nstart_time\030\001 \001(\003\022\020\n\010end_time\030\002 \001(" +
-      "\003\"_\n\033GetEnergyProductionResponse\022\024\n\014tota" +
-      "l_energy\030\001 \001(\001\022*\n\010readings\030\002 \003(\0132\030.smart" +
-      "home.EnergyReading\"8\n\rEnergyReading\022\021\n\tt" +
-      "imestamp\030\001 \001(\003\022\024\n\014power_output\030\002 \001(\0012\376\002\n" +
-      "\021SolarPanelService\022Q\n\006TurnOn\022\".smarthome" +
-      ".SolarPanelTurnOnRequest\032#.smarthome.Sol" +
-      "arPanelTurnOnResponse\022T\n\007TurnOff\022#.smart" +
-      "home.SolarPanelTurnOffRequest\032$.smarthom" +
-      "e.SolarPanelTurnOffResponse\022Z\n\tGetStatus" +
-      "\022%.smarthome.SolarPanelGetStatusRequest\032" +
-      "&.smarthome.SolarPanelGetStatusResponse\022" +
-      "d\n\023GetEnergyProduction\022%.smarthome.GetEn" +
-      "ergyProductionRequest\032&.smarthome.GetEne" +
-      "rgyProductionResponseB(\n\023com.smarthome.p" +
-      "rotoB\017SolarPanelProtoP\001b\006proto3"
+      "\n\020solarpanel.proto\022\tsmarthome\"\034\n\032SolarPa" +
+      "nelGetStatusRequest\"x\n\033SolarPanelGetStat" +
+      "usResponse\022\026\n\016battery_status\030\001 \001(\001\022\034\n\024cu" +
+      "rrent_power_output\030\002 \001(\001\022#\n\033power_produc" +
+      "tion_percentage\030\003 \001(\0012o\n\021SolarPanelServi" +
+      "ce\022Z\n\tGetStatus\022%.smarthome.SolarPanelGe" +
+      "tStatusRequest\032&.smarthome.SolarPanelGet" +
+      "StatusResponseB(\n\023com.smarthome.protoB\017S" +
+      "olarPanelProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_smarthome_SolarPanelTurnOnRequest_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_smarthome_SolarPanelTurnOnRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SolarPanelTurnOnRequest_descriptor,
-        new java.lang.String[] { });
-    internal_static_smarthome_SolarPanelTurnOnResponse_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_smarthome_SolarPanelTurnOnResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SolarPanelTurnOnResponse_descriptor,
-        new java.lang.String[] { "Success", "Message", });
-    internal_static_smarthome_SolarPanelTurnOffRequest_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_smarthome_SolarPanelTurnOffRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SolarPanelTurnOffRequest_descriptor,
-        new java.lang.String[] { });
-    internal_static_smarthome_SolarPanelTurnOffResponse_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_smarthome_SolarPanelTurnOffResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SolarPanelTurnOffResponse_descriptor,
-        new java.lang.String[] { "Success", "Message", });
     internal_static_smarthome_SolarPanelGetStatusRequest_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(0);
     internal_static_smarthome_SolarPanelGetStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_SolarPanelGetStatusRequest_descriptor,
         new java.lang.String[] { });
     internal_static_smarthome_SolarPanelGetStatusResponse_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(1);
     internal_static_smarthome_SolarPanelGetStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_SolarPanelGetStatusResponse_descriptor,
-        new java.lang.String[] { "IsOnline", "CurrentPowerOutput", "DailyEnergyProduction", "Efficiency", });
-    internal_static_smarthome_GetEnergyProductionRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_smarthome_GetEnergyProductionRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_GetEnergyProductionRequest_descriptor,
-        new java.lang.String[] { "StartTime", "EndTime", });
-    internal_static_smarthome_GetEnergyProductionResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
-    internal_static_smarthome_GetEnergyProductionResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_GetEnergyProductionResponse_descriptor,
-        new java.lang.String[] { "TotalEnergy", "Readings", });
-    internal_static_smarthome_EnergyReading_descriptor =
-      getDescriptor().getMessageTypes().get(8);
-    internal_static_smarthome_EnergyReading_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_EnergyReading_descriptor,
-        new java.lang.String[] { "Timestamp", "PowerOutput", });
+        new java.lang.String[] { "BatteryStatus", "CurrentPowerOutput", "PowerProductionPercentage", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

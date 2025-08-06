@@ -9,48 +9,24 @@ package com.smarthome.proto;
 public enum WashingMachineProgram
     implements com.google.protobuf.ProtocolMessageEnum {
   /**
-   * <code>COTTON = 0;</code>
+   * <code>DELICATE = 0;</code>
    */
-  COTTON(0),
+  DELICATE(0),
   /**
-   * <code>SYNTHETIC = 1;</code>
+   * <code>QUICK_WASH = 1;</code>
    */
-  SYNTHETIC(1),
-  /**
-   * <code>DELICATE = 2;</code>
-   */
-  DELICATE(2),
-  /**
-   * <code>WOOL = 3;</code>
-   */
-  WOOL(3),
-  /**
-   * <code>QUICK_WASH = 4;</code>
-   */
-  QUICK_WASH(4),
+  QUICK_WASH(1),
   UNRECOGNIZED(-1),
   ;
 
   /**
-   * <code>COTTON = 0;</code>
+   * <code>DELICATE = 0;</code>
    */
-  public static final int COTTON_VALUE = 0;
+  public static final int DELICATE_VALUE = 0;
   /**
-   * <code>SYNTHETIC = 1;</code>
+   * <code>QUICK_WASH = 1;</code>
    */
-  public static final int SYNTHETIC_VALUE = 1;
-  /**
-   * <code>DELICATE = 2;</code>
-   */
-  public static final int DELICATE_VALUE = 2;
-  /**
-   * <code>WOOL = 3;</code>
-   */
-  public static final int WOOL_VALUE = 3;
-  /**
-   * <code>QUICK_WASH = 4;</code>
-   */
-  public static final int QUICK_WASH_VALUE = 4;
+  public static final int QUICK_WASH_VALUE = 1;
 
 
   public final int getNumber() {
@@ -77,11 +53,8 @@ public enum WashingMachineProgram
    */
   public static WashingMachineProgram forNumber(int value) {
     switch (value) {
-      case 0: return COTTON;
-      case 1: return SYNTHETIC;
-      case 2: return DELICATE;
-      case 3: return WOOL;
-      case 4: return QUICK_WASH;
+      case 0: return DELICATE;
+      case 1: return QUICK_WASH;
       default: return null;
     }
   }

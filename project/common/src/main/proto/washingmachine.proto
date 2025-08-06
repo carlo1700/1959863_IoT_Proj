@@ -17,11 +17,8 @@ service WashingMachineService {
 }
 
 enum WashingMachineProgram {
-  COTTON = 0;
-  SYNTHETIC = 1;
-  DELICATE = 2;
-  WOOL = 3;
-  QUICK_WASH = 4;
+  DELICATE = 0;
+  QUICK_WASH = 1;
 }
 
 message WashingMachineTurnOnRequest {}
@@ -68,7 +65,5 @@ message WashingMachineGetStatusRequest {}
 message WashingMachineGetStatusResponse {
   bool is_running = 1;
   WashingMachineProgram current_program = 2;
-  int32 remaining_time = 3; // in minutes
-  bool door_locked = 4;
-  int32 current_temperature = 5;
+  bool is_on = 3;
 }

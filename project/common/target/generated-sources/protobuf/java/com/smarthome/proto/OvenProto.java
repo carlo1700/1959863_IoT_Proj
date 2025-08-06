@@ -45,16 +45,6 @@ public final class OvenProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_smarthome_SetTemperatureResponse_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SetTimerRequest_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SetTimerRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_smarthome_SetTimerResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_smarthome_SetTimerResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_smarthome_OvenGetStatusRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -64,6 +54,16 @@ public final class OvenProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_smarthome_OvenGetStatusResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_smarthome_OvenSetProgramRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_smarthome_OvenSetProgramRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_smarthome_OvenSetProgramResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_smarthome_OvenSetProgramResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -80,23 +80,28 @@ public final class OvenProto {
       "(\010\022\017\n\007message\030\002 \001(\t\",\n\025SetTemperatureReq" +
       "uest\022\023\n\013temperature\030\001 \001(\005\":\n\026SetTemperat" +
       "ureResponse\022\017\n\007success\030\001 \001(\010\022\017\n\007message\030" +
-      "\002 \001(\t\"\"\n\017SetTimerRequest\022\017\n\007minutes\030\001 \001(" +
-      "\005\"4\n\020SetTimerResponse\022\017\n\007success\030\001 \001(\010\022\017" +
-      "\n\007message\030\002 \001(\t\"\026\n\024OvenGetStatusRequest\"" +
-      "S\n\025OvenGetStatusResponse\022\r\n\005is_on\030\001 \001(\010\022" +
-      "\023\n\013temperature\030\002 \001(\005\022\026\n\016remaining_time\030\003" +
-      " \001(\0052\212\003\n\013OvenService\022E\n\006TurnOn\022\034.smartho" +
-      "me.OvenTurnOnRequest\032\035.smarthome.OvenTur" +
-      "nOnResponse\022H\n\007TurnOff\022\035.smarthome.OvenT" +
-      "urnOffRequest\032\036.smarthome.OvenTurnOffRes" +
-      "ponse\022U\n\016SetTemperature\022 .smarthome.SetT" +
-      "emperatureRequest\032!.smarthome.SetTempera" +
-      "tureResponse\022C\n\010SetTimer\022\032.smarthome.Set" +
-      "TimerRequest\032\033.smarthome.SetTimerRespons" +
-      "e\022N\n\tGetStatus\022\037.smarthome.OvenGetStatus" +
-      "Request\032 .smarthome.OvenGetStatusRespons" +
-      "eB\"\n\023com.smarthome.protoB\tOvenProtoP\001b\006p" +
-      "roto3"
+      "\002 \001(\t\"\026\n\024OvenGetStatusRequest\"l\n\025OvenGet" +
+      "StatusResponse\022\r\n\005is_on\030\001 \001(\010\022\023\n\013tempera" +
+      "ture\030\002 \001(\005\022/\n\017current_program\030\003 \001(\0162\026.sm" +
+      "arthome.OvenProgram\"g\n\025OvenSetProgramReq" +
+      "uest\022\'\n\007program\030\001 \001(\0162\026.smarthome.OvenPr" +
+      "ogram\022\023\n\013temperature\030\002 \001(\005\022\020\n\010duration\030\003" +
+      " \001(\005\":\n\026OvenSetProgramResponse\022\017\n\007succes" +
+      "s\030\001 \001(\010\022\017\n\007message\030\002 \001(\t*a\n\013OvenProgram\022" +
+      "\034\n\030OVEN_PROGRAM_UNSPECIFIED\020\000\022\027\n\023OVEN_PR" +
+      "OGRAM_STATIC\020\001\022\033\n\027OVEN_PROGRAM_CONVECTIO" +
+      "N\020\0022\230\003\n\013OvenService\022E\n\006TurnOn\022\034.smarthom" +
+      "e.OvenTurnOnRequest\032\035.smarthome.OvenTurn" +
+      "OnResponse\022H\n\007TurnOff\022\035.smarthome.OvenTu" +
+      "rnOffRequest\032\036.smarthome.OvenTurnOffResp" +
+      "onse\022U\n\016SetTemperature\022 .smarthome.SetTe" +
+      "mperatureRequest\032!.smarthome.SetTemperat" +
+      "ureResponse\022N\n\tGetStatus\022\037.smarthome.Ove" +
+      "nGetStatusRequest\032 .smarthome.OvenGetSta" +
+      "tusResponse\022Q\n\nSetProgram\022 .smarthome.Ov" +
+      "enSetProgramRequest\032!.smarthome.OvenSetP" +
+      "rogramResponseB\"\n\023com.smarthome.protoB\tO" +
+      "venProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -138,30 +143,30 @@ public final class OvenProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_SetTemperatureResponse_descriptor,
         new java.lang.String[] { "Success", "Message", });
-    internal_static_smarthome_SetTimerRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_smarthome_SetTimerRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SetTimerRequest_descriptor,
-        new java.lang.String[] { "Minutes", });
-    internal_static_smarthome_SetTimerResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
-    internal_static_smarthome_SetTimerResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_smarthome_SetTimerResponse_descriptor,
-        new java.lang.String[] { "Success", "Message", });
     internal_static_smarthome_OvenGetStatusRequest_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_smarthome_OvenGetStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_OvenGetStatusRequest_descriptor,
         new java.lang.String[] { });
     internal_static_smarthome_OvenGetStatusResponse_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_smarthome_OvenGetStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_OvenGetStatusResponse_descriptor,
-        new java.lang.String[] { "IsOn", "Temperature", "RemainingTime", });
+        new java.lang.String[] { "IsOn", "Temperature", "CurrentProgram", });
+    internal_static_smarthome_OvenSetProgramRequest_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_smarthome_OvenSetProgramRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_smarthome_OvenSetProgramRequest_descriptor,
+        new java.lang.String[] { "Program", "Temperature", "Duration", });
+    internal_static_smarthome_OvenSetProgramResponse_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_smarthome_OvenSetProgramResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_smarthome_OvenSetProgramResponse_descriptor,
+        new java.lang.String[] { "Success", "Message", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

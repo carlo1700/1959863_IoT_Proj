@@ -11,8 +11,8 @@ service OvenService {
   rpc TurnOn(OvenTurnOnRequest) returns (OvenTurnOnResponse);
   rpc TurnOff(OvenTurnOffRequest) returns (OvenTurnOffResponse);
   rpc SetTemperature(SetTemperatureRequest) returns (SetTemperatureResponse);
-  rpc SetTimer(SetTimerRequest) returns (SetTimerResponse);
   rpc GetStatus(OvenGetStatusRequest) returns (OvenGetStatusResponse);
+  rpc SetProgram(OvenSetProgramRequest) returns (OvenSetProgramResponse);
 }
 
 message OvenTurnOnRequest {}
@@ -38,19 +38,29 @@ message SetTemperatureResponse {
   string message = 2;
 }
 
-message SetTimerRequest {
-  int32 minutes = 1;
-}
-
-message SetTimerResponse {
-  bool success = 1;
-  string message = 2;
-}
-
 message OvenGetStatusRequest {}
 
 message OvenGetStatusResponse {
   bool is_on = 1;
   int32 temperature = 2;
-  int32 remaining_time = 3; // in minutes
+  OvenProgram current_program = 3; // modalità attiva: statico o ventilato
+}
+
+
+// Enum dei programmi disponibili per il forno
+enum OvenProgram {
+  OVEN_PROGRAM_UNSPECIFIED = 0;
+  OVEN_PROGRAM_STATIC = 1;
+  OVEN_PROGRAM_CONVECTION = 2; // "ventilato"
+}
+
+message OvenSetProgramRequest {
+  OvenProgram program = 1;
+  int32 temperature = 2; // in Celsius
+  int32 duration = 3;    // in minutes
+}
+
+message OvenSetProgramResponse {
+  bool success = 1;
+  string message = 2;
 }

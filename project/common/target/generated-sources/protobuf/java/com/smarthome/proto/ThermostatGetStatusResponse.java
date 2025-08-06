@@ -16,7 +16,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private ThermostatGetStatusResponse() {
-    mode_ = 0;
   }
 
   @java.lang.Override
@@ -50,57 +49,6 @@ private static final long serialVersionUID = 0L;
     return currentTemperature_;
   }
 
-  public static final int TARGET_TEMPERATURE_FIELD_NUMBER = 2;
-  private double targetTemperature_ = 0D;
-  /**
-   * <code>double target_temperature = 2;</code>
-   * @return The targetTemperature.
-   */
-  @java.lang.Override
-  public double getTargetTemperature() {
-    return targetTemperature_;
-  }
-
-  public static final int MODE_FIELD_NUMBER = 3;
-  private int mode_ = 0;
-  /**
-   * <code>.smarthome.ThermostatMode mode = 3;</code>
-   * @return The enum numeric value on the wire for mode.
-   */
-  @java.lang.Override public int getModeValue() {
-    return mode_;
-  }
-  /**
-   * <code>.smarthome.ThermostatMode mode = 3;</code>
-   * @return The mode.
-   */
-  @java.lang.Override public com.smarthome.proto.ThermostatMode getMode() {
-    com.smarthome.proto.ThermostatMode result = com.smarthome.proto.ThermostatMode.forNumber(mode_);
-    return result == null ? com.smarthome.proto.ThermostatMode.UNRECOGNIZED : result;
-  }
-
-  public static final int HEATING_FIELD_NUMBER = 4;
-  private boolean heating_ = false;
-  /**
-   * <code>bool heating = 4;</code>
-   * @return The heating.
-   */
-  @java.lang.Override
-  public boolean getHeating() {
-    return heating_;
-  }
-
-  public static final int COOLING_FIELD_NUMBER = 5;
-  private boolean cooling_ = false;
-  /**
-   * <code>bool cooling = 5;</code>
-   * @return The cooling.
-   */
-  @java.lang.Override
-  public boolean getCooling() {
-    return cooling_;
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -118,18 +66,6 @@ private static final long serialVersionUID = 0L;
     if (java.lang.Double.doubleToRawLongBits(currentTemperature_) != 0) {
       output.writeDouble(1, currentTemperature_);
     }
-    if (java.lang.Double.doubleToRawLongBits(targetTemperature_) != 0) {
-      output.writeDouble(2, targetTemperature_);
-    }
-    if (mode_ != com.smarthome.proto.ThermostatMode.OFF.getNumber()) {
-      output.writeEnum(3, mode_);
-    }
-    if (heating_ != false) {
-      output.writeBool(4, heating_);
-    }
-    if (cooling_ != false) {
-      output.writeBool(5, cooling_);
-    }
     getUnknownFields().writeTo(output);
   }
 
@@ -142,22 +78,6 @@ private static final long serialVersionUID = 0L;
     if (java.lang.Double.doubleToRawLongBits(currentTemperature_) != 0) {
       size += com.google.protobuf.CodedOutputStream
         .computeDoubleSize(1, currentTemperature_);
-    }
-    if (java.lang.Double.doubleToRawLongBits(targetTemperature_) != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeDoubleSize(2, targetTemperature_);
-    }
-    if (mode_ != com.smarthome.proto.ThermostatMode.OFF.getNumber()) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeEnumSize(3, mode_);
-    }
-    if (heating_ != false) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(4, heating_);
-    }
-    if (cooling_ != false) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(5, cooling_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -177,14 +97,6 @@ private static final long serialVersionUID = 0L;
     if (java.lang.Double.doubleToLongBits(getCurrentTemperature())
         != java.lang.Double.doubleToLongBits(
             other.getCurrentTemperature())) return false;
-    if (java.lang.Double.doubleToLongBits(getTargetTemperature())
-        != java.lang.Double.doubleToLongBits(
-            other.getTargetTemperature())) return false;
-    if (mode_ != other.mode_) return false;
-    if (getHeating()
-        != other.getHeating()) return false;
-    if (getCooling()
-        != other.getCooling()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -199,17 +111,6 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + CURRENT_TEMPERATURE_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         java.lang.Double.doubleToLongBits(getCurrentTemperature()));
-    hash = (37 * hash) + TARGET_TEMPERATURE_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        java.lang.Double.doubleToLongBits(getTargetTemperature()));
-    hash = (37 * hash) + MODE_FIELD_NUMBER;
-    hash = (53 * hash) + mode_;
-    hash = (37 * hash) + HEATING_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getHeating());
-    hash = (37 * hash) + COOLING_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getCooling());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -342,10 +243,6 @@ private static final long serialVersionUID = 0L;
       super.clear();
       bitField0_ = 0;
       currentTemperature_ = 0D;
-      targetTemperature_ = 0D;
-      mode_ = 0;
-      heating_ = false;
-      cooling_ = false;
       return this;
     }
 
@@ -381,18 +278,6 @@ private static final long serialVersionUID = 0L;
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
         result.currentTemperature_ = currentTemperature_;
-      }
-      if (((from_bitField0_ & 0x00000002) != 0)) {
-        result.targetTemperature_ = targetTemperature_;
-      }
-      if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.mode_ = mode_;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        result.heating_ = heating_;
-      }
-      if (((from_bitField0_ & 0x00000010) != 0)) {
-        result.cooling_ = cooling_;
       }
     }
 
@@ -443,18 +328,6 @@ private static final long serialVersionUID = 0L;
       if (other.getCurrentTemperature() != 0D) {
         setCurrentTemperature(other.getCurrentTemperature());
       }
-      if (other.getTargetTemperature() != 0D) {
-        setTargetTemperature(other.getTargetTemperature());
-      }
-      if (other.mode_ != 0) {
-        setModeValue(other.getModeValue());
-      }
-      if (other.getHeating() != false) {
-        setHeating(other.getHeating());
-      }
-      if (other.getCooling() != false) {
-        setCooling(other.getCooling());
-      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -486,26 +359,6 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000001;
               break;
             } // case 9
-            case 17: {
-              targetTemperature_ = input.readDouble();
-              bitField0_ |= 0x00000002;
-              break;
-            } // case 17
-            case 24: {
-              mode_ = input.readEnum();
-              bitField0_ |= 0x00000004;
-              break;
-            } // case 24
-            case 32: {
-              heating_ = input.readBool();
-              bitField0_ |= 0x00000008;
-              break;
-            } // case 32
-            case 40: {
-              cooling_ = input.readBool();
-              bitField0_ |= 0x00000010;
-              break;
-            } // case 40
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -551,155 +404,6 @@ private static final long serialVersionUID = 0L;
     public Builder clearCurrentTemperature() {
       bitField0_ = (bitField0_ & ~0x00000001);
       currentTemperature_ = 0D;
-      onChanged();
-      return this;
-    }
-
-    private double targetTemperature_ ;
-    /**
-     * <code>double target_temperature = 2;</code>
-     * @return The targetTemperature.
-     */
-    @java.lang.Override
-    public double getTargetTemperature() {
-      return targetTemperature_;
-    }
-    /**
-     * <code>double target_temperature = 2;</code>
-     * @param value The targetTemperature to set.
-     * @return This builder for chaining.
-     */
-    public Builder setTargetTemperature(double value) {
-
-      targetTemperature_ = value;
-      bitField0_ |= 0x00000002;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>double target_temperature = 2;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearTargetTemperature() {
-      bitField0_ = (bitField0_ & ~0x00000002);
-      targetTemperature_ = 0D;
-      onChanged();
-      return this;
-    }
-
-    private int mode_ = 0;
-    /**
-     * <code>.smarthome.ThermostatMode mode = 3;</code>
-     * @return The enum numeric value on the wire for mode.
-     */
-    @java.lang.Override public int getModeValue() {
-      return mode_;
-    }
-    /**
-     * <code>.smarthome.ThermostatMode mode = 3;</code>
-     * @param value The enum numeric value on the wire for mode to set.
-     * @return This builder for chaining.
-     */
-    public Builder setModeValue(int value) {
-      mode_ = value;
-      bitField0_ |= 0x00000004;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>.smarthome.ThermostatMode mode = 3;</code>
-     * @return The mode.
-     */
-    @java.lang.Override
-    public com.smarthome.proto.ThermostatMode getMode() {
-      com.smarthome.proto.ThermostatMode result = com.smarthome.proto.ThermostatMode.forNumber(mode_);
-      return result == null ? com.smarthome.proto.ThermostatMode.UNRECOGNIZED : result;
-    }
-    /**
-     * <code>.smarthome.ThermostatMode mode = 3;</code>
-     * @param value The mode to set.
-     * @return This builder for chaining.
-     */
-    public Builder setMode(com.smarthome.proto.ThermostatMode value) {
-      if (value == null) {
-        throw new NullPointerException();
-      }
-      bitField0_ |= 0x00000004;
-      mode_ = value.getNumber();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>.smarthome.ThermostatMode mode = 3;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearMode() {
-      bitField0_ = (bitField0_ & ~0x00000004);
-      mode_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private boolean heating_ ;
-    /**
-     * <code>bool heating = 4;</code>
-     * @return The heating.
-     */
-    @java.lang.Override
-    public boolean getHeating() {
-      return heating_;
-    }
-    /**
-     * <code>bool heating = 4;</code>
-     * @param value The heating to set.
-     * @return This builder for chaining.
-     */
-    public Builder setHeating(boolean value) {
-
-      heating_ = value;
-      bitField0_ |= 0x00000008;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool heating = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearHeating() {
-      bitField0_ = (bitField0_ & ~0x00000008);
-      heating_ = false;
-      onChanged();
-      return this;
-    }
-
-    private boolean cooling_ ;
-    /**
-     * <code>bool cooling = 5;</code>
-     * @return The cooling.
-     */
-    @java.lang.Override
-    public boolean getCooling() {
-      return cooling_;
-    }
-    /**
-     * <code>bool cooling = 5;</code>
-     * @param value The cooling to set.
-     * @return This builder for chaining.
-     */
-    public Builder setCooling(boolean value) {
-
-      cooling_ = value;
-      bitField0_ |= 0x00000010;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool cooling = 5;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearCooling() {
-      bitField0_ = (bitField0_ & ~0x00000010);
-      cooling_ = false;
       onChanged();
       return this;
     }

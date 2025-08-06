@@ -101,7 +101,7 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (program_ != com.smarthome.proto.WashingMachineProgram.COTTON.getNumber()) {
+    if (program_ != com.smarthome.proto.WashingMachineProgram.DELICATE.getNumber()) {
       output.writeEnum(1, program_);
     }
     if (temperature_ != 0) {
@@ -119,7 +119,7 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (program_ != com.smarthome.proto.WashingMachineProgram.COTTON.getNumber()) {
+    if (program_ != com.smarthome.proto.WashingMachineProgram.DELICATE.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(1, program_);
     }

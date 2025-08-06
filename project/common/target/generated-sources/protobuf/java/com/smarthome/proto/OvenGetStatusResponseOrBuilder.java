@@ -21,11 +21,20 @@ public interface OvenGetStatusResponseOrBuilder extends
 
   /**
    * <pre>
-   * in minutes
+   * modalità attiva: statico o ventilato
    * </pre>
    *
-   * <code>int32 remaining_time = 3;</code>
-   * @return The remainingTime.
+   * <code>.smarthome.OvenProgram current_program = 3;</code>
+   * @return The enum numeric value on the wire for currentProgram.
    */
-  int getRemainingTime();
+  int getCurrentProgramValue();
+  /**
+   * <pre>
+   * modalità attiva: statico o ventilato
+   * </pre>
+   *
+   * <code>.smarthome.OvenProgram current_program = 3;</code>
+   * @return The currentProgram.
+   */
+  com.smarthome.proto.OvenProgram getCurrentProgram();
 }

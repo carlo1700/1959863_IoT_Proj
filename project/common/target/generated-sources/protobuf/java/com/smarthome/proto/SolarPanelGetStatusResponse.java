@@ -38,22 +38,26 @@ private static final long serialVersionUID = 0L;
             com.smarthome.proto.SolarPanelGetStatusResponse.class, com.smarthome.proto.SolarPanelGetStatusResponse.Builder.class);
   }
 
-  public static final int IS_ONLINE_FIELD_NUMBER = 1;
-  private boolean isOnline_ = false;
+  public static final int BATTERY_STATUS_FIELD_NUMBER = 1;
+  private double batteryStatus_ = 0D;
   /**
-   * <code>bool is_online = 1;</code>
-   * @return The isOnline.
+   * <pre>
+   * percentuale carica batteria (0-100%)
+   * </pre>
+   *
+   * <code>double battery_status = 1;</code>
+   * @return The batteryStatus.
    */
   @java.lang.Override
-  public boolean getIsOnline() {
-    return isOnline_;
+  public double getBatteryStatus() {
+    return batteryStatus_;
   }
 
   public static final int CURRENT_POWER_OUTPUT_FIELD_NUMBER = 2;
   private double currentPowerOutput_ = 0D;
   /**
    * <pre>
-   * in watts
+   * potenza corrente in watts
    * </pre>
    *
    * <code>double current_power_output = 2;</code>
@@ -64,34 +68,19 @@ private static final long serialVersionUID = 0L;
     return currentPowerOutput_;
   }
 
-  public static final int DAILY_ENERGY_PRODUCTION_FIELD_NUMBER = 3;
-  private double dailyEnergyProduction_ = 0D;
+  public static final int POWER_PRODUCTION_PERCENTAGE_FIELD_NUMBER = 3;
+  private double powerProductionPercentage_ = 0D;
   /**
    * <pre>
-   * in kWh
+   * produzione in % rispetto alla potenza massima
    * </pre>
    *
-   * <code>double daily_energy_production = 3;</code>
-   * @return The dailyEnergyProduction.
+   * <code>double power_production_percentage = 3;</code>
+   * @return The powerProductionPercentage.
    */
   @java.lang.Override
-  public double getDailyEnergyProduction() {
-    return dailyEnergyProduction_;
-  }
-
-  public static final int EFFICIENCY_FIELD_NUMBER = 4;
-  private double efficiency_ = 0D;
-  /**
-   * <pre>
-   * percentage
-   * </pre>
-   *
-   * <code>double efficiency = 4;</code>
-   * @return The efficiency.
-   */
-  @java.lang.Override
-  public double getEfficiency() {
-    return efficiency_;
+  public double getPowerProductionPercentage() {
+    return powerProductionPercentage_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -108,17 +97,14 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (isOnline_ != false) {
-      output.writeBool(1, isOnline_);
+    if (java.lang.Double.doubleToRawLongBits(batteryStatus_) != 0) {
+      output.writeDouble(1, batteryStatus_);
     }
     if (java.lang.Double.doubleToRawLongBits(currentPowerOutput_) != 0) {
       output.writeDouble(2, currentPowerOutput_);
     }
-    if (java.lang.Double.doubleToRawLongBits(dailyEnergyProduction_) != 0) {
-      output.writeDouble(3, dailyEnergyProduction_);
-    }
-    if (java.lang.Double.doubleToRawLongBits(efficiency_) != 0) {
-      output.writeDouble(4, efficiency_);
+    if (java.lang.Double.doubleToRawLongBits(powerProductionPercentage_) != 0) {
+      output.writeDouble(3, powerProductionPercentage_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -129,21 +115,17 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (isOnline_ != false) {
+    if (java.lang.Double.doubleToRawLongBits(batteryStatus_) != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(1, isOnline_);
+        .computeDoubleSize(1, batteryStatus_);
     }
     if (java.lang.Double.doubleToRawLongBits(currentPowerOutput_) != 0) {
       size += com.google.protobuf.CodedOutputStream
         .computeDoubleSize(2, currentPowerOutput_);
     }
-    if (java.lang.Double.doubleToRawLongBits(dailyEnergyProduction_) != 0) {
+    if (java.lang.Double.doubleToRawLongBits(powerProductionPercentage_) != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeDoubleSize(3, dailyEnergyProduction_);
-    }
-    if (java.lang.Double.doubleToRawLongBits(efficiency_) != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeDoubleSize(4, efficiency_);
+        .computeDoubleSize(3, powerProductionPercentage_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -160,17 +142,15 @@ private static final long serialVersionUID = 0L;
     }
     com.smarthome.proto.SolarPanelGetStatusResponse other = (com.smarthome.proto.SolarPanelGetStatusResponse) obj;
 
-    if (getIsOnline()
-        != other.getIsOnline()) return false;
+    if (java.lang.Double.doubleToLongBits(getBatteryStatus())
+        != java.lang.Double.doubleToLongBits(
+            other.getBatteryStatus())) return false;
     if (java.lang.Double.doubleToLongBits(getCurrentPowerOutput())
         != java.lang.Double.doubleToLongBits(
             other.getCurrentPowerOutput())) return false;
-    if (java.lang.Double.doubleToLongBits(getDailyEnergyProduction())
+    if (java.lang.Double.doubleToLongBits(getPowerProductionPercentage())
         != java.lang.Double.doubleToLongBits(
-            other.getDailyEnergyProduction())) return false;
-    if (java.lang.Double.doubleToLongBits(getEfficiency())
-        != java.lang.Double.doubleToLongBits(
-            other.getEfficiency())) return false;
+            other.getPowerProductionPercentage())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -182,18 +162,15 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + IS_ONLINE_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getIsOnline());
+    hash = (37 * hash) + BATTERY_STATUS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        java.lang.Double.doubleToLongBits(getBatteryStatus()));
     hash = (37 * hash) + CURRENT_POWER_OUTPUT_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         java.lang.Double.doubleToLongBits(getCurrentPowerOutput()));
-    hash = (37 * hash) + DAILY_ENERGY_PRODUCTION_FIELD_NUMBER;
+    hash = (37 * hash) + POWER_PRODUCTION_PERCENTAGE_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        java.lang.Double.doubleToLongBits(getDailyEnergyProduction()));
-    hash = (37 * hash) + EFFICIENCY_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        java.lang.Double.doubleToLongBits(getEfficiency()));
+        java.lang.Double.doubleToLongBits(getPowerProductionPercentage()));
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -325,10 +302,9 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
-      isOnline_ = false;
+      batteryStatus_ = 0D;
       currentPowerOutput_ = 0D;
-      dailyEnergyProduction_ = 0D;
-      efficiency_ = 0D;
+      powerProductionPercentage_ = 0D;
       return this;
     }
 
@@ -363,16 +339,13 @@ private static final long serialVersionUID = 0L;
     private void buildPartial0(com.smarthome.proto.SolarPanelGetStatusResponse result) {
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.isOnline_ = isOnline_;
+        result.batteryStatus_ = batteryStatus_;
       }
       if (((from_bitField0_ & 0x00000002) != 0)) {
         result.currentPowerOutput_ = currentPowerOutput_;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.dailyEnergyProduction_ = dailyEnergyProduction_;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        result.efficiency_ = efficiency_;
+        result.powerProductionPercentage_ = powerProductionPercentage_;
       }
     }
 
@@ -420,17 +393,14 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.smarthome.proto.SolarPanelGetStatusResponse other) {
       if (other == com.smarthome.proto.SolarPanelGetStatusResponse.getDefaultInstance()) return this;
-      if (other.getIsOnline() != false) {
-        setIsOnline(other.getIsOnline());
+      if (other.getBatteryStatus() != 0D) {
+        setBatteryStatus(other.getBatteryStatus());
       }
       if (other.getCurrentPowerOutput() != 0D) {
         setCurrentPowerOutput(other.getCurrentPowerOutput());
       }
-      if (other.getDailyEnergyProduction() != 0D) {
-        setDailyEnergyProduction(other.getDailyEnergyProduction());
-      }
-      if (other.getEfficiency() != 0D) {
-        setEfficiency(other.getEfficiency());
+      if (other.getPowerProductionPercentage() != 0D) {
+        setPowerProductionPercentage(other.getPowerProductionPercentage());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -458,26 +428,21 @@ private static final long serialVersionUID = 0L;
             case 0:
               done = true;
               break;
-            case 8: {
-              isOnline_ = input.readBool();
+            case 9: {
+              batteryStatus_ = input.readDouble();
               bitField0_ |= 0x00000001;
               break;
-            } // case 8
+            } // case 9
             case 17: {
               currentPowerOutput_ = input.readDouble();
               bitField0_ |= 0x00000002;
               break;
             } // case 17
             case 25: {
-              dailyEnergyProduction_ = input.readDouble();
+              powerProductionPercentage_ = input.readDouble();
               bitField0_ |= 0x00000004;
               break;
             } // case 25
-            case 33: {
-              efficiency_ = input.readDouble();
-              bitField0_ |= 0x00000008;
-              break;
-            } // case 33
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -495,34 +460,46 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private boolean isOnline_ ;
+    private double batteryStatus_ ;
     /**
-     * <code>bool is_online = 1;</code>
-     * @return The isOnline.
+     * <pre>
+     * percentuale carica batteria (0-100%)
+     * </pre>
+     *
+     * <code>double battery_status = 1;</code>
+     * @return The batteryStatus.
      */
     @java.lang.Override
-    public boolean getIsOnline() {
-      return isOnline_;
+    public double getBatteryStatus() {
+      return batteryStatus_;
     }
     /**
-     * <code>bool is_online = 1;</code>
-     * @param value The isOnline to set.
+     * <pre>
+     * percentuale carica batteria (0-100%)
+     * </pre>
+     *
+     * <code>double battery_status = 1;</code>
+     * @param value The batteryStatus to set.
      * @return This builder for chaining.
      */
-    public Builder setIsOnline(boolean value) {
+    public Builder setBatteryStatus(double value) {
 
-      isOnline_ = value;
+      batteryStatus_ = value;
       bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
     /**
-     * <code>bool is_online = 1;</code>
+     * <pre>
+     * percentuale carica batteria (0-100%)
+     * </pre>
+     *
+     * <code>double battery_status = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearIsOnline() {
+    public Builder clearBatteryStatus() {
       bitField0_ = (bitField0_ & ~0x00000001);
-      isOnline_ = false;
+      batteryStatus_ = 0D;
       onChanged();
       return this;
     }
@@ -530,7 +507,7 @@ private static final long serialVersionUID = 0L;
     private double currentPowerOutput_ ;
     /**
      * <pre>
-     * in watts
+     * potenza corrente in watts
      * </pre>
      *
      * <code>double current_power_output = 2;</code>
@@ -542,7 +519,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * in watts
+     * potenza corrente in watts
      * </pre>
      *
      * <code>double current_power_output = 2;</code>
@@ -558,7 +535,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * in watts
+     * potenza corrente in watts
      * </pre>
      *
      * <code>double current_power_output = 2;</code>
@@ -571,90 +548,46 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private double dailyEnergyProduction_ ;
+    private double powerProductionPercentage_ ;
     /**
      * <pre>
-     * in kWh
+     * produzione in % rispetto alla potenza massima
      * </pre>
      *
-     * <code>double daily_energy_production = 3;</code>
-     * @return The dailyEnergyProduction.
+     * <code>double power_production_percentage = 3;</code>
+     * @return The powerProductionPercentage.
      */
     @java.lang.Override
-    public double getDailyEnergyProduction() {
-      return dailyEnergyProduction_;
+    public double getPowerProductionPercentage() {
+      return powerProductionPercentage_;
     }
     /**
      * <pre>
-     * in kWh
+     * produzione in % rispetto alla potenza massima
      * </pre>
      *
-     * <code>double daily_energy_production = 3;</code>
-     * @param value The dailyEnergyProduction to set.
+     * <code>double power_production_percentage = 3;</code>
+     * @param value The powerProductionPercentage to set.
      * @return This builder for chaining.
      */
-    public Builder setDailyEnergyProduction(double value) {
+    public Builder setPowerProductionPercentage(double value) {
 
-      dailyEnergyProduction_ = value;
+      powerProductionPercentage_ = value;
       bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
      * <pre>
-     * in kWh
+     * produzione in % rispetto alla potenza massima
      * </pre>
      *
-     * <code>double daily_energy_production = 3;</code>
+     * <code>double power_production_percentage = 3;</code>
      * @return This builder for chaining.
      */
-    public Builder clearDailyEnergyProduction() {
+    public Builder clearPowerProductionPercentage() {
       bitField0_ = (bitField0_ & ~0x00000004);
-      dailyEnergyProduction_ = 0D;
-      onChanged();
-      return this;
-    }
-
-    private double efficiency_ ;
-    /**
-     * <pre>
-     * percentage
-     * </pre>
-     *
-     * <code>double efficiency = 4;</code>
-     * @return The efficiency.
-     */
-    @java.lang.Override
-    public double getEfficiency() {
-      return efficiency_;
-    }
-    /**
-     * <pre>
-     * percentage
-     * </pre>
-     *
-     * <code>double efficiency = 4;</code>
-     * @param value The efficiency to set.
-     * @return This builder for chaining.
-     */
-    public Builder setEfficiency(double value) {
-
-      efficiency_ = value;
-      bitField0_ |= 0x00000008;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * percentage
-     * </pre>
-     *
-     * <code>double efficiency = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearEfficiency() {
-      bitField0_ = (bitField0_ & ~0x00000008);
-      efficiency_ = 0D;
+      powerProductionPercentage_ = 0D;
       onChanged();
       return this;
     }

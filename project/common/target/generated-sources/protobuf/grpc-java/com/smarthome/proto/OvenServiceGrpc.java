@@ -111,37 +111,6 @@ public final class OvenServiceGrpc {
     return getSetTemperatureMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.SetTimerRequest,
-      com.smarthome.proto.SetTimerResponse> getSetTimerMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "SetTimer",
-      requestType = com.smarthome.proto.SetTimerRequest.class,
-      responseType = com.smarthome.proto.SetTimerResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.smarthome.proto.SetTimerRequest,
-      com.smarthome.proto.SetTimerResponse> getSetTimerMethod() {
-    io.grpc.MethodDescriptor<com.smarthome.proto.SetTimerRequest, com.smarthome.proto.SetTimerResponse> getSetTimerMethod;
-    if ((getSetTimerMethod = OvenServiceGrpc.getSetTimerMethod) == null) {
-      synchronized (OvenServiceGrpc.class) {
-        if ((getSetTimerMethod = OvenServiceGrpc.getSetTimerMethod) == null) {
-          OvenServiceGrpc.getSetTimerMethod = getSetTimerMethod =
-              io.grpc.MethodDescriptor.<com.smarthome.proto.SetTimerRequest, com.smarthome.proto.SetTimerResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetTimer"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetTimerRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetTimerResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new OvenServiceMethodDescriptorSupplier("SetTimer"))
-              .build();
-        }
-      }
-    }
-    return getSetTimerMethod;
-  }
-
   private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.OvenGetStatusRequest,
       com.smarthome.proto.OvenGetStatusResponse> getGetStatusMethod;
 
@@ -171,6 +140,37 @@ public final class OvenServiceGrpc {
       }
     }
     return getGetStatusMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.OvenSetProgramRequest,
+      com.smarthome.proto.OvenSetProgramResponse> getSetProgramMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetProgram",
+      requestType = com.smarthome.proto.OvenSetProgramRequest.class,
+      responseType = com.smarthome.proto.OvenSetProgramResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.smarthome.proto.OvenSetProgramRequest,
+      com.smarthome.proto.OvenSetProgramResponse> getSetProgramMethod() {
+    io.grpc.MethodDescriptor<com.smarthome.proto.OvenSetProgramRequest, com.smarthome.proto.OvenSetProgramResponse> getSetProgramMethod;
+    if ((getSetProgramMethod = OvenServiceGrpc.getSetProgramMethod) == null) {
+      synchronized (OvenServiceGrpc.class) {
+        if ((getSetProgramMethod = OvenServiceGrpc.getSetProgramMethod) == null) {
+          OvenServiceGrpc.getSetProgramMethod = getSetProgramMethod =
+              io.grpc.MethodDescriptor.<com.smarthome.proto.OvenSetProgramRequest, com.smarthome.proto.OvenSetProgramResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetProgram"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.smarthome.proto.OvenSetProgramRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.smarthome.proto.OvenSetProgramResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new OvenServiceMethodDescriptorSupplier("SetProgram"))
+              .build();
+        }
+      }
+    }
+    return getSetProgramMethod;
   }
 
   /**
@@ -247,16 +247,16 @@ public final class OvenServiceGrpc {
 
     /**
      */
-    default void setTimer(com.smarthome.proto.SetTimerRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetTimerResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetTimerMethod(), responseObserver);
+    default void getStatus(com.smarthome.proto.OvenGetStatusRequest request,
+        io.grpc.stub.StreamObserver<com.smarthome.proto.OvenGetStatusResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetStatusMethod(), responseObserver);
     }
 
     /**
      */
-    default void getStatus(com.smarthome.proto.OvenGetStatusRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.OvenGetStatusResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetStatusMethod(), responseObserver);
+    default void setProgram(com.smarthome.proto.OvenSetProgramRequest request,
+        io.grpc.stub.StreamObserver<com.smarthome.proto.OvenSetProgramResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetProgramMethod(), responseObserver);
     }
   }
 
@@ -319,18 +319,18 @@ public final class OvenServiceGrpc {
 
     /**
      */
-    public void setTimer(com.smarthome.proto.SetTimerRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetTimerResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getSetTimerMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
     public void getStatus(com.smarthome.proto.OvenGetStatusRequest request,
         io.grpc.stub.StreamObserver<com.smarthome.proto.OvenGetStatusResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetStatusMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void setProgram(com.smarthome.proto.OvenSetProgramRequest request,
+        io.grpc.stub.StreamObserver<com.smarthome.proto.OvenSetProgramResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetProgramMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -376,16 +376,16 @@ public final class OvenServiceGrpc {
 
     /**
      */
-    public com.smarthome.proto.SetTimerResponse setTimer(com.smarthome.proto.SetTimerRequest request) {
+    public com.smarthome.proto.OvenGetStatusResponse getStatus(com.smarthome.proto.OvenGetStatusRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getSetTimerMethod(), getCallOptions(), request);
+          getChannel(), getGetStatusMethod(), getCallOptions(), request);
     }
 
     /**
      */
-    public com.smarthome.proto.OvenGetStatusResponse getStatus(com.smarthome.proto.OvenGetStatusRequest request) {
+    public com.smarthome.proto.OvenSetProgramResponse setProgram(com.smarthome.proto.OvenSetProgramRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getGetStatusMethod(), getCallOptions(), request);
+          getChannel(), getSetProgramMethod(), getCallOptions(), request);
     }
   }
 
@@ -434,26 +434,26 @@ public final class OvenServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.SetTimerResponse> setTimer(
-        com.smarthome.proto.SetTimerRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getSetTimerMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
     public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.OvenGetStatusResponse> getStatus(
         com.smarthome.proto.OvenGetStatusRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetStatusMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.OvenSetProgramResponse> setProgram(
+        com.smarthome.proto.OvenSetProgramRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetProgramMethod(), getCallOptions()), request);
     }
   }
 
   private static final int METHODID_TURN_ON = 0;
   private static final int METHODID_TURN_OFF = 1;
   private static final int METHODID_SET_TEMPERATURE = 2;
-  private static final int METHODID_SET_TIMER = 3;
-  private static final int METHODID_GET_STATUS = 4;
+  private static final int METHODID_GET_STATUS = 3;
+  private static final int METHODID_SET_PROGRAM = 4;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -484,13 +484,13 @@ public final class OvenServiceGrpc {
           serviceImpl.setTemperature((com.smarthome.proto.SetTemperatureRequest) request,
               (io.grpc.stub.StreamObserver<com.smarthome.proto.SetTemperatureResponse>) responseObserver);
           break;
-        case METHODID_SET_TIMER:
-          serviceImpl.setTimer((com.smarthome.proto.SetTimerRequest) request,
-              (io.grpc.stub.StreamObserver<com.smarthome.proto.SetTimerResponse>) responseObserver);
-          break;
         case METHODID_GET_STATUS:
           serviceImpl.getStatus((com.smarthome.proto.OvenGetStatusRequest) request,
               (io.grpc.stub.StreamObserver<com.smarthome.proto.OvenGetStatusResponse>) responseObserver);
+          break;
+        case METHODID_SET_PROGRAM:
+          serviceImpl.setProgram((com.smarthome.proto.OvenSetProgramRequest) request,
+              (io.grpc.stub.StreamObserver<com.smarthome.proto.OvenSetProgramResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -532,19 +532,19 @@ public final class OvenServiceGrpc {
               com.smarthome.proto.SetTemperatureResponse>(
                 service, METHODID_SET_TEMPERATURE)))
         .addMethod(
-          getSetTimerMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.smarthome.proto.SetTimerRequest,
-              com.smarthome.proto.SetTimerResponse>(
-                service, METHODID_SET_TIMER)))
-        .addMethod(
           getGetStatusMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
               com.smarthome.proto.OvenGetStatusRequest,
               com.smarthome.proto.OvenGetStatusResponse>(
                 service, METHODID_GET_STATUS)))
+        .addMethod(
+          getSetProgramMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.smarthome.proto.OvenSetProgramRequest,
+              com.smarthome.proto.OvenSetProgramResponse>(
+                service, METHODID_SET_PROGRAM)))
         .build();
   }
 
@@ -596,8 +596,8 @@ public final class OvenServiceGrpc {
               .addMethod(getTurnOnMethod())
               .addMethod(getTurnOffMethod())
               .addMethod(getSetTemperatureMethod())
-              .addMethod(getSetTimerMethod())
               .addMethod(getGetStatusMethod())
+              .addMethod(getSetProgramMethod())
               .build();
         }
       }

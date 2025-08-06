@@ -18,130 +18,6 @@ public final class ThermostatServiceGrpc {
   public static final java.lang.String SERVICE_NAME = "smarthome.ThermostatService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.ThermostatTurnOnRequest,
-      com.smarthome.proto.ThermostatTurnOnResponse> getTurnOnMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "TurnOn",
-      requestType = com.smarthome.proto.ThermostatTurnOnRequest.class,
-      responseType = com.smarthome.proto.ThermostatTurnOnResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.smarthome.proto.ThermostatTurnOnRequest,
-      com.smarthome.proto.ThermostatTurnOnResponse> getTurnOnMethod() {
-    io.grpc.MethodDescriptor<com.smarthome.proto.ThermostatTurnOnRequest, com.smarthome.proto.ThermostatTurnOnResponse> getTurnOnMethod;
-    if ((getTurnOnMethod = ThermostatServiceGrpc.getTurnOnMethod) == null) {
-      synchronized (ThermostatServiceGrpc.class) {
-        if ((getTurnOnMethod = ThermostatServiceGrpc.getTurnOnMethod) == null) {
-          ThermostatServiceGrpc.getTurnOnMethod = getTurnOnMethod =
-              io.grpc.MethodDescriptor.<com.smarthome.proto.ThermostatTurnOnRequest, com.smarthome.proto.ThermostatTurnOnResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "TurnOn"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.ThermostatTurnOnRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.ThermostatTurnOnResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new ThermostatServiceMethodDescriptorSupplier("TurnOn"))
-              .build();
-        }
-      }
-    }
-    return getTurnOnMethod;
-  }
-
-  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.ThermostatTurnOffRequest,
-      com.smarthome.proto.ThermostatTurnOffResponse> getTurnOffMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "TurnOff",
-      requestType = com.smarthome.proto.ThermostatTurnOffRequest.class,
-      responseType = com.smarthome.proto.ThermostatTurnOffResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.smarthome.proto.ThermostatTurnOffRequest,
-      com.smarthome.proto.ThermostatTurnOffResponse> getTurnOffMethod() {
-    io.grpc.MethodDescriptor<com.smarthome.proto.ThermostatTurnOffRequest, com.smarthome.proto.ThermostatTurnOffResponse> getTurnOffMethod;
-    if ((getTurnOffMethod = ThermostatServiceGrpc.getTurnOffMethod) == null) {
-      synchronized (ThermostatServiceGrpc.class) {
-        if ((getTurnOffMethod = ThermostatServiceGrpc.getTurnOffMethod) == null) {
-          ThermostatServiceGrpc.getTurnOffMethod = getTurnOffMethod =
-              io.grpc.MethodDescriptor.<com.smarthome.proto.ThermostatTurnOffRequest, com.smarthome.proto.ThermostatTurnOffResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "TurnOff"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.ThermostatTurnOffRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.ThermostatTurnOffResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new ThermostatServiceMethodDescriptorSupplier("TurnOff"))
-              .build();
-        }
-      }
-    }
-    return getTurnOffMethod;
-  }
-
-  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.SetTargetTemperatureRequest,
-      com.smarthome.proto.SetTargetTemperatureResponse> getSetTargetTemperatureMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "SetTargetTemperature",
-      requestType = com.smarthome.proto.SetTargetTemperatureRequest.class,
-      responseType = com.smarthome.proto.SetTargetTemperatureResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.smarthome.proto.SetTargetTemperatureRequest,
-      com.smarthome.proto.SetTargetTemperatureResponse> getSetTargetTemperatureMethod() {
-    io.grpc.MethodDescriptor<com.smarthome.proto.SetTargetTemperatureRequest, com.smarthome.proto.SetTargetTemperatureResponse> getSetTargetTemperatureMethod;
-    if ((getSetTargetTemperatureMethod = ThermostatServiceGrpc.getSetTargetTemperatureMethod) == null) {
-      synchronized (ThermostatServiceGrpc.class) {
-        if ((getSetTargetTemperatureMethod = ThermostatServiceGrpc.getSetTargetTemperatureMethod) == null) {
-          ThermostatServiceGrpc.getSetTargetTemperatureMethod = getSetTargetTemperatureMethod =
-              io.grpc.MethodDescriptor.<com.smarthome.proto.SetTargetTemperatureRequest, com.smarthome.proto.SetTargetTemperatureResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetTargetTemperature"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetTargetTemperatureRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetTargetTemperatureResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new ThermostatServiceMethodDescriptorSupplier("SetTargetTemperature"))
-              .build();
-        }
-      }
-    }
-    return getSetTargetTemperatureMethod;
-  }
-
-  private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.SetModeRequest,
-      com.smarthome.proto.SetModeResponse> getSetModeMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "SetMode",
-      requestType = com.smarthome.proto.SetModeRequest.class,
-      responseType = com.smarthome.proto.SetModeResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.smarthome.proto.SetModeRequest,
-      com.smarthome.proto.SetModeResponse> getSetModeMethod() {
-    io.grpc.MethodDescriptor<com.smarthome.proto.SetModeRequest, com.smarthome.proto.SetModeResponse> getSetModeMethod;
-    if ((getSetModeMethod = ThermostatServiceGrpc.getSetModeMethod) == null) {
-      synchronized (ThermostatServiceGrpc.class) {
-        if ((getSetModeMethod = ThermostatServiceGrpc.getSetModeMethod) == null) {
-          ThermostatServiceGrpc.getSetModeMethod = getSetModeMethod =
-              io.grpc.MethodDescriptor.<com.smarthome.proto.SetModeRequest, com.smarthome.proto.SetModeResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetMode"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetModeRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.smarthome.proto.SetModeResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new ThermostatServiceMethodDescriptorSupplier("SetMode"))
-              .build();
-        }
-      }
-    }
-    return getSetModeMethod;
-  }
-
   private static volatile io.grpc.MethodDescriptor<com.smarthome.proto.ThermostatGetStatusRequest,
       com.smarthome.proto.ThermostatGetStatusResponse> getGetStatusMethod;
 
@@ -226,34 +102,6 @@ public final class ThermostatServiceGrpc {
 
     /**
      */
-    default void turnOn(com.smarthome.proto.ThermostatTurnOnRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatTurnOnResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getTurnOnMethod(), responseObserver);
-    }
-
-    /**
-     */
-    default void turnOff(com.smarthome.proto.ThermostatTurnOffRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatTurnOffResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getTurnOffMethod(), responseObserver);
-    }
-
-    /**
-     */
-    default void setTargetTemperature(com.smarthome.proto.SetTargetTemperatureRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetTargetTemperatureResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetTargetTemperatureMethod(), responseObserver);
-    }
-
-    /**
-     */
-    default void setMode(com.smarthome.proto.SetModeRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetModeResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetModeMethod(), responseObserver);
-    }
-
-    /**
-     */
     default void getStatus(com.smarthome.proto.ThermostatGetStatusRequest request,
         io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatGetStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetStatusMethod(), responseObserver);
@@ -295,38 +143,6 @@ public final class ThermostatServiceGrpc {
 
     /**
      */
-    public void turnOn(com.smarthome.proto.ThermostatTurnOnRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatTurnOnResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getTurnOnMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
-    public void turnOff(com.smarthome.proto.ThermostatTurnOffRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatTurnOffResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getTurnOffMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
-    public void setTargetTemperature(com.smarthome.proto.SetTargetTemperatureRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetTargetTemperatureResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getSetTargetTemperatureMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
-    public void setMode(com.smarthome.proto.SetModeRequest request,
-        io.grpc.stub.StreamObserver<com.smarthome.proto.SetModeResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getSetModeMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
     public void getStatus(com.smarthome.proto.ThermostatGetStatusRequest request,
         io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatGetStatusResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
@@ -351,34 +167,6 @@ public final class ThermostatServiceGrpc {
     protected ThermostatServiceBlockingStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new ThermostatServiceBlockingStub(channel, callOptions);
-    }
-
-    /**
-     */
-    public com.smarthome.proto.ThermostatTurnOnResponse turnOn(com.smarthome.proto.ThermostatTurnOnRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getTurnOnMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public com.smarthome.proto.ThermostatTurnOffResponse turnOff(com.smarthome.proto.ThermostatTurnOffRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getTurnOffMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public com.smarthome.proto.SetTargetTemperatureResponse setTargetTemperature(com.smarthome.proto.SetTargetTemperatureRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getSetTargetTemperatureMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public com.smarthome.proto.SetModeResponse setMode(com.smarthome.proto.SetModeRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getSetModeMethod(), getCallOptions(), request);
     }
 
     /**
@@ -410,38 +198,6 @@ public final class ThermostatServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.ThermostatTurnOnResponse> turnOn(
-        com.smarthome.proto.ThermostatTurnOnRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getTurnOnMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.ThermostatTurnOffResponse> turnOff(
-        com.smarthome.proto.ThermostatTurnOffRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getTurnOffMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.SetTargetTemperatureResponse> setTargetTemperature(
-        com.smarthome.proto.SetTargetTemperatureRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getSetTargetTemperatureMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.SetModeResponse> setMode(
-        com.smarthome.proto.SetModeRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getSetModeMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
     public com.google.common.util.concurrent.ListenableFuture<com.smarthome.proto.ThermostatGetStatusResponse> getStatus(
         com.smarthome.proto.ThermostatGetStatusRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
@@ -449,11 +205,7 @@ public final class ThermostatServiceGrpc {
     }
   }
 
-  private static final int METHODID_TURN_ON = 0;
-  private static final int METHODID_TURN_OFF = 1;
-  private static final int METHODID_SET_TARGET_TEMPERATURE = 2;
-  private static final int METHODID_SET_MODE = 3;
-  private static final int METHODID_GET_STATUS = 4;
+  private static final int METHODID_GET_STATUS = 0;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -472,22 +224,6 @@ public final class ThermostatServiceGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_TURN_ON:
-          serviceImpl.turnOn((com.smarthome.proto.ThermostatTurnOnRequest) request,
-              (io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatTurnOnResponse>) responseObserver);
-          break;
-        case METHODID_TURN_OFF:
-          serviceImpl.turnOff((com.smarthome.proto.ThermostatTurnOffRequest) request,
-              (io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatTurnOffResponse>) responseObserver);
-          break;
-        case METHODID_SET_TARGET_TEMPERATURE:
-          serviceImpl.setTargetTemperature((com.smarthome.proto.SetTargetTemperatureRequest) request,
-              (io.grpc.stub.StreamObserver<com.smarthome.proto.SetTargetTemperatureResponse>) responseObserver);
-          break;
-        case METHODID_SET_MODE:
-          serviceImpl.setMode((com.smarthome.proto.SetModeRequest) request,
-              (io.grpc.stub.StreamObserver<com.smarthome.proto.SetModeResponse>) responseObserver);
-          break;
         case METHODID_GET_STATUS:
           serviceImpl.getStatus((com.smarthome.proto.ThermostatGetStatusRequest) request,
               (io.grpc.stub.StreamObserver<com.smarthome.proto.ThermostatGetStatusResponse>) responseObserver);
@@ -510,34 +246,6 @@ public final class ThermostatServiceGrpc {
 
   public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
     return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-        .addMethod(
-          getTurnOnMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.smarthome.proto.ThermostatTurnOnRequest,
-              com.smarthome.proto.ThermostatTurnOnResponse>(
-                service, METHODID_TURN_ON)))
-        .addMethod(
-          getTurnOffMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.smarthome.proto.ThermostatTurnOffRequest,
-              com.smarthome.proto.ThermostatTurnOffResponse>(
-                service, METHODID_TURN_OFF)))
-        .addMethod(
-          getSetTargetTemperatureMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.smarthome.proto.SetTargetTemperatureRequest,
-              com.smarthome.proto.SetTargetTemperatureResponse>(
-                service, METHODID_SET_TARGET_TEMPERATURE)))
-        .addMethod(
-          getSetModeMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.smarthome.proto.SetModeRequest,
-              com.smarthome.proto.SetModeResponse>(
-                service, METHODID_SET_MODE)))
         .addMethod(
           getGetStatusMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -593,10 +301,6 @@ public final class ThermostatServiceGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new ThermostatServiceFileDescriptorSupplier())
-              .addMethod(getTurnOnMethod())
-              .addMethod(getTurnOffMethod())
-              .addMethod(getSetTargetTemperatureMethod())
-              .addMethod(getSetModeMethod())
               .addMethod(getGetStatusMethod())
               .build();
         }

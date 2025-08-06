@@ -68,41 +68,15 @@ private static final long serialVersionUID = 0L;
     return result == null ? com.smarthome.proto.WashingMachineProgram.UNRECOGNIZED : result;
   }
 
-  public static final int REMAINING_TIME_FIELD_NUMBER = 3;
-  private int remainingTime_ = 0;
+  public static final int IS_ON_FIELD_NUMBER = 3;
+  private boolean isOn_ = false;
   /**
-   * <pre>
-   * in minutes
-   * </pre>
-   *
-   * <code>int32 remaining_time = 3;</code>
-   * @return The remainingTime.
+   * <code>bool is_on = 3;</code>
+   * @return The isOn.
    */
   @java.lang.Override
-  public int getRemainingTime() {
-    return remainingTime_;
-  }
-
-  public static final int DOOR_LOCKED_FIELD_NUMBER = 4;
-  private boolean doorLocked_ = false;
-  /**
-   * <code>bool door_locked = 4;</code>
-   * @return The doorLocked.
-   */
-  @java.lang.Override
-  public boolean getDoorLocked() {
-    return doorLocked_;
-  }
-
-  public static final int CURRENT_TEMPERATURE_FIELD_NUMBER = 5;
-  private int currentTemperature_ = 0;
-  /**
-   * <code>int32 current_temperature = 5;</code>
-   * @return The currentTemperature.
-   */
-  @java.lang.Override
-  public int getCurrentTemperature() {
-    return currentTemperature_;
+  public boolean getIsOn() {
+    return isOn_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -122,17 +96,11 @@ private static final long serialVersionUID = 0L;
     if (isRunning_ != false) {
       output.writeBool(1, isRunning_);
     }
-    if (currentProgram_ != com.smarthome.proto.WashingMachineProgram.COTTON.getNumber()) {
+    if (currentProgram_ != com.smarthome.proto.WashingMachineProgram.DELICATE.getNumber()) {
       output.writeEnum(2, currentProgram_);
     }
-    if (remainingTime_ != 0) {
-      output.writeInt32(3, remainingTime_);
-    }
-    if (doorLocked_ != false) {
-      output.writeBool(4, doorLocked_);
-    }
-    if (currentTemperature_ != 0) {
-      output.writeInt32(5, currentTemperature_);
+    if (isOn_ != false) {
+      output.writeBool(3, isOn_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -147,21 +115,13 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(1, isRunning_);
     }
-    if (currentProgram_ != com.smarthome.proto.WashingMachineProgram.COTTON.getNumber()) {
+    if (currentProgram_ != com.smarthome.proto.WashingMachineProgram.DELICATE.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(2, currentProgram_);
     }
-    if (remainingTime_ != 0) {
+    if (isOn_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(3, remainingTime_);
-    }
-    if (doorLocked_ != false) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(4, doorLocked_);
-    }
-    if (currentTemperature_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(5, currentTemperature_);
+        .computeBoolSize(3, isOn_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -181,12 +141,8 @@ private static final long serialVersionUID = 0L;
     if (getIsRunning()
         != other.getIsRunning()) return false;
     if (currentProgram_ != other.currentProgram_) return false;
-    if (getRemainingTime()
-        != other.getRemainingTime()) return false;
-    if (getDoorLocked()
-        != other.getDoorLocked()) return false;
-    if (getCurrentTemperature()
-        != other.getCurrentTemperature()) return false;
+    if (getIsOn()
+        != other.getIsOn()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -203,13 +159,9 @@ private static final long serialVersionUID = 0L;
         getIsRunning());
     hash = (37 * hash) + CURRENT_PROGRAM_FIELD_NUMBER;
     hash = (53 * hash) + currentProgram_;
-    hash = (37 * hash) + REMAINING_TIME_FIELD_NUMBER;
-    hash = (53 * hash) + getRemainingTime();
-    hash = (37 * hash) + DOOR_LOCKED_FIELD_NUMBER;
+    hash = (37 * hash) + IS_ON_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getDoorLocked());
-    hash = (37 * hash) + CURRENT_TEMPERATURE_FIELD_NUMBER;
-    hash = (53 * hash) + getCurrentTemperature();
+        getIsOn());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -343,9 +295,7 @@ private static final long serialVersionUID = 0L;
       bitField0_ = 0;
       isRunning_ = false;
       currentProgram_ = 0;
-      remainingTime_ = 0;
-      doorLocked_ = false;
-      currentTemperature_ = 0;
+      isOn_ = false;
       return this;
     }
 
@@ -386,13 +336,7 @@ private static final long serialVersionUID = 0L;
         result.currentProgram_ = currentProgram_;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.remainingTime_ = remainingTime_;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        result.doorLocked_ = doorLocked_;
-      }
-      if (((from_bitField0_ & 0x00000010) != 0)) {
-        result.currentTemperature_ = currentTemperature_;
+        result.isOn_ = isOn_;
       }
     }
 
@@ -446,14 +390,8 @@ private static final long serialVersionUID = 0L;
       if (other.currentProgram_ != 0) {
         setCurrentProgramValue(other.getCurrentProgramValue());
       }
-      if (other.getRemainingTime() != 0) {
-        setRemainingTime(other.getRemainingTime());
-      }
-      if (other.getDoorLocked() != false) {
-        setDoorLocked(other.getDoorLocked());
-      }
-      if (other.getCurrentTemperature() != 0) {
-        setCurrentTemperature(other.getCurrentTemperature());
+      if (other.getIsOn() != false) {
+        setIsOn(other.getIsOn());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -492,20 +430,10 @@ private static final long serialVersionUID = 0L;
               break;
             } // case 16
             case 24: {
-              remainingTime_ = input.readInt32();
+              isOn_ = input.readBool();
               bitField0_ |= 0x00000004;
               break;
             } // case 24
-            case 32: {
-              doorLocked_ = input.readBool();
-              bitField0_ |= 0x00000008;
-              break;
-            } // case 32
-            case 40: {
-              currentTemperature_ = input.readInt32();
-              bitField0_ |= 0x00000010;
-              break;
-            } // case 40
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -608,110 +536,34 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private int remainingTime_ ;
+    private boolean isOn_ ;
     /**
-     * <pre>
-     * in minutes
-     * </pre>
-     *
-     * <code>int32 remaining_time = 3;</code>
-     * @return The remainingTime.
+     * <code>bool is_on = 3;</code>
+     * @return The isOn.
      */
     @java.lang.Override
-    public int getRemainingTime() {
-      return remainingTime_;
+    public boolean getIsOn() {
+      return isOn_;
     }
     /**
-     * <pre>
-     * in minutes
-     * </pre>
-     *
-     * <code>int32 remaining_time = 3;</code>
-     * @param value The remainingTime to set.
+     * <code>bool is_on = 3;</code>
+     * @param value The isOn to set.
      * @return This builder for chaining.
      */
-    public Builder setRemainingTime(int value) {
+    public Builder setIsOn(boolean value) {
 
-      remainingTime_ = value;
+      isOn_ = value;
       bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
-     * <pre>
-     * in minutes
-     * </pre>
-     *
-     * <code>int32 remaining_time = 3;</code>
+     * <code>bool is_on = 3;</code>
      * @return This builder for chaining.
      */
-    public Builder clearRemainingTime() {
+    public Builder clearIsOn() {
       bitField0_ = (bitField0_ & ~0x00000004);
-      remainingTime_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private boolean doorLocked_ ;
-    /**
-     * <code>bool door_locked = 4;</code>
-     * @return The doorLocked.
-     */
-    @java.lang.Override
-    public boolean getDoorLocked() {
-      return doorLocked_;
-    }
-    /**
-     * <code>bool door_locked = 4;</code>
-     * @param value The doorLocked to set.
-     * @return This builder for chaining.
-     */
-    public Builder setDoorLocked(boolean value) {
-
-      doorLocked_ = value;
-      bitField0_ |= 0x00000008;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool door_locked = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearDoorLocked() {
-      bitField0_ = (bitField0_ & ~0x00000008);
-      doorLocked_ = false;
-      onChanged();
-      return this;
-    }
-
-    private int currentTemperature_ ;
-    /**
-     * <code>int32 current_temperature = 5;</code>
-     * @return The currentTemperature.
-     */
-    @java.lang.Override
-    public int getCurrentTemperature() {
-      return currentTemperature_;
-    }
-    /**
-     * <code>int32 current_temperature = 5;</code>
-     * @param value The currentTemperature to set.
-     * @return This builder for chaining.
-     */
-    public Builder setCurrentTemperature(int value) {
-
-      currentTemperature_ = value;
-      bitField0_ |= 0x00000010;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 current_temperature = 5;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearCurrentTemperature() {
-      bitField0_ = (bitField0_ & ~0x00000010);
-      currentTemperature_ = 0;
+      isOn_ = false;
       onChanged();
       return this;
     }

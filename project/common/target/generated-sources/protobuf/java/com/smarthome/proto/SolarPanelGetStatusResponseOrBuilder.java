@@ -8,14 +8,18 @@ public interface SolarPanelGetStatusResponseOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>bool is_online = 1;</code>
-   * @return The isOnline.
+   * <pre>
+   * percentuale carica batteria (0-100%)
+   * </pre>
+   *
+   * <code>double battery_status = 1;</code>
+   * @return The batteryStatus.
    */
-  boolean getIsOnline();
+  double getBatteryStatus();
 
   /**
    * <pre>
-   * in watts
+   * potenza corrente in watts
    * </pre>
    *
    * <code>double current_power_output = 2;</code>
@@ -25,21 +29,11 @@ public interface SolarPanelGetStatusResponseOrBuilder extends
 
   /**
    * <pre>
-   * in kWh
+   * produzione in % rispetto alla potenza massima
    * </pre>
    *
-   * <code>double daily_energy_production = 3;</code>
-   * @return The dailyEnergyProduction.
+   * <code>double power_production_percentage = 3;</code>
+   * @return The powerProductionPercentage.
    */
-  double getDailyEnergyProduction();
-
-  /**
-   * <pre>
-   * percentage
-   * </pre>
-   *
-   * <code>double efficiency = 4;</code>
-   * @return The efficiency.
-   */
-  double getEfficiency();
+  double getPowerProductionPercentage();
 }
