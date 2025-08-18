@@ -17,6 +17,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <version>${grpc.version}</version> <!-- o la versione che stai usando -->
+        </dependency>
+
+        <dependency>
             <groupId>com.smarthome</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>

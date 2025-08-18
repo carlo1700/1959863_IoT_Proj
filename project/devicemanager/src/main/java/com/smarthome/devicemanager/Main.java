@@ -5,53 +5,55 @@ import java.util.concurrent.TimeUnit;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.health.v1.HealthCheckResponse;
+import io.grpc.protobuf.services.HealthStatusManager;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import io.grpc.protobuf.services.HealthStatusManager;
-
 
 @SpringBootApplication
 public class Main {
     private static final int PORT = 50051;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-
         // Avvio dell'app Spring Boot per le REST API
         ConfigurableApplicationContext context = SpringApplication.run(Main.class, args);
-        
-        // Ottieni il bean gestito da Spring
-        DeviceManagerServiceImpl grpcService = context.getBean(DeviceManagerServiceImpl.class);
-        HealthStatusManager healthStatusManager = new HealthStatusManager();
 
-        // Avvio del server gRPC in un thread separato
-        new Thread(() -> {
-            try {
-                Server server = ServerBuilder.forPort(PORT)
-                        .addService(grpcService) // bean Spring
-                        .addService(healthStatusManager.getHealthService())  // aggiunge il servizio health
-                        .build()
-                        .start();
+        System.out.println("✅ Spring Boot application started");
 
-                healthStatusManager.setStatus("", io.grpc.health.v1.HealthCheckResponse.ServingStatus.SERVING);
+        try {
+            // Ottieni il bean gestito da Spring
+            DeviceManagerServiceImpl grpcService = context.getBean(DeviceManagerServiceImpl.class);
+            HealthStatusManager healthStatusManager = new HealthStatusManager();
 
-                System.out.println("Device Manager gRPC server started on port " + PORT);
+            // Costruisci e avvia il server gRPC
+            Server server = ServerBuilder.forPort(PORT)
+                    .addService(grpcService)
+                    .addService(healthStatusManager.getHealthService())
+                    .build()
+                    .start();
 
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                    try {
-                        server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace(System.err);
-                    }
-                    System.err.println("*** server shut down");
-                }));
+            healthStatusManager.setStatus("", HealthCheckResponse.ServingStatus.SERVING);
+            System.out.println("✅ Device Manager gRPC server started on port " + PORT);
 
-                server.awaitTermination();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+            // Hook di shutdown
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.err.println("*** Shutting down gRPC server since JVM is shutting down");
+                try {
+                    server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace(System.err);
+                }
+                System.err.println("*** Server shut down");
+            }));
+
+            // Mantieni attivo il server
+            server.awaitTermination();
+
+        } catch (Exception e) {
+            System.err.println("❌ Failed to start gRPC server: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

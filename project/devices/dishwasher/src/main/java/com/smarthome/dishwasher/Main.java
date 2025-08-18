@@ -5,10 +5,10 @@ import com.smarthome.proto.DeviceManagerServiceGrpc.DeviceManagerServiceBlocking
 
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import io.grpc.StatusRuntimeException;
+import io.grpc.netty.NettyChannelBuilder;
+import java.net.InetSocketAddress;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -44,18 +44,29 @@ public class Main {
         final int maxAttempts = 20;
         long delayMillis = 500;
 
-        ManagedChannel channel = ManagedChannelBuilder
-                .forAddress("devicemanager", 50051) // usa il service name
-                .usePlaintext()
-                .enableRetry()
-                .build();
-
-        DeviceManagerServiceBlockingStub stub = DeviceManagerServiceGrpc
-                .newBlockingStub(channel)
-                .withWaitForReady()
-                .withDeadlineAfter(5, TimeUnit.SECONDS);
-
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            ManagedChannel channel = NettyChannelBuilder
+                    .forAddress(new InetSocketAddress("devicemanager", 50051))
+                    .usePlaintext()
+                    .build();
+
+            ConnectivityState state = channel.getState(true);
+            System.out.println("gRPC channel state: " + state);
+
+            if (state != ConnectivityState.READY) {
+                System.out.println("Channel not ready, waiting...");
+                try {
+                    channel.awaitTermination(2, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+            DeviceManagerServiceBlockingStub stub = DeviceManagerServiceGrpc
+                    .newBlockingStub(channel)
+                    .withDeadlineAfter(15, TimeUnit.SECONDS);
+
             try {
                 System.out.println("Attempt " + attempt + " to register with Device Manager...");
 
@@ -74,6 +85,8 @@ public class Main {
                 System.err.println(
                         "Attempt " + attempt + " failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
                 e.printStackTrace();
+            } finally {
+                channel.shutdown();
             }
 
             try {
@@ -86,7 +99,6 @@ public class Main {
         }
 
         System.err.println("Device registration failed after " + maxAttempts + " attempts.");
-        channel.shutdown();
     }
 
 }

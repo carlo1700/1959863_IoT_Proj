@@ -8,7 +8,9 @@ services:
       - "8080:8080"
     container_name: smart-home-devicemanager
     networks:
-      - smart-home-network
+      smart-home-network:
+        aliases:
+          - devicemanager
     healthcheck:
       test: ["CMD", "grpc-health-probe", "-addr=:50051"]
       interval: 5s
@@ -116,6 +118,8 @@ services:
     build:
       context: .
       dockerfile: devices/washingmachine/Dockerfile
+    ports:
+      - "51000:51000"
     container_name: washingmachine
     networks:
       - smart-home-network
