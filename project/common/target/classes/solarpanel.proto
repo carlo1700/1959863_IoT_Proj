@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "SolarPanelProto";
+
+// Solar Panel Service
+service SolarPanelService {
+  rpc GetStatus(SolarPanelGetStatusRequest) returns (SolarPanelGetStatusResponse);
+}
+
+
+
+message SolarPanelGetStatusRequest {}
+
+message SolarPanelGetStatusResponse {
+  double battery_status = 1;           // percentuale carica batteria (0-100%)
+  double current_power_output = 2;     // potenza corrente in watts
+  double power_production_percentage = 3; // produzione in % rispetto alla potenza massima
+}
