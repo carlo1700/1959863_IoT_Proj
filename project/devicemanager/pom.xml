@@ -18,7 +18,7 @@
         <dependency>
             <groupId>com.hubspot.jackson</groupId>
             <artifactId>jackson-datatype-protobuf</artifactId>
-            <version>0.9.13</version> <!-- Puoi aggiornare alla versione più recente se vuoi -->
+            <version>0.9.13</version> 
         </dependency>
         <dependency>
             <groupId>com.smarthome</groupId>
@@ -53,6 +53,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
         </dependency>
     </dependencies>
 

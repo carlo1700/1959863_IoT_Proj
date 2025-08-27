@@ -13,12 +13,33 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
 
+import com.smarthome.logging.DeviceEventRepository;
+import com.smarthome.logging.PgDataSource;
 
 @Service
 public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceManagerServiceImplBase {
 
     private final Map<String, Device> devices = new ConcurrentHashMap<>();
     private final Map<String, ManagedChannel> channels = new ConcurrentHashMap<>();
+
+    // ====== LOGGING ======
+    private final DeviceEventRepository repo = new DeviceEventRepository(PgDataSource.get());
+
+    private void log(String deviceId, String action, String status, String payloadJson, String errorMsg) {
+        try {
+            repo.logEvent(deviceId, "DeviceManager", action, status, currentUser(), payloadJson, errorMsg);
+        } catch (Exception ex) {
+            // Il logging non deve mai bloccare il flusso applicativo
+            System.err.println("[LOG][DB] failed: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    private String currentUser() {
+        // Se in futuro hai un utente reale, rimpiazza questo metodo.
+        return "system";
+    }
+    // =====================
 
     @Override
     public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
@@ -43,6 +64,12 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 .setMessage("Device registered: " + request.getDeviceId())
                 .build();
 
+        // log
+        log(request.getDeviceId(), "Register", "SUCCESS",
+                String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}",
+                        request.getDeviceType(), request.getAddress(), request.getPort()),
+                null);
+
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
@@ -61,6 +88,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 .setSuccess(true)
                 .setMessage("Device unregistered: " + request.getDeviceId())
                 .build();
+
+        // log
+        log(request.getDeviceId(), "Unregister", "SUCCESS", "{}", null);
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -83,18 +113,19 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     .setSuccess(false)
                     .setMessage("Device not found: " + request.getDeviceId())
                     .build();
+            log(request.getDeviceId(), "SendCommand", "FAILURE", "{}", "Device not found");
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             return;
         }
 
-        // Here you would implement the actual command forwarding to the device
-        // For now, just return a success response
+        // (placeholder di inoltro comando)
         SendCommandResponse response = SendCommandResponse.newBuilder()
                 .setSuccess(true)
                 .setMessage("Command sent to device: " + request.getDeviceId())
                 .build();
 
+        log(request.getDeviceId(), "SendCommand", "SUCCESS", "{}", null);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
@@ -106,200 +137,269 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     public String turnOnDevice(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "TurnOn", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
 
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "TurnOn", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
 
         String deviceType = device.getDeviceType();
+        log(deviceId, "TurnOn", "PENDING", "{}", null);
 
         try {
             switch (deviceType.toUpperCase()) {
 
-                case "LIGHT":
+                case "LIGHT": {
                     LightServiceGrpc.LightServiceBlockingStub lightStub = LightServiceGrpc.newBlockingStub(channel);
                     TurnOnResponse lightResp = lightStub.turnOn(TurnOnRequest.newBuilder().build());
-                    return lightResp.getSuccess()
+                    String msg = lightResp.getSuccess()
                             ? "Light turned on: " + lightResp.getMessage()
                             : "Failed to turn on light: " + lightResp.getMessage();
+                    log(deviceId, "TurnOn", lightResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            lightResp.getSuccess() ? null : lightResp.getMessage());
+                    return msg;
+                }
 
-                case "AIRCONDITIONER":
+                case "AIRCONDITIONER": {
                     AirConditionerServiceGrpc.AirConditionerServiceBlockingStub airconditionerStub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
                     AirConditionerTurnOnResponse airconditionerResp = airconditionerStub
                             .turnOn(AirConditionerTurnOnRequest.newBuilder().build());
-                    return airconditionerResp.getSuccess()
+                    String msg = airconditionerResp.getSuccess()
                             ? "airconditioner activated: " + airconditionerResp.getMessage()
                             : "Failed to activate airconditioner: " + airconditionerResp.getMessage();
+                    log(deviceId, "TurnOn", airconditionerResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            airconditionerResp.getSuccess() ? null : airconditionerResp.getMessage());
+                    return msg;
+                }
 
-                case "DISHWASHER":
+                case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub dishwasherStub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
                     DishwasherTurnOnResponse dishResp = dishwasherStub
                             .turnOn(DishwasherTurnOnRequest.newBuilder().build());
-                    return dishResp.getSuccess()
+                    String msg = dishResp.getSuccess()
                             ? "Dishwasher started: " + dishResp.getMessage()
                             : "Failed to start dishwasher: " + dishResp.getMessage();
+                    log(deviceId, "TurnOn", dishResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            dishResp.getSuccess() ? null : dishResp.getMessage());
+                    return msg;
+                }
 
-                case "MOTIONSENSOR":
+                case "MOTIONSENSOR": {
                     MotionSensorServiceGrpc.MotionSensorServiceBlockingStub motionStub = MotionSensorServiceGrpc
                             .newBlockingStub(channel);
                     MotionSensorTurnOnResponse motionResp = motionStub
                             .turnOn(MotionSensorTurnOnRequest.newBuilder().build());
-                    return motionResp.getSuccess()
+                    String msg = motionResp.getSuccess()
                             ? "Motion sensor enabled: " + motionResp.getMessage()
                             : "Failed to enable motion sensor: " + motionResp.getMessage();
+                    log(deviceId, "TurnOn", motionResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            motionResp.getSuccess() ? null : motionResp.getMessage());
+                    return msg;
+                }
 
-                case "OVEN":
+                case "OVEN": {
                     OvenServiceGrpc.OvenServiceBlockingStub ovenStub = OvenServiceGrpc.newBlockingStub(channel);
                     OvenTurnOnResponse ovenResp = ovenStub.turnOn(OvenTurnOnRequest.newBuilder().build());
-                    return ovenResp.getSuccess()
+                    String msg = ovenResp.getSuccess()
                             ? "Oven preheating: " + ovenResp.getMessage()
                             : "Failed to preheat oven: " + ovenResp.getMessage();
+                    log(deviceId, "TurnOn", ovenResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            ovenResp.getSuccess() ? null : ovenResp.getMessage());
+                    return msg;
+                }
 
-                case "WASHINGMACHINE":
+                case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub washStub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
                     WashingMachineTurnOnResponse washResp = washStub
                             .turnOn(WashingMachineTurnOnRequest.newBuilder().build());
-                    return washResp.getSuccess()
+                    String msg = washResp.getSuccess()
                             ? "Washing machine cycle started: " + washResp.getMessage()
                             : "Failed to start washing machine: " + washResp.getMessage();
+                    log(deviceId, "TurnOn", washResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            washResp.getSuccess() ? null : washResp.getMessage());
+                    return msg;
+                }
 
                 default:
+                    log(deviceId, "TurnOn", "FAILURE", "{}", "Unsupported type: " + deviceType);
                     return "Device type not supported: " + deviceType;
             }
 
         } catch (StatusRuntimeException e) {
+            log(deviceId, "TurnOn", "FAILURE", "{}", e.getStatus().getDescription());
             return "gRPC error on device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "TurnOn", "FAILURE", "{}", e.getMessage());
+            return "Error on device " + deviceId + ": " + e.getMessage();
         }
     }
 
     public String SetUpBlind(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "SetUpBlind", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
 
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "SetUpBlind", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
 
         if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
+            log(deviceId, "SetUpBlind", "FAILURE", "{}", "Wrong type (not BLIND)");
             return "Device is not a blind: " + deviceId;
         }
 
         BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
-
-        // 3. Costruisci la richiesta TurnUp
         BlindSetUpRequest request = BlindSetUpRequest.newBuilder().build();
 
-        // 4. Invia il comando e gestisci eventuali errori
+        log(deviceId, "SetUpBlind", "PENDING", "{}", null);
+
         try {
             BlindSetUpResponse resp = blindStub.setUp(request);
-            if (resp.getSuccess()) {
-                // 5. Restituisci il messaggio di conferma
-                return "Light turned on for device " + deviceId + ": " + resp.getMessage();
-            } else {
-                return "Failed to turn on light for device " + deviceId + ": " + resp.getMessage();
-            }
+            String msg = resp.getSuccess()
+                    ? "Light turned on for device " + deviceId + ": " + resp.getMessage()
+                    : "Failed to turn on light for device " + deviceId + ": " + resp.getMessage();
+            log(deviceId, "SetUpBlind", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                    resp.getSuccess() ? null : resp.getMessage());
+            return msg;
         } catch (StatusRuntimeException e) {
+            log(deviceId, "SetUpBlind", "FAILURE", "{}", e.getStatus().getDescription());
             return "gRPC error on turnOn for device " + deviceId + ": " + e.getStatus().getDescription();
         }
-
     }
 
     public String turnOffDevice(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "TurnOff", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
 
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "TurnOff", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
 
         String deviceType = device.getDeviceType();
+        log(deviceId, "TurnOff", "PENDING", "{}", null);
 
         try {
             switch (deviceType.toUpperCase()) {
 
-                case "LIGHT":
+                case "LIGHT": {
                     LightServiceGrpc.LightServiceBlockingStub lightStub = LightServiceGrpc.newBlockingStub(channel);
                     TurnOffResponse lightResp = lightStub.turnOff(TurnOffRequest.newBuilder().build());
-                    return lightResp.getSuccess()
+                    String msg = lightResp.getSuccess()
                             ? "Light turned off: " + lightResp.getMessage()
                             : "Failed to turn off light: " + lightResp.getMessage();
+                    log(deviceId, "TurnOff", lightResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            lightResp.getSuccess() ? null : lightResp.getMessage());
+                    return msg;
+                }
 
-                case "AIRCONDITIONER":
+                case "AIRCONDITIONER": {
                     AirConditionerServiceGrpc.AirConditionerServiceBlockingStub airconditionerStub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
                     AirConditionerTurnOffResponse airconditionerResp = airconditionerStub
                             .turnOff(AirConditionerTurnOffRequest.newBuilder().build());
-                    return airconditionerResp.getSuccess()
+                    String msg = airconditionerResp.getSuccess()
                             ? "airconditioner deactivated: " + airconditionerResp.getMessage()
                             : "Failed to deactivate airconditioner: " + airconditionerResp.getMessage();
+                    log(deviceId, "TurnOff", airconditionerResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            airconditionerResp.getSuccess() ? null : airconditionerResp.getMessage());
+                    return msg;
+                }
 
-                case "DISHWASHER":
+                case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub dishwasherStub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
                     DishwasherTurnOffResponse dishResp = dishwasherStub
                             .turnOff(DishwasherTurnOffRequest.newBuilder().build());
-                    return dishResp.getSuccess()
+                    String msg = dishResp.getSuccess()
                             ? "Dishwasher turned off: " + dishResp.getMessage()
                             : "Failed to turn off dishwasher: " + dishResp.getMessage();
+                    log(deviceId, "TurnOff", dishResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            dishResp.getSuccess() ? null : dishResp.getMessage());
+                    return msg;
+                }
 
-                case "MOTIONSENSOR":
+                case "MOTIONSENSOR": {
                     MotionSensorServiceGrpc.MotionSensorServiceBlockingStub motionStub = MotionSensorServiceGrpc
                             .newBlockingStub(channel);
                     MotionSensorTurnOffResponse motionResp = motionStub
                             .turnOff(MotionSensorTurnOffRequest.newBuilder().build());
-                    return motionResp.getSuccess()
+                    String msg = motionResp.getSuccess()
                             ? "Motion sensor disabled: " + motionResp.getMessage()
                             : "Failed to disable motion sensor: " + motionResp.getMessage();
+                    log(deviceId, "TurnOff", motionResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            motionResp.getSuccess() ? null : motionResp.getMessage());
+                    return msg;
+                }
 
-                case "OVEN":
+                case "OVEN": {
                     OvenServiceGrpc.OvenServiceBlockingStub ovenStub = OvenServiceGrpc.newBlockingStub(channel);
                     OvenTurnOffResponse ovenResp = ovenStub.turnOff(OvenTurnOffRequest.newBuilder().build());
-                    return ovenResp.getSuccess()
+                    String msg = ovenResp.getSuccess()
                             ? "Oven turned off: " + ovenResp.getMessage()
                             : "Failed to turn off oven: " + ovenResp.getMessage();
+                    log(deviceId, "TurnOff", ovenResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            ovenResp.getSuccess() ? null : ovenResp.getMessage());
+                    return msg;
+                }
 
-                case "WASHINGMACHINE":
+                case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub washStub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
                     WashingMachineTurnOffResponse washResp = washStub
                             .turnOff(WashingMachineTurnOffRequest.newBuilder().build());
-                    return washResp.getSuccess()
+                    String msg = washResp.getSuccess()
                             ? "Washing machine turned off: " + washResp.getMessage()
                             : "Failed to turn off washing machine: " + washResp.getMessage();
+                    log(deviceId, "TurnOff", washResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            washResp.getSuccess() ? null : washResp.getMessage());
+                    return msg;
+                }
 
                 default:
+                    log(deviceId, "TurnOff", "FAILURE", "{}", "Unsupported type: " + deviceType);
                     return "Device type not supported: " + deviceType;
             }
 
         } catch (StatusRuntimeException e) {
+            log(deviceId, "TurnOff", "FAILURE", "{}", e.getStatus().getDescription());
             return "gRPC error on device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "TurnOff", "FAILURE", "{}", e.getMessage());
+            return "Error on device " + deviceId + ": " + e.getMessage();
         }
     }
 
     public String getStatusDevice(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "GetStatus", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
 
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "GetStatus", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
 
         String deviceType = device.getDeviceType();
+        log(deviceId, "GetStatus", "PENDING", "{}", null);
 
         try {
             switch (deviceType.toUpperCase()) {
@@ -308,46 +408,57 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     AirConditionerGetStatusResponse resp = stub
                             .getStatus(AirConditionerGetStatusRequest.newBuilder().build());
-                    return "Air conditioner status: is_on=" + resp.getIsOn() + ", current_program="
+                    String out = "Air conditioner status: is_on=" + resp.getIsOn() + ", current_program="
                             + resp.getCurrentProgram();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
                 }
 
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
                     DishwasherGetStatusResponse resp = stub.getStatus(DishwasherGetStatusRequest.newBuilder().build());
-                    return "Dishwasher status: program=" + resp.getCurrentProgram() + ", remainingTime="
+                    String out = "Dishwasher status: program=" + resp.getCurrentProgram() + ", remainingTime="
                             + resp.getRemainingTime();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
                 }
                 case "MOTIONSENSOR": {
                     MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
                             .newBlockingStub(channel);
                     MotionSensorGetStatusResponse resp = stub
                             .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-                    return "MotionSensor status: motionDetected=" + resp.getMotionDetected() + ", lastMotionTime="
+                    String out = "MotionSensor status: motionDetected=" + resp.getMotionDetected() + ", lastMotionTime="
                             + resp.getLastMotionTime();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
                 }
                 case "OVEN": {
                     OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
                     OvenGetStatusResponse resp = stub.getStatus(OvenGetStatusRequest.newBuilder().build());
-
-                    return "Oven status: isOn=" + resp.getIsOn()
+                    String out = "Oven status: isOn=" + resp.getIsOn()
                             + ", temp=" + resp.getTemperature()
                             + ", mode=" + resp.getCurrentProgram().name();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
                 }
                 case "SOLARPANEL": {
                     SolarPanelServiceGrpc.SolarPanelServiceBlockingStub stub = SolarPanelServiceGrpc
                             .newBlockingStub(channel);
                     SolarPanelGetStatusResponse resp = stub.getStatus(SolarPanelGetStatusRequest.newBuilder().build());
-                    return "SolarPanel status: powerOutput=" + resp.getCurrentPowerOutput()
+                    String out = "SolarPanel status: powerOutput=" + resp.getCurrentPowerOutput()
                             + ", batteryStatus=" + resp.getBatteryStatus();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
                 }
 
                 case "THERMOSTAT": {
                     ThermostatServiceGrpc.ThermostatServiceBlockingStub stub = ThermostatServiceGrpc
                             .newBlockingStub(channel);
                     ThermostatGetStatusResponse resp = stub.getStatus(ThermostatGetStatusRequest.newBuilder().build());
-                    return "Thermostat status: temp=" + resp.getCurrentTemperature();
+                    String out = "Thermostat status: temp=" + resp.getCurrentTemperature();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
                 }
 
                 case "WASHINGMACHINE": {
@@ -355,97 +466,134 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     WashingMachineGetStatusResponse resp = stub
                             .getStatus(WashingMachineGetStatusRequest.newBuilder().build());
-
-                    return "WashingMachine status: program=" + resp.getCurrentProgram() + ", is_running="
+                    String out = "WashingMachine status: program=" + resp.getCurrentProgram() + ", is_running="
                             + resp.getIsRunning() + ", is_on=" + resp.getIsOn();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
                 }
 
                 default:
+                    log(deviceId, "GetStatus", "FAILURE", "{}", "Unsupported type: " + deviceType);
                     return "Device type not supported: " + deviceType;
             }
         } catch (StatusRuntimeException e) {
+            log(deviceId, "GetStatus", "FAILURE", "{}", e.getStatus().getDescription());
             return "gRPC error on device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "GetStatus", "FAILURE", "{}", e.getMessage());
+            return "Error on device " + deviceId + ": " + e.getMessage();
         }
     }
 
     public String startDevice(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "Start", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "Start", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
         String deviceType = device.getDeviceType();
+        log(deviceId, "Start", "PENDING", "{}", null);
         try {
             switch (deviceType.toUpperCase()) {
                 case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub stub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
                     WashingMachineStartResponse resp = stub.start(WashingMachineStartRequest.newBuilder().build());
-                    return resp.getSuccess() ? "Washing machine started: " + resp.getMessage()
+                    String msg = resp.getSuccess() ? "Washing machine started: " + resp.getMessage()
                             : "Failed to start washing machine: " + resp.getMessage();
+                    log(deviceId, "Start", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            resp.getSuccess() ? null : resp.getMessage());
+                    return msg;
                 }
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
                     DishwasherStartResponse resp = stub.start(DishwasherStartRequest.newBuilder().build());
-                    return resp.getSuccess() ? "Dishwasher started: " + resp.getMessage()
+                    String msg = resp.getSuccess() ? "Dishwasher started: " + resp.getMessage()
                             : "Failed to start dishwasher: " + resp.getMessage();
+                    log(deviceId, "Start", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            resp.getSuccess() ? null : resp.getMessage());
+                    return msg;
                 }
                 default:
+                    log(deviceId, "Start", "FAILURE", "{}", "Unsupported type: " + deviceType);
                     return "Start not supported for device type: " + deviceType;
             }
         } catch (StatusRuntimeException e) {
+            log(deviceId, "Start", "FAILURE", "{}", e.getStatus().getDescription());
             return "gRPC error on start for device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "Start", "FAILURE", "{}", e.getMessage());
+            return "Error on start for device " + deviceId + ": " + e.getMessage();
         }
     }
 
     public String stopDevice(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "Stop", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "Stop", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
         String deviceType = device.getDeviceType();
+        log(deviceId, "Stop", "PENDING", "{}", null);
         try {
             switch (deviceType.toUpperCase()) {
                 case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub stub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
                     WashingMachineStopResponse resp = stub.stop(WashingMachineStopRequest.newBuilder().build());
-                    return resp.getSuccess() ? "Washing machine stopped: " + resp.getMessage()
+                    String msg = resp.getSuccess() ? "Washing machine stopped: " + resp.getMessage()
                             : "Failed to stop washing machine: " + resp.getMessage();
+                    log(deviceId, "Stop", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            resp.getSuccess() ? null : resp.getMessage());
+                    return msg;
                 }
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
                     DishwasherStopResponse resp = stub.stop(DishwasherStopRequest.newBuilder().build());
-                    return resp.getSuccess() ? "Dishwasher stopped: " + resp.getMessage()
+                    String msg = resp.getSuccess() ? "Dishwasher stopped: " + resp.getMessage()
                             : "Failed to stop dishwasher: " + resp.getMessage();
+                    log(deviceId, "Stop", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            resp.getSuccess() ? null : resp.getMessage());
+                    return msg;
                 }
                 default:
+                    log(deviceId, "Stop", "FAILURE", "{}", "Unsupported type: " + deviceType);
                     return "Stop not supported for device type: " + deviceType;
             }
         } catch (StatusRuntimeException e) {
+            log(deviceId, "Stop", "FAILURE", "{}", e.getStatus().getDescription());
             return "gRPC error on stop for device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "Stop", "FAILURE", "{}", e.getMessage());
+            return "Error on stop for device " + deviceId + ": " + e.getMessage();
         }
     }
 
     public String setProgramDevice(String deviceId, int program) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "SetProgram", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "SetProgram", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
         String deviceType = device.getDeviceType();
+        log(deviceId, "SetProgram", "PENDING", String.format("{\"program\":%d}", program), null);
         try {
             switch (deviceType.toUpperCase()) {
                 case "WASHINGMACHINE": {
@@ -454,77 +602,157 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     WashingMachineSetProgramRequest req = WashingMachineSetProgramRequest.newBuilder()
                             .setProgramValue(program).build();
                     WashingMachineSetProgramResponse resp = stub.setProgram(req);
-                    return resp.getSuccess() ? "Washing machine program set: " + resp.getMessage()
+                    String msg = resp.getSuccess() ? "Washing machine program set: " + resp.getMessage()
                             : "Failed to set program: " + resp.getMessage();
+                    log(deviceId, "SetProgram", resp.getSuccess() ? "SUCCESS" : "FAILURE",
+                            String.format("{\"program\":%d}", program),
+                            resp.getSuccess() ? null : resp.getMessage());
+                    return msg;
                 }
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
                     SetProgramRequest req = SetProgramRequest.newBuilder().setProgramValue(program).build();
                     SetProgramResponse resp = stub.setProgram(req);
-                    return resp.getSuccess() ? "Dishwasher program set: " + resp.getMessage()
+                    String msg = resp.getSuccess() ? "Dishwasher program set: " + resp.getMessage()
                             : "Failed to set program: " + resp.getMessage();
+                    log(deviceId, "SetProgram", resp.getSuccess() ? "SUCCESS" : "FAILURE",
+                            String.format("{\"program\":%d}", program),
+                            resp.getSuccess() ? null : resp.getMessage());
+                    return msg;
                 }
                 case "OVEN": {
                     OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
                     OvenSetProgramRequest req = OvenSetProgramRequest.newBuilder().setProgramValue(program).build();
                     OvenSetProgramResponse resp = stub.setProgram(req);
-                    return resp.getSuccess() ? "Oven program set: " + resp.getMessage()
+                    String msg = resp.getSuccess() ? "Oven program set: " + resp.getMessage()
                             : "Failed to set oven program: " + resp.getMessage();
+                    log(deviceId, "SetProgram", resp.getSuccess() ? "SUCCESS" : "FAILURE",
+                            String.format("{\"program\":%d}", program),
+                            resp.getSuccess() ? null : resp.getMessage());
+                    return msg;
                 }
                 default:
+                    log(deviceId, "SetProgram", "FAILURE", String.format("{\"program\":%d}", program),
+                            "Unsupported type: " + deviceType);
                     return "Set program not supported for device type: " + deviceType;
             }
         } catch (StatusRuntimeException e) {
+            log(deviceId, "SetProgram", "FAILURE", String.format("{\"program\":%d}", program),
+                    e.getStatus().getDescription());
             return "gRPC error on setProgram for device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "SetProgram", "FAILURE", String.format("{\"program\":%d}", program),
+                    e.getMessage());
+            return "gRPC error on setProgram for device " + deviceId + ": " + e.getMessage();
         }
     }
 
     public String setSensitivityMotionSensor(String deviceId, int sensitivity) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "SetSensitivity", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "SetSensitivity", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
         if (!device.getDeviceType().equalsIgnoreCase("MOTIONSENSOR")) {
+            log(deviceId, "SetSensitivity", "FAILURE", "{}", "Wrong type (not MOTIONSENSOR)");
             return "Device is not a motion sensor: " + deviceId;
         }
+        log(deviceId, "SetSensitivity", "PENDING", String.format("{\"sensitivity\":%d}", sensitivity), null);
         try {
             MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
                     .newBlockingStub(channel);
             SetSensitivityRequest req = SetSensitivityRequest.newBuilder().setSensitivity(sensitivity).build();
             SetSensitivityResponse resp = stub.setSensitivity(req);
-            return resp.getSuccess() ? "Motion sensor sensitivity set: " + resp.getMessage()
+            String msg = resp.getSuccess() ? "Motion sensor sensitivity set: " + resp.getMessage()
                     : "Failed to set sensitivity: " + resp.getMessage();
+            log(deviceId, "SetSensitivity", resp.getSuccess() ? "SUCCESS" : "FAILURE",
+                    String.format("{\"sensitivity\":%d}", sensitivity),
+                    resp.getSuccess() ? null : resp.getMessage());
+            return msg;
         } catch (StatusRuntimeException e) {
+            log(deviceId, "SetSensitivity", "FAILURE",
+                    String.format("{\"sensitivity\":%d}", sensitivity),
+                    e.getStatus().getDescription());
             return "gRPC error on setSensitivity for device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "SetSensitivity", "FAILURE",
+                    String.format("{\"sensitivity\":%d}", sensitivity),
+                    e.getMessage());
+            return "gRPC error on setSensitivity for device " + deviceId + ": " + e.getMessage();
         }
     }
 
     public String setTemperatureOven(String deviceId, int temperature) {
         Device device = devices.get(deviceId);
         if (device == null) {
+            log(deviceId, "SetTemperature", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
         ManagedChannel channel = channels.get(deviceId);
         if (channel == null || channel.isShutdown()) {
+            log(deviceId, "SetTemperature", "FAILURE", "{}", "Channel unavailable");
             return "gRPC channel non disponibile per device: " + deviceId;
         }
         if (!device.getDeviceType().equalsIgnoreCase("OVEN")) {
+            log(deviceId, "SetTemperature", "FAILURE", "{}", "Wrong type (not OVEN)");
             return "Device is not an oven: " + deviceId;
         }
+        log(deviceId, "SetTemperature", "PENDING", String.format("{\"temperature\":%d}", temperature), null);
         try {
             OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
             SetTemperatureRequest req = SetTemperatureRequest.newBuilder().setTemperature(temperature).build();
             SetTemperatureResponse resp = stub.setTemperature(req);
-            return resp.getSuccess() ? "Oven temperature set: " + resp.getMessage()
+            String msg = resp.getSuccess() ? "Oven temperature set: " + resp.getMessage()
                     : "Failed to set oven temperature: " + resp.getMessage();
+            log(deviceId, "SetTemperature", resp.getSuccess() ? "SUCCESS" : "FAILURE",
+                    String.format("{\"temperature\":%d}", temperature),
+                    resp.getSuccess() ? null : resp.getMessage());
+            return msg;
         } catch (StatusRuntimeException e) {
+            log(deviceId, "SetTemperature", "FAILURE",
+                    String.format("{\"temperature\":%d}", temperature),
+                    e.getStatus().getDescription());
             return "gRPC error on setTemperature for device " + deviceId + ": " + e.getStatus().getDescription();
+        } catch (Exception e) {
+            log(deviceId, "SetTemperature", "FAILURE",
+                    String.format("{\"temperature\":%d}", temperature),
+                    e.getMessage());
+            return "gRPC error on setTemperature for device " + deviceId + ": " + e.getMessage();
         }
     }
 
+    public String registerDeviceHttp(String deviceId, String deviceType, String address, int port) {
+    // se esiste già, chiudi il vecchio canale per evitare orphan/leak
+        ManagedChannel old = channels.remove(deviceId);
+        if (old != null && !old.isShutdown()) {
+                try { old.shutdownNow(); } catch (Exception ignore) {}
+        }
+
+        Device device = Device.newBuilder()
+                .setDeviceId(deviceId)
+                .setDeviceType(deviceType)
+                .setAddress(address)
+                .setPort(port)
+                .setOnline(true)
+                .build();
+
+        devices.put(deviceId, device);
+
+        ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
+                .usePlaintext()
+                .build();
+        channels.put(deviceId, ch);
+
+        // (opzionale) log nel DB
+        // log(deviceId, "Register", "SUCCESS",
+        //     String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, address, port), null);
+
+        return "Device registered: " + deviceId;
+        }
 }

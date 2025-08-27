@@ -1,0 +1,8 @@
+com\smarthome\logging\PgDataSource.class
+com\smarthome\devicemanager\config\CorsConfig$1.class
+com\smarthome\devicemanager\DeviceManagerServiceImpl.class
+com\smarthome\devicemanager\JacksonConfig.class
+com\smarthome\devicemanager\Main.class
+com\smarthome\devicemanager\config\CorsConfig.class
+com\smarthome\logging\DeviceEventRepository.class
+com\smarthome\devicemanager\api\DeviceApiController.class

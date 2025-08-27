@@ -6,6 +6,7 @@ import com.smarthome.proto.RegisterDeviceRequest;
 import com.smarthome.proto.RegisterDeviceResponse;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,13 @@ public class DeviceApiController {
     }
 
     @PostMapping("/turnOnDevice/{deviceId}")
-    public String turnOnDevice(@PathVariable String deviceId) {
-        return service.turnOnDevice(deviceId);
+    public ResponseEntity<String> turnOnDevice(@PathVariable String deviceId) {
+        try {
+            return ResponseEntity.ok(service.turnOnDevice(deviceId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
     }
 
     @PostMapping("/setupBlind/{deviceId}")
@@ -42,8 +48,13 @@ public class DeviceApiController {
     }
 
     @PostMapping("/turnOffDevice/{deviceId}")
-    public String turnOffDevice(@PathVariable String deviceId) {
-        return service.turnOffDevice(deviceId);
+    public ResponseEntity<String> turnOffDevice(@PathVariable String deviceId) {
+        try {
+            return ResponseEntity.ok(service.turnOffDevice(deviceId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
     }
 
     @GetMapping("/status/{deviceId}")
@@ -66,11 +77,22 @@ public class DeviceApiController {
         return service.setProgramDevice(deviceId, program);
     }
 
-    
-
     @PostMapping("/setTemperatureOven/{deviceId}")
     public String setTemperatureOven(@PathVariable String deviceId, @RequestParam int temperature) {
         return service.setTemperatureOven(deviceId, temperature);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<String> register(
+        @RequestParam(name = "id") String id,
+        @RequestParam(name = "type") String type,
+        @RequestParam(name = "address") String address,
+        @RequestParam(name = "port") int port) {
+        try {
+            return ResponseEntity.ok(service.registerDeviceHttp(id, type, address, port));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+    }
 }
