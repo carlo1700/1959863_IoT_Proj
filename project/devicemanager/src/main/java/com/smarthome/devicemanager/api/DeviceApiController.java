@@ -41,6 +41,11 @@ public class DeviceApiController {
         return service.SetUpBlind(deviceId);
     }
 
+    @PostMapping("/setdownBlind/{deviceId}")
+    public String setDownBlind(@PathVariable String deviceId) {
+        return service.SetDownBlind(deviceId);
+    }
+
     @PostMapping("/turnOffDevice/{deviceId}")
     public String turnOffDevice(@PathVariable String deviceId) {
         return service.turnOffDevice(deviceId);
@@ -65,8 +70,6 @@ public class DeviceApiController {
     public String setProgramDevice(@PathVariable String deviceId, @RequestParam int program) {
         return service.setProgramDevice(deviceId, program);
     }
-
-    
 
     @PostMapping("/setTemperatureOven/{deviceId}")
     public String setTemperatureOven(@PathVariable String deviceId, @RequestParam int temperature) {

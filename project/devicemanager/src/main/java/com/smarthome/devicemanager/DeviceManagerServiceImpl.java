@@ -13,7 +13,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceManagerServiceImplBase {
 
@@ -211,6 +210,36 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
             return "gRPC error on turnOn for device " + deviceId + ": " + e.getStatus().getDescription();
         }
 
+    }
+
+    public String SetDownBlind(String deviceId) {
+        Device device = devices.get(deviceId);
+        if (device == null) {
+            return "Device not found: " + deviceId;
+        }
+
+        ManagedChannel channel = channels.get(deviceId);
+        if (channel == null || channel.isShutdown()) {
+            return "gRPC channel non disponibile per device: " + deviceId;
+        }
+
+        if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
+            return "Device is not a blind: " + deviceId;
+        }
+
+        BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
+        BlindSetDownRequest request = BlindSetDownRequest.newBuilder().build();
+
+        try {
+            BlindSetDownResponse resp = blindStub.setDown(request);
+            if (resp.getSuccess()) {
+                return "Blind moved down for device " + deviceId + ": " + resp.getMessage();
+            } else {
+                return "Failed to move down blind for device " + deviceId + ": " + resp.getMessage();
+            }
+        } catch (StatusRuntimeException e) {
+            return "gRPC error on setDown for device " + deviceId + ": " + e.getStatus().getDescription();
+        }
     }
 
     public String turnOffDevice(String deviceId) {
@@ -471,6 +500,15 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     OvenSetProgramResponse resp = stub.setProgram(req);
                     return resp.getSuccess() ? "Oven program set: " + resp.getMessage()
                             : "Failed to set oven program: " + resp.getMessage();
+                }
+                case "AIRCONDITIONER": {
+                    AirConditionerServiceGrpc.AirConditionerServiceBlockingStub stub = AirConditionerServiceGrpc
+                            .newBlockingStub(channel);
+                    SetAirConditionerProgramRequest req = SetAirConditionerProgramRequest.newBuilder()
+                            .setProgramValue(program).build();
+                    SetAirConditionerProgramResponse resp = stub.setProgram(req);
+                    return resp.getSuccess() ? "Air conditioner program set: " + resp.getMessage()
+                            : "Failed to set air conditioner program: " + resp.getMessage();
                 }
                 default:
                     return "Set program not supported for device type: " + deviceType;
