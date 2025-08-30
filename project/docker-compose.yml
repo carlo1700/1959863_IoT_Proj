@@ -129,3 +129,4 @@ services:
 networks:
   smart-home-network:
     driver: bridge
+    enable_ipv6: false

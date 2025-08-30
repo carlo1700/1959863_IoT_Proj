@@ -2,14 +2,12 @@ package com.smarthome.devicemanager.api;
 
 import com.smarthome.devicemanager.DeviceManagerServiceImpl;
 import com.smarthome.proto.Device;
-import com.smarthome.proto.RegisterDeviceRequest;
 import com.smarthome.proto.RegisterDeviceResponse;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/devices")
@@ -32,48 +30,66 @@ public class DeviceApiController {
     }
 
     @PostMapping("/turnOnDevice/{deviceId}")
-    public String turnOnDevice(@PathVariable String deviceId) {
-        return service.turnOnDevice(deviceId);
+    public ResponseEntity<String> turnOnDevice(@PathVariable("deviceId") String deviceId) {
+        try {
+            return ResponseEntity.ok(service.turnOnDevice(deviceId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
     }
 
     @PostMapping("/setupBlind/{deviceId}")
-    public String setUpBlind(@PathVariable String deviceId) {
+    public String setUpBlind(@PathVariable("deviceId") String deviceId) {
         return service.SetUpBlind(deviceId);
     }
 
-    @PostMapping("/setdownBlind/{deviceId}")
-    public String setDownBlind(@PathVariable String deviceId) {
-        return service.SetDownBlind(deviceId);
-    }
-
     @PostMapping("/turnOffDevice/{deviceId}")
-    public String turnOffDevice(@PathVariable String deviceId) {
-        return service.turnOffDevice(deviceId);
+    public ResponseEntity<String> turnOffDevice(@PathVariable("deviceId") String deviceId) {
+        try {
+            return ResponseEntity.ok(service.turnOffDevice(deviceId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
     }
 
     @GetMapping("/status/{deviceId}")
-    public String getStatusDevice(@PathVariable String deviceId) {
+    public String getStatusDevice(@PathVariable("deviceId") String deviceId) {
         return service.getStatusDevice(deviceId);
     }
 
     @PostMapping("/startDevice/{deviceId}")
-    public String startDevice(@PathVariable String deviceId) {
+    public String startDevice(@PathVariable("deviceId") String deviceId) {
         return service.startDevice(deviceId);
     }
 
     @PostMapping("/stopDevice/{deviceId}")
-    public String stopDevice(@PathVariable String deviceId) {
+    public String stopDevice(@PathVariable("deviceId") String deviceId) {
         return service.stopDevice(deviceId);
     }
 
     @PostMapping("/setProgram/{deviceId}")
-    public String setProgramDevice(@PathVariable String deviceId, @RequestParam int program) {
+    public String setProgramDevice(@PathVariable("deviceId") String deviceId,
+            @RequestParam(name = "program") int program) {
         return service.setProgramDevice(deviceId, program);
     }
 
     @PostMapping("/setTemperatureOven/{deviceId}")
-    public String setTemperatureOven(@PathVariable String deviceId, @RequestParam int temperature) {
+    public String setTemperatureOven(@PathVariable("deviceId") String deviceId,
+            @RequestParam(name = "temperature") int temperature) {
         return service.setTemperatureOven(deviceId, temperature);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<RegisterDeviceResponse> registerDevice(
+            @RequestParam(name = "id") String id,
+            @RequestParam(name = "type") String type,
+            @RequestParam(name = "address") String address,
+            @RequestParam(name = "port") int port) {
+
+        RegisterDeviceResponse response = service.registerDeviceHttp(id, type, address, port);
+        return ResponseEntity.ok(response);
     }
 
 }

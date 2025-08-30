@@ -565,4 +565,73 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         }
     }
 
+    public RegisterDeviceResponse registerDeviceHttp(String deviceId, String deviceType,
+            String address, int port) {
+        Device device = Device.newBuilder()
+                .setDeviceId(deviceId)
+                .setDeviceType(deviceType)
+                .setAddress(address)
+                .setPort(port)
+                .setOnline(true)
+                .build();
+
+        devices.put(deviceId, device);
+
+        // Create gRPC channel for the device
+        ManagedChannel channel = ManagedChannelBuilder
+                .forAddress(address, port)
+                .usePlaintext()
+                .build();
+        channels.put(deviceId, channel);
+
+        return RegisterDeviceResponse.newBuilder()
+                .setSuccess(true)
+                .setMessage("Device registered: " + deviceId)
+                .build();
+    }
+
+    private boolean alarmActive = false;
+    private boolean alarmTriggered = false;
+
+    public synchronized String activateAlarm(boolean enable) {
+        this.alarmActive = enable;
+        this.alarmTriggered = false; // reset quando attivo/disattivo
+
+        if (enable) {
+            // controlla subito tutti i sensori
+            checkAllSensors();
+        }
+
+        return "Alarm is now " + (alarmActive ? "active" : "inactive");
+    }
+
+    public synchronized void checkAllSensors() {
+        for (Device device : devices.values()) {
+            if (device.getDeviceType().equalsIgnoreCase("MOTIONSENSOR")) {
+                ManagedChannel channel = channels.get(device.getDeviceId());
+                if (channel == null || channel.isShutdown())
+                    continue;
+
+                try {
+                    MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
+                            .newBlockingStub(channel);
+
+                    MotionSensorGetStatusResponse resp = stub.getStatus(
+                            MotionSensorGetStatusRequest.newBuilder().build());
+
+                    if (resp.getMotionDetected() && alarmActive) {
+                        alarmTriggered = true;
+                    }
+
+                } catch (StatusRuntimeException e) {
+                    System.err.println("gRPC error on sensor " + device.getDeviceId() + ": " + e.getStatus());
+                }
+            }
+        }
+    }
+
+    public synchronized String getAlarmStatus() {
+        return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
+    }
+
 }

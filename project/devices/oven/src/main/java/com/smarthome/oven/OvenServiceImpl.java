@@ -11,7 +11,7 @@ public class OvenServiceImpl extends OvenServiceGrpc.OvenServiceImplBase {
 
     @Override
     public void turnOn(OvenTurnOnRequest request, StreamObserver<OvenTurnOnResponse> responseObserver) {
-        
+
         isOn = true;
 
         OvenTurnOnResponse response = OvenTurnOnResponse.newBuilder()
@@ -25,7 +25,7 @@ public class OvenServiceImpl extends OvenServiceGrpc.OvenServiceImplBase {
 
     @Override
     public void turnOff(OvenTurnOffRequest request, StreamObserver<OvenTurnOffResponse> responseObserver) {
-        
+
         isOn = false;
 
         OvenTurnOffResponse response = OvenTurnOffResponse.newBuilder()
@@ -59,4 +59,21 @@ public class OvenServiceImpl extends OvenServiceGrpc.OvenServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void setProgram(OvenSetProgramRequest request, StreamObserver<OvenSetProgramResponse> responseObserver) {
+        // Aggiorna il programma interno
+        currentProgram = request.getProgram();
+
+        // Crea la risposta
+        OvenSetProgramResponse response = OvenSetProgramResponse.newBuilder()
+                .setSuccess(true)
+                .setMessage("Oven program set to " + currentProgram.name())
+                .build();
+
+        // Invia la risposta
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
 }
