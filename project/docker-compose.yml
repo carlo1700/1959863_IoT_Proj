@@ -97,9 +97,12 @@ services:
       - "50058:50058"
     container_name: airconditioner
     networks:
-      - smart-home-network
+      smart-home-network:
+        aliases:
+          - airconditioner
     depends_on:
-      - devicemanager
+      devicemanager:
+        condition: service_healthy
 
   dishwasher:
     build:

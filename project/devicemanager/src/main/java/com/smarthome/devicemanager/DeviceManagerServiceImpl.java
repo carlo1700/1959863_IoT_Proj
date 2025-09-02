@@ -1,15 +1,21 @@
 package com.smarthome.devicemanager;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import com.smarthome.proto.*;
 
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +27,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     @Override
     public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
+
+        String address = request.getAddress();
+        int port = request.getPort();
+
         Device device = Device.newBuilder()
                 .setDeviceId(request.getDeviceId())
                 .setDeviceType(request.getDeviceType())
@@ -31,10 +41,22 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
         devices.put(request.getDeviceId(), device);
 
-        // Create gRPC channel for the device
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(request.getAddress(), request.getPort())
+        // Creazione socket address sicuro
+        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+
+        // Creazione canale gRPC con Netty
+        ManagedChannel channel = NettyChannelBuilder.forAddress(socketAddress)
                 .usePlaintext()
+                .keepAliveTime(30, TimeUnit.SECONDS)
+                .keepAliveTimeout(10, TimeUnit.SECONDS)
                 .build();
+
+        // Aggiungi un watcher per tracciare lo stato della connessione
+        channel.notifyWhenStateChanged(channel.getState(true), () -> {
+            ConnectivityState newState = channel.getState(false);
+            System.out.println("🔌 Channel state for device " + request.getDeviceId() + ": " + newState);
+        });
+
         channels.put(request.getDeviceId(), channel);
 
         RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
@@ -44,6 +66,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+
+        System.out.println("✅ Device " + request.getDeviceId() +
+                " registered at " + request.getAddress() + ":" + request.getPort());
     }
 
     @Override
@@ -593,21 +618,32 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     private boolean alarmActive = false;
     private boolean alarmTriggered = false;
 
+    // Attiva/disattiva l'allarme
     public synchronized String activateAlarm(boolean enable) {
         this.alarmActive = enable;
-        this.alarmTriggered = false; // reset quando attivo/disattivo
-
-        if (enable) {
-            // controlla subito tutti i sensori
-            checkAllSensors();
-        }
+        this.alarmTriggered = false;
 
         return "Alarm is now " + (alarmActive ? "active" : "inactive");
     }
 
+    // Scheduler che controlla i sensori ogni 5 secondi
+    @Scheduled(fixedRate = 5000)
+    public synchronized void scheduledSensorCheck() {
+        if (alarmActive) {
+            System.out.println("⏱ Scheduled check: checking all sensors... (alarmActive=" + alarmActive + ")");
+            checkAllSensors();
+            System.out.println("⏱ Scheduled check completed. alarmTriggered=" + alarmTriggered);
+        }
+    }
+
+    // Controllo dei sensori
     public synchronized void checkAllSensors() {
+        if (devices == null || devices.isEmpty()) {
+            return;
+        }
+
         for (Device device : devices.values()) {
-            if (device.getDeviceType().equalsIgnoreCase("MOTIONSENSOR")) {
+            if ("MOTIONSENSOR".equalsIgnoreCase(device.getDeviceType())) {
                 ManagedChannel channel = channels.get(device.getDeviceId());
                 if (channel == null || channel.isShutdown())
                     continue;
@@ -616,20 +652,20 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
                             .newBlockingStub(channel);
 
-                    MotionSensorGetStatusResponse resp = stub.getStatus(
-                            MotionSensorGetStatusRequest.newBuilder().build());
+                    MotionSensorGetStatusResponse resp = stub
+                            .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
 
                     if (resp.getMotionDetected() && alarmActive) {
                         alarmTriggered = true;
                     }
-
                 } catch (StatusRuntimeException e) {
-                    System.err.println("gRPC error on sensor " + device.getDeviceId() + ": " + e.getStatus());
+                    System.err.println("❌ gRPC error on " + device.getDeviceId() + ": " + e.getStatus());
                 }
             }
         }
     }
 
+    // Stato allarme
     public synchronized String getAlarmStatus() {
         return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
     }

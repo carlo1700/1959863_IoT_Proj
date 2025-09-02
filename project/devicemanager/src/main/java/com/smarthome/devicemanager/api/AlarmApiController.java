@@ -17,7 +17,7 @@ public class AlarmApiController {
 
     // POST per attivare/disattivare l'allarme
     @PostMapping("/activate")
-    public ResponseEntity<String> activateAlarm(@RequestParam boolean enable) {
+    public ResponseEntity<String> activateAlarm(@RequestParam("enable") boolean enable) {
         try {
             String result = service.activateAlarm(enable);
             return ResponseEntity.ok(result);
