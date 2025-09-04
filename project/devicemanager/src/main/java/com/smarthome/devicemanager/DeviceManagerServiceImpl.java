@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.function.Function;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +22,21 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import org.springframework.stereotype.Service;
 
 import com.smarthome.logging.DeviceEventRepository;
 import com.smarthome.logging.PgDataSource;
+import com.smarthome.logging.RoomGroupRepository;
+
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceManagerServiceImplBase {
+    // repo persistente
+    private final RoomGroupRepository rgRepo = new RoomGroupRepository(PgDataSource.get());
+
+    // cache in-memory persistita
+    private final ConcurrentHashMap<String, Set<String>> rooms  = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Set<String>> groups = new ConcurrentHashMap<>();
 
     private final Map<String, Device> devices = new ConcurrentHashMap<>();
     private final Map<String, ManagedChannel> channels = new ConcurrentHashMap<>();
@@ -900,5 +913,198 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         //Stato allarme
         public synchronized String getAlarmStatus() {
         return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
+        }
+
+        private Set<String> ensureSet(Map<String, Set<String>> map, String key) {
+                return map.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet());
+        }
+
+        private Map<String, String> executeForDevices(Collection<String> ids, Function<String, String> actionPerDevice) {
+        Map<String, String> out = new LinkedHashMap<>();
+                if (ids == null || ids.isEmpty()) return out;
+                for (String id : ids) {
+                        try {
+                        out.put(id, actionPerDevice.apply(id));
+                        } catch (Exception e) {
+                        out.put(id, "ERROR: " + e.getMessage());
+                        }
+                }
+        return out;
+        }
+
+        // ===== Rooms =====
+        public String createRoom(String roomId) {
+        try {
+                rgRepo.createRoom(roomId); // <-- prima era roomGroupRepo
+                rooms.putIfAbsent(roomId, ConcurrentHashMap.newKeySet());
+                return "Room created: " + roomId;
+        } catch (Exception e) {
+                return "ERROR creating room: " + e.getMessage();
+        }
+        }
+
+        public String addDeviceToRoom(String roomId, String deviceId) {
+                if (!devices.containsKey(deviceId)) return "Device not found: " + deviceId;
+                try {
+                        rgRepo.addDeviceToRoom(roomId, deviceId); // <-- prima era roomGroupRepo
+                        rooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
+                        return "Added " + deviceId + " to room " + roomId;
+                } catch (Exception e) {
+                        return "ERROR adding device to room: " + e.getMessage();
+                }
+        }
+
+        public String removeDeviceFromRoom(String roomId, String deviceId) {
+        try {
+                rgRepo.removeDeviceFromRoom(roomId, deviceId); // <-- prima era roomGroupRepo
+                Set<String> set = rooms.get(roomId);
+                if (set != null) set.remove(deviceId);
+                return "Removed " + deviceId + " from room " + roomId;
+        } catch (Exception e) {
+                return "ERROR removing device from room: " + e.getMessage();
+        }
+        }
+
+        public Set<String> listRoomDevices(String roomId) {
+        return rooms.getOrDefault(roomId, Set.of());
+        }
+
+        // ===== Groups =====
+        public String createGroup(String groupId) {
+        try {
+                rgRepo.createGroup(groupId); // <-- prima era roomGroupRepo
+                groups.putIfAbsent(groupId, ConcurrentHashMap.newKeySet());
+                return "Group created: " + groupId;
+        } catch (Exception e) {
+                return "ERROR creating group: " + e.getMessage();
+        }
+        }
+
+        public String addDeviceToGroup(String groupId, String deviceId) {
+        if (!devices.containsKey(deviceId)) return "Device not found: " + deviceId;
+        try {
+                rgRepo.addDeviceToGroup(groupId, deviceId); // <-- prima era roomGroupRepo
+                groups.computeIfAbsent(groupId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
+                return "Added " + deviceId + " to group " + groupId;
+        } catch (Exception e) {
+                return "ERROR adding device to group: " + e.getMessage();
+        }
+        }
+
+        public String removeDeviceFromGroup(String groupId, String deviceId) {
+        try {
+                rgRepo.removeDeviceFromGroup(groupId, deviceId); // <-- prima era roomGroupRepo
+                Set<String> set = groups.get(groupId);
+                if (set != null) set.remove(deviceId);
+                return "Removed " + deviceId + " from group " + groupId;
+        } catch (Exception e) {
+                return "ERROR removing device from group: " + e.getMessage();
+        }
+        }
+
+        public Set<String> listGroupDevices(String groupId) {
+        return groups.getOrDefault(groupId, Set.of());
+        }
+
+        // broadcast comandi
+        public Map<String, String> turnOnRoom(String roomId) {
+        Set<String> ids = listRoomDevices(roomId);
+        return executeForDevices(ids, this::turnOnDevice);
+        }
+
+        public Map<String, String> turnOffRoom(String roomId) {
+        Set<String> ids = listRoomDevices(roomId);
+        return executeForDevices(ids, this::turnOffDevice);
+        }
+
+        public Map<String, String> startRoom(String roomId) {
+        Set<String> ids = listRoomDevices(roomId);
+        return executeForDevices(ids, this::startDevice);
+        }
+
+        public Map<String, String> stopRoom(String roomId) {
+        Set<String> ids = listRoomDevices(roomId);
+        return executeForDevices(ids, this::stopDevice);
+        }
+
+        public Map<String, String> setProgramRoom(String roomId, int program) {
+        Set<String> ids = listRoomDevices(roomId);
+        return executeForDevices(ids, id -> setProgramDevice(id, program));
+        }
+
+        public Map<String, String> setTemperatureRoom(String roomId, int temperature) {
+        Set<String> ids = listRoomDevices(roomId);
+        return executeForDevices(ids, id -> setTemperatureOven(id, temperature));
+        }
+
+        public Map<String, String> turnOnGroup(String groupId) {
+        Set<String> ids = listGroupDevices(groupId);
+        return executeForDevices(ids, this::turnOnDevice);
+        }
+
+        public Map<String, String> turnOffGroup(String groupId) {
+        Set<String> ids = listGroupDevices(groupId);
+        return executeForDevices(ids, this::turnOffDevice);
+        }
+
+        public Map<String, String> startGroup(String groupId) {
+        Set<String> ids = listGroupDevices(groupId);
+        return executeForDevices(ids, this::startDevice);
+        }
+
+        public Map<String, String> stopGroup(String groupId) {
+        Set<String> ids = listGroupDevices(groupId);
+        return executeForDevices(ids, this::stopDevice);
+        }
+
+        public Map<String, String> setProgramGroup(String groupId, int program) {
+        Set<String> ids = listGroupDevices(groupId);
+        return executeForDevices(ids, id -> setProgramDevice(id, program));
+        }
+
+        public Map<String, String> setTemperatureGroup(String groupId, int temperature) {
+        Set<String> ids = listGroupDevices(groupId);
+        return executeForDevices(ids, id -> setTemperatureOven(id, temperature));
+        }
+
+        @PostConstruct
+        public void initRoomsAndGroups() {
+        try {
+                rooms.clear();
+                groups.clear();
+
+                // Rooms
+                for (String roomId : rgRepo.listRooms()) {
+                Set<String> set = ConcurrentHashMap.newKeySet();
+                set.addAll(rgRepo.listDevicesInRoom(roomId));
+                rooms.put(roomId, set);
+                }
+
+                // Groups
+                for (String groupId : rgRepo.listGroups()) {
+                Set<String> set = ConcurrentHashMap.newKeySet();
+                set.addAll(rgRepo.listDevicesInGroup(groupId));
+                groups.put(groupId, set);
+                }
+
+                System.out.println("Rooms/Groups loaded from DB: rooms=" + rooms.keySet() + " groups=" + groups.keySet());
+        } catch (Exception e) {
+                System.err.println("Failed loading rooms/groups: " + e.getMessage());
+        }
+        }
+
+        // Passthrough per le API di listing
+        public List<String> listRooms() throws Exception {
+        return rgRepo.listRooms();
+        }
+        public List<String> listGroups() throws Exception {
+        return rgRepo.listGroups();
+        }
+        public Map<String, Set<String>> listAllRooms() {
+        return Collections.unmodifiableMap(rooms);
+        }
+
+        public Map<String, Set<String>> listAllGroups() {
+        return Collections.unmodifiableMap(groups);
         }
 }
