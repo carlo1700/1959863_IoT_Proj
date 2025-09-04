@@ -11,4 +11,4 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/devices/airconditioner/target/airconditioner-1.0-SNAPSHOT.jar app.jar
 EXPOSE 50058
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]

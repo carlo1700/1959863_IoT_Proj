@@ -72,7 +72,7 @@ public class Main {
 
                 RegisterDeviceRequest request = RegisterDeviceRequest.newBuilder()
                         .setDeviceId("airConditioner1")
-                        .setDeviceType("AIR_CONDITIONER")
+                        .setDeviceType("AIRCONDITIONER")
                         .setAddress("airconditioner")
                         .setPort(PORT)
                         .build();

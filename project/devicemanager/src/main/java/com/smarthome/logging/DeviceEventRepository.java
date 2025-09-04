@@ -65,7 +65,7 @@ public class DeviceEventRepository {
             ps.setString(3, action);
             ps.setString(4, status);
             ps.setString(5, userName);
-            ps.setString(6, payloadJson); // può essere null; CAST(? AS JSONB) gestisce NULL
+            ps.setString(6, payloadJson); 
             ps.setString(7, errorMsg);
             ps.executeUpdate();
         }

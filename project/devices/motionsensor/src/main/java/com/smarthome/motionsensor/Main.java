@@ -72,7 +72,7 @@ public class Main {
 
                 RegisterDeviceRequest request = RegisterDeviceRequest.newBuilder()
                         .setDeviceId("motionsensor1")
-                        .setDeviceType("MOTION_SENSOR")
+                        .setDeviceType("MOTIONSENSOR")
                         .setAddress("motionsensor")
                         .setPort(PORT)
                         .build();

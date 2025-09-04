@@ -59,4 +59,17 @@ public class OvenServiceImpl extends OvenServiceGrpc.OvenServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void setProgram(OvenSetProgramRequest request, StreamObserver<OvenSetProgramResponse> responseObserver) {
+        currentProgram = request.getProgram();
+
+        OvenSetProgramResponse response = OvenSetProgramResponse.newBuilder()
+                .setSuccess(true)
+                .setMessage("Oven program set to " + currentProgram.name())
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 }

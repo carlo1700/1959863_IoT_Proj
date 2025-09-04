@@ -25,4 +25,4 @@ RUN chmod +x /usr/local/bin/grpc-health-probe
 EXPOSE 50051
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]

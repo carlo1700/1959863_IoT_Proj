@@ -47,7 +47,7 @@ services:
       timeout: 2s
       retries: 5
     environment:
-      - DB_URL=jdbc:postgresql://db:5432/logs
+      - DB_URL=jdbc:postgresql://smart-home-db:5432/logs
       - DB_USER=smarthome
       - DB_PASS=smarthome
     depends_on:
@@ -134,9 +134,12 @@ services:
       - "50058:50058"
     container_name: airconditioner
     networks:
-      - smart-home-network
+      smart-home-network:
+        aliases:
+          - airconditioner
     depends_on:
-      - devicemanager
+      devicemanager:
+        condition: service_healthy
 
   dishwasher:
     build:
@@ -169,3 +172,4 @@ volumes:
 networks:
   smart-home-network:
     driver: bridge
+    enable_ipv6: false

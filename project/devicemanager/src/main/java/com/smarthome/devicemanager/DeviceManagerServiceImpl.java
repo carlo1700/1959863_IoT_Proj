@@ -1,15 +1,21 @@
 package com.smarthome.devicemanager;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import com.smarthome.proto.*;
 
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +33,16 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     private void log(String deviceId, String action, String status, String payloadJson, String errorMsg) {
         try {
-                repo.insertEvent(deviceId, "DeviceManager", action, status, "system", payloadJson, errorMsg);
+                repo.insertEvent(
+                deviceId,                         // device_id
+                "DeviceManager",                  // source
+                action,                           // action (es. "TurnOn")
+                status,                           // status (PENDING/SUCCESS/FAILURE)
+                currentUser(),                    // user_name
+                (payloadJson == null || payloadJson.isBlank()) ? null : payloadJson, // JSONB
+                errorMsg                          // error_msg
+                );
         } catch (Exception e) {
-                // non bloccare il flusso operativo per un problema di logging
                 System.err.println("DB log error [" + action + "@" + deviceId + "]: " + e.getMessage());
         }
     }
@@ -38,10 +51,11 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         // Se in futuro hai un utente reale, rimpiazza questo metodo.
         return "system";
     }
-    // =====================
 
     @Override
         public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
+        String address = request.getAddress();
+        int port = request.getPort();
         String deviceId = request.getDeviceId();
         String deviceType = request.getDeviceType();
         String normalizedType = deviceType.replace("_", "");
@@ -62,10 +76,20 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 if (old != null && !old.isShutdown()) {
                 try { old.shutdownNow(); } catch (Exception ignore) {}
                 }
-                ManagedChannel channel = ManagedChannelBuilder.forAddress(request.getAddress(), request.getPort())
+                InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+
+                // Creazione canale gRPC con Netty
+                ManagedChannel channel = NettyChannelBuilder.forAddress(socketAddress)
                         .usePlaintext()
+                        .keepAliveTime(30, TimeUnit.SECONDS)
+                        .keepAliveTimeout(10, TimeUnit.SECONDS)
                         .build();
-                channels.put(deviceId, channel);
+                // Aggiungi un watcher per tracciare lo stato della connessione
+                channel.notifyWhenStateChanged(channel.getState(true), () -> {
+                        ConnectivityState newState = channel.getState(false);
+                        System.out.println("🔌 Channel state for device " + request.getDeviceId() + ": " + newState);
+                        });
+                channels.put(request.getDeviceId(), channel);
 
                 RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
                         .setSuccess(true)
@@ -75,6 +99,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
+
+                System.out.println("✅ Device " + request.getDeviceId() +
+                " registered at " + request.getAddress() + ":" + request.getPort());
         } catch (Exception e) {
                 log(deviceId, "Register", "FAILURE", payload, e.getMessage());
                 responseObserver.onNext(RegisterDeviceResponse.newBuilder()
@@ -286,6 +313,36 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         } catch (StatusRuntimeException e) {
             log(deviceId, "SetUpBlind", "FAILURE", "{}", e.getStatus().getDescription());
             return "gRPC error on turnOn for device " + deviceId + ": " + e.getStatus().getDescription();
+        }
+    }
+
+    public String SetDownBlind(String deviceId) {
+        Device device = devices.get(deviceId);
+        if (device == null) {
+            return "Device not found: " + deviceId;
+        }
+
+        ManagedChannel channel = channels.get(deviceId);
+        if (channel == null || channel.isShutdown()) {
+            return "gRPC channel non disponibile per device: " + deviceId;
+        }
+
+        if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
+            return "Device is not a blind: " + deviceId;
+        }
+
+        BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
+        BlindSetDownRequest request = BlindSetDownRequest.newBuilder().build();
+
+        try {
+            BlindSetDownResponse resp = blindStub.setDown(request);
+            if (resp.getSuccess()) {
+                return "Blind moved down for device " + deviceId + ": " + resp.getMessage();
+            } else {
+                return "Failed to move down blind for device " + deviceId + ": " + resp.getMessage();
+            }
+        } catch (StatusRuntimeException e) {
+            return "gRPC error on setDown for device " + deviceId + ": " + e.getStatus().getDescription();
         }
     }
 
@@ -643,6 +700,15 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             resp.getSuccess() ? null : resp.getMessage());
                     return msg;
                 }
+                 case "AIRCONDITIONER": {
+                    AirConditionerServiceGrpc.AirConditionerServiceBlockingStub stub = AirConditionerServiceGrpc
+                            .newBlockingStub(channel);
+                    SetAirConditionerProgramRequest req = SetAirConditionerProgramRequest.newBuilder()
+                            .setProgramValue(program).build();
+                    SetAirConditionerProgramResponse resp = stub.setProgram(req);
+                    return resp.getSuccess() ? "Air conditioner program set: " + resp.getMessage()
+                            : "Failed to set air conditioner program: " + resp.getMessage();
+                }
                 default:
                     log(deviceId, "SetProgram", "FAILURE", String.format("{\"program\":%d}", program),
                             "Unsupported type: " + deviceType);
@@ -738,8 +804,13 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         }
     }
 
-    public String registerDeviceHttp(String deviceId, String deviceType, String address, int port) {
-        // normalizza il tipo: la tua lista a volte usa AIR_CONDITIONER ma gli switch usano AIRCONDITIONER
+        // campi per l’allarme
+        private boolean alarmActive = false;
+        private boolean alarmTriggered = false;
+
+        public synchronized RegisterDeviceResponse registerDeviceHttp(String deviceId, String deviceType,
+                                                              String address, int port) {
+        // normalizza tipo (alcune API usano underscore, altre no)
         String normalizedType = deviceType.replace("_", "");
 
         String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, address, port);
@@ -748,29 +819,86 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         // chiudi canale precedente se stai ri-registrando lo stesso id
         ManagedChannel old = channels.remove(deviceId);
         if (old != null && !old.isShutdown()) {
-                try { old.shutdownNow(); } catch (Exception ignore) {}
+                try {
+                old.shutdownNow();
+                } catch (Exception ignore) {}
         }
 
         try {
+                // crea device
                 Device device = Device.newBuilder()
                         .setDeviceId(deviceId)
-                        .setDeviceType(normalizedType)   // <-- importante per gli switch
+                        .setDeviceType(normalizedType)
                         .setAddress(address)
                         .setPort(port)
                         .setOnline(true)
                         .build();
                 devices.put(deviceId, device);
 
+                // crea canale gRPC
                 ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
                         .usePlaintext()
                         .build();
                 channels.put(deviceId, ch);
 
                 log(deviceId, "Register", "SUCCESS", payload, null);
-                return "Device registered: " + deviceId;
+
+                // ritorna RegisterDeviceResponse come nella prima versione
+                return RegisterDeviceResponse.newBuilder()
+                        .setSuccess(true)
+                        .setMessage("Device registered: " + deviceId)
+                        .build();
+
         } catch (Exception e) {
                 log(deviceId, "Register", "FAILURE", payload, e.getMessage());
                 throw e;
         }
+        }
+
+        public synchronized String activateAlarm(boolean enable) {
+        this.alarmActive = enable;
+        this.alarmTriggered = false; 
+
+        return "Alarm is now " + (alarmActive ? "active" : "inactive");
+        }
+
+        // Scheduler che controlla i sensori ogni 5 secondi
+        @Scheduled(fixedRate = 5000)
+        public synchronized void scheduledSensorCheck() {
+                if (alarmActive) {
+                System.out.println("⏱ Scheduled check: checking all sensors... (alarmActive=" + alarmActive + ")");
+                checkAllSensors();
+                System.out.println("⏱ Scheduled check completed. alarmTriggered=" + alarmTriggered);
+                }
+        }
+
+        public synchronized void checkAllSensors() {
+                if (devices == null || devices.isEmpty()) {
+                return;
+                }
+                for (Device device : devices.values()) {
+                        if ("MOTIONSENSOR".equalsIgnoreCase(device.getDeviceType())) {
+                        ManagedChannel channel = channels.get(device.getDeviceId());
+                        if (channel == null || channel.isShutdown())
+                                continue;
+
+                        try {
+                                MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub =
+                                        MotionSensorServiceGrpc.newBlockingStub(channel);
+
+                                MotionSensorGetStatusResponse resp = stub.getStatus(MotionSensorGetStatusRequest.newBuilder().build());
+
+                                if (resp.getMotionDetected() && alarmActive) {
+                                alarmTriggered = true;
+                                }
+
+                        } catch (StatusRuntimeException e) {
+                                System.err.println("❌ gRPC error on " + device.getDeviceId() + ": " + e.getStatus());                        }
+                        }
+                }
+        }
+        //Stato allarme
+        public synchronized String getAlarmStatus() {
+        return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
         }
 }
