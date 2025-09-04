@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "LightProto";
+
+// Light Service
+service LightService {
+  rpc TurnOn (TurnOnRequest) returns (TurnOnResponse);
+  rpc TurnOff (TurnOffRequest) returns (TurnOffResponse);
+  rpc GetStatus (GetStatusRequest) returns (GetStatusResponse);
+}
+
+// ---- REQUEST / RESPONSE Messages ----
+
+message TurnOnRequest {}
+
+message TurnOnResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message TurnOffRequest {}
+
+message TurnOffResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetStatusRequest {}
+
+message GetStatusResponse {
+  bool is_on = 1;
+}

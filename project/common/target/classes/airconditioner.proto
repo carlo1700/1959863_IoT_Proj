@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "AirConditionerProto";
+
+// Air Conditioner Service
+service AirConditionerService {
+  rpc TurnOn(AirConditionerTurnOnRequest) returns (AirConditionerTurnOnResponse);
+  rpc TurnOff(AirConditionerTurnOffRequest) returns (AirConditionerTurnOffResponse);
+  rpc SetProgram(SetAirConditionerProgramRequest) returns (SetAirConditionerProgramResponse);
+  rpc GetStatus(AirConditionerGetStatusRequest) returns (AirConditionerGetStatusResponse);
+}
+
+// Enum con 2 modalità
+enum AirConditionerProgram {
+  AIR_PROGRAM_UNSPECIFIED = 0;
+  AIR_PROGRAM_COOL = 1;
+  AIR_PROGRAM_HEAT = 2;
+}
+
+// Accensione
+message AirConditionerTurnOnRequest {}
+message AirConditionerTurnOnResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Spegnimento
+message AirConditionerTurnOffRequest {}
+message AirConditionerTurnOffResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Imposta programma
+message SetAirConditionerProgramRequest {
+  AirConditionerProgram program = 1;
+}
+
+message SetAirConditionerProgramResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Stato del condizionatore
+message AirConditionerGetStatusRequest {}
+
+message AirConditionerGetStatusResponse {
+  bool is_on = 1;
+  AirConditionerProgram current_program = 2;
+}

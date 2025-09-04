@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "ThermostatProto";
+
+// Thermostat Service
+service ThermostatService {
+  rpc GetStatus(ThermostatGetStatusRequest) returns (ThermostatGetStatusResponse);
+}
+
+
+message ThermostatGetStatusRequest {}
+
+message ThermostatGetStatusResponse {
+  double current_temperature = 1;
+}

@@ -38,12 +38,12 @@ public class AirConditionerServiceImpl extends AirConditionerServiceGrpc.AirCond
 
     @Override
     public void setProgram(SetAirConditionerProgramRequest request, StreamObserver<SetAirConditionerProgramResponse> responseObserver) {
-        
+
         if (!isOn) {
             SetAirConditionerProgramResponse response = SetAirConditionerProgramResponse.newBuilder()
-            .setSuccess(false)
-            .setMessage("Air conditioner is not turned on")
-            .build();
+                    .setSuccess(false)
+                    .setMessage("Air conditioner is not turned on")
+                    .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             return;
