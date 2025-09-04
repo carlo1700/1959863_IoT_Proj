@@ -29,17 +29,26 @@ public class MotionSensorServiceImpl extends MotionSensorServiceGrpc.MotionSenso
     }
 
     @Override
+<<<<<<< HEAD
     public void getStatus(MotionSensorGetStatusRequest request,
             StreamObserver<MotionSensorGetStatusResponse> responseObserver) {
         
         boolean motionDetected = Math.random() < 0.5;
 
+=======
+    public void getStatus(MotionSensorGetStatusRequest request, StreamObserver<MotionSensorGetStatusResponse> responseObserver) {
+        boolean motionDetected = Math.random() < 0.5;
+>>>>>>> 7fa978c2aa0674f6098c37cde6034a25a6de46d4
         MotionSensorGetStatusResponse response = MotionSensorGetStatusResponse.newBuilder()
                 .setMotionDetected(motionDetected)
                 .setLastMotionTime(System.currentTimeMillis())
                 .setSensitivity(5)
                 .build();
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 7fa978c2aa0674f6098c37cde6034a25a6de46d4
         System.out.println("📡 MotionSensor status: motionDetected=" + motionDetected);
 
         responseObserver.onNext(response);

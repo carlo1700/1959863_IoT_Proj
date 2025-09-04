@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "MotionSensorProto";
+
+// Motion Sensor Service
+service MotionSensorService {
+  rpc TurnOn(MotionSensorTurnOnRequest) returns (MotionSensorTurnOnResponse);
+  rpc TurnOff(MotionSensorTurnOffRequest) returns (MotionSensorTurnOffResponse);
+  rpc GetStatus(MotionSensorGetStatusRequest) returns (MotionSensorGetStatusResponse);
+  rpc SetSensitivity(SetSensitivityRequest) returns (SetSensitivityResponse);
+}
+
+message MotionSensorTurnOnRequest {}
+
+message MotionSensorTurnOnResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message MotionSensorTurnOffRequest {}
+
+message MotionSensorTurnOffResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message MotionSensorGetStatusRequest {}
+
+message MotionSensorGetStatusResponse {
+  bool motion_detected = 1;
+  int64 last_motion_time = 2; // timestamp
+  int32 sensitivity = 3; // 1-10
+}
+
+message SetSensitivityRequest {
+  int32 sensitivity = 1; // 1-10
+}
+
+message SetSensitivityResponse {
+  bool success = 1;
+  string message = 2;
+}
