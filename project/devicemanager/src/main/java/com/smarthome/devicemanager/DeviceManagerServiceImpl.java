@@ -332,36 +332,6 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     public String SetDownBlind(String deviceId) {
         Device device = devices.get(deviceId);
         if (device == null) {
-            return "Device not found: " + deviceId;
-        }
-
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
-
-        if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
-            return "Device is not a blind: " + deviceId;
-        }
-
-        BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
-        BlindSetDownRequest request = BlindSetDownRequest.newBuilder().build();
-
-        try {
-            BlindSetDownResponse resp = blindStub.setDown(request);
-            if (resp.getSuccess()) {
-                return "Blind moved down for device " + deviceId + ": " + resp.getMessage();
-            } else {
-                return "Failed to move down blind for device " + deviceId + ": " + resp.getMessage();
-            }
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on setDown for device " + deviceId + ": " + e.getStatus().getDescription();
-        }
-    }
-
-    public String SetDownBlind(String deviceId) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
             log(deviceId, "TurnOff", "FAILURE", "{}", "Device not found");
             return "Device not found: " + deviceId;
         }
