@@ -35,7 +35,7 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     private final RoomGroupRepository rgRepo = new RoomGroupRepository(PgDataSource.get());
 
     // cache in-memory persistita
-    private final ConcurrentHashMap<String, Set<String>> rooms  = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Set<String>> rooms = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> groups = new ConcurrentHashMap<>();
 
     private final Map<String, Device> devices = new ConcurrentHashMap<>();
@@ -46,17 +46,17 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     private void log(String deviceId, String action, String status, String payloadJson, String errorMsg) {
         try {
-                repo.insertEvent(
-                deviceId,                         // device_id
-                "DeviceManager",                  // source
-                action,                           // action (es. "TurnOn")
-                status,                           // status (PENDING/SUCCESS/FAILURE)
-                currentUser(),                    // user_name
-                (payloadJson == null || payloadJson.isBlank()) ? null : payloadJson, // JSONB
-                errorMsg                          // error_msg
-                );
+            repo.insertEvent(
+                    deviceId, // device_id
+                    "DeviceManager", // source
+                    action, // action (es. "TurnOn")
+                    status, // status (PENDING/SUCCESS/FAILURE)
+                    currentUser(), // user_name
+                    (payloadJson == null || payloadJson.isBlank()) ? null : payloadJson, // JSONB
+                    errorMsg // error_msg
+            );
         } catch (Exception e) {
-                System.err.println("DB log error [" + action + "@" + deviceId + "]: " + e.getMessage());
+            System.err.println("DB log error [" + action + "@" + deviceId + "]: " + e.getMessage());
         }
     }
 
@@ -66,64 +66,70 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     }
 
     @Override
-        public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
+    public void registerDevice(RegisterDeviceRequest request,
+            StreamObserver<RegisterDeviceResponse> responseObserver) {
         String address = request.getAddress();
         int port = request.getPort();
         String deviceId = request.getDeviceId();
         String deviceType = request.getDeviceType();
         String normalizedType = deviceType.replace("_", "");
-        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, request.getAddress(), request.getPort());
+        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType,
+                request.getAddress(), request.getPort());
         log(deviceId, "Register", "PENDING", payload, null);
 
         try {
-                Device device = Device.newBuilder()
-                        .setDeviceId(deviceId)
-                        .setDeviceType(normalizedType)
-                        .setAddress(request.getAddress())
-                        .setPort(request.getPort())
-                        .setOnline(true)
-                        .build();
-                devices.put(deviceId, device);
+            Device device = Device.newBuilder()
+                    .setDeviceId(deviceId)
+                    .setDeviceType(normalizedType)
+                    .setAddress(request.getAddress())
+                    .setPort(request.getPort())
+                    .setOnline(true)
+                    .build();
+            devices.put(deviceId, device);
 
-                ManagedChannel old = channels.remove(deviceId);
-                if (old != null && !old.isShutdown()) {
-                try { old.shutdownNow(); } catch (Exception ignore) {}
+            ManagedChannel old = channels.remove(deviceId);
+            if (old != null && !old.isShutdown()) {
+                try {
+                    old.shutdownNow();
+                } catch (Exception ignore) {
                 }
-                InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+            }
+            InetSocketAddress socketAddress = new InetSocketAddress(address, port);
 
-                // Creazione canale gRPC con Netty
-                ManagedChannel channel = NettyChannelBuilder.forAddress(socketAddress)
-                        .usePlaintext()
-                        .keepAliveTime(30, TimeUnit.SECONDS)
-                        .keepAliveTimeout(10, TimeUnit.SECONDS)
-                        .build();
-                // Aggiungi un watcher per tracciare lo stato della connessione
-                channel.notifyWhenStateChanged(channel.getState(true), () -> {
-                        ConnectivityState newState = channel.getState(false);
-                        System.out.println("🔌 Channel state for device " + request.getDeviceId() + ": " + newState);
-                        });
-                channels.put(request.getDeviceId(), channel);
+            // Creazione canale gRPC con Netty
+            ManagedChannel channel = NettyChannelBuilder.forAddress(socketAddress)
+                    .usePlaintext()
+                    .keepAliveTime(30, TimeUnit.SECONDS)
+                    .keepAliveTimeout(10, TimeUnit.SECONDS)
+                    .build();
+            // Aggiungi un watcher per tracciare lo stato della connessione
+            channel.notifyWhenStateChanged(channel.getState(true), () -> {
+                ConnectivityState newState = channel.getState(false);
+                System.out.println("🔌 Channel state for device " + request.getDeviceId() + ": "
+                        + newState);
+            });
+            channels.put(request.getDeviceId(), channel);
 
-                RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
-                        .setSuccess(true)
-                        .setMessage("Device registered: " + deviceId)
-                        .build();
-                log(deviceId, "Register", "SUCCESS", payload, null);
+            RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Device registered: " + deviceId)
+                    .build();
+            log(deviceId, "Register", "SUCCESS", payload, null);
 
-                responseObserver.onNext(response);
-                responseObserver.onCompleted();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
 
-                System.out.println("✅ Device " + request.getDeviceId() +
-                " registered at " + request.getAddress() + ":" + request.getPort());
+            System.out.println("✅ Device " + request.getDeviceId() +
+                    " registered at " + request.getAddress() + ":" + request.getPort());
         } catch (Exception e) {
-                log(deviceId, "Register", "FAILURE", payload, e.getMessage());
-                responseObserver.onNext(RegisterDeviceResponse.newBuilder()
-                        .setSuccess(false)
-                        .setMessage("Register failed: " + e.getMessage())
-                        .build());
-                responseObserver.onCompleted();
+            log(deviceId, "Register", "FAILURE", payload, e.getMessage());
+            responseObserver.onNext(RegisterDeviceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setMessage("Register failed: " + e.getMessage())
+                    .build());
+            responseObserver.onCompleted();
         }
-        }
+    }
 
     @Override
     public void unregisterDevice(UnregisterDeviceRequest request,
@@ -205,7 +211,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
             switch (deviceType.toUpperCase()) {
 
                 case "LIGHT": {
-                    LightServiceGrpc.LightServiceBlockingStub lightStub = LightServiceGrpc.newBlockingStub(channel);
+                    LightServiceGrpc.LightServiceBlockingStub lightStub = LightServiceGrpc
+                            .newBlockingStub(channel);
                     TurnOnResponse lightResp = lightStub.turnOn(TurnOnRequest.newBuilder().build());
                     String msg = lightResp.getSuccess()
                             ? "Light turned on: " + lightResp.getMessage()
@@ -222,9 +229,12 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .turnOn(AirConditionerTurnOnRequest.newBuilder().build());
                     String msg = airconditionerResp.getSuccess()
                             ? "airconditioner activated: " + airconditionerResp.getMessage()
-                            : "Failed to activate airconditioner: " + airconditionerResp.getMessage();
-                    log(deviceId, "TurnOn", airconditionerResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
-                            airconditionerResp.getSuccess() ? null : airconditionerResp.getMessage());
+                            : "Failed to activate airconditioner: "
+                                    + airconditionerResp.getMessage();
+                    log(deviceId, "TurnOn", airconditionerResp.getSuccess() ? "SUCCESS" : "FAILURE",
+                            "{}",
+                            airconditionerResp.getSuccess() ? null
+                                    : airconditionerResp.getMessage());
                     return msg;
                 }
 
@@ -255,8 +265,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 }
 
                 case "OVEN": {
-                    OvenServiceGrpc.OvenServiceBlockingStub ovenStub = OvenServiceGrpc.newBlockingStub(channel);
-                    OvenTurnOnResponse ovenResp = ovenStub.turnOn(OvenTurnOnRequest.newBuilder().build());
+                    OvenServiceGrpc.OvenServiceBlockingStub ovenStub = OvenServiceGrpc
+                            .newBlockingStub(channel);
+                    OvenTurnOnResponse ovenResp = ovenStub
+                            .turnOn(OvenTurnOnRequest.newBuilder().build());
                     String msg = ovenResp.getSuccess()
                             ? "Oven preheating: " + ovenResp.getMessage()
                             : "Failed to preheat oven: " + ovenResp.getMessage();
@@ -381,8 +393,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
             switch (deviceType.toUpperCase()) {
 
                 case "LIGHT": {
-                    LightServiceGrpc.LightServiceBlockingStub lightStub = LightServiceGrpc.newBlockingStub(channel);
-                    TurnOffResponse lightResp = lightStub.turnOff(TurnOffRequest.newBuilder().build());
+                    LightServiceGrpc.LightServiceBlockingStub lightStub = LightServiceGrpc
+                            .newBlockingStub(channel);
+                    TurnOffResponse lightResp = lightStub
+                            .turnOff(TurnOffRequest.newBuilder().build());
                     String msg = lightResp.getSuccess()
                             ? "Light turned off: " + lightResp.getMessage()
                             : "Failed to turn off light: " + lightResp.getMessage();
@@ -397,10 +411,14 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     AirConditionerTurnOffResponse airconditionerResp = airconditionerStub
                             .turnOff(AirConditionerTurnOffRequest.newBuilder().build());
                     String msg = airconditionerResp.getSuccess()
-                            ? "airconditioner deactivated: " + airconditionerResp.getMessage()
-                            : "Failed to deactivate airconditioner: " + airconditionerResp.getMessage();
-                    log(deviceId, "TurnOff", airconditionerResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
-                            airconditionerResp.getSuccess() ? null : airconditionerResp.getMessage());
+                            ? "airconditioner deactivated: "
+                                    + airconditionerResp.getMessage()
+                            : "Failed to deactivate airconditioner: "
+                                    + airconditionerResp.getMessage();
+                    log(deviceId, "TurnOff",
+                            airconditionerResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
+                            airconditionerResp.getSuccess() ? null
+                                    : airconditionerResp.getMessage());
                     return msg;
                 }
 
@@ -431,8 +449,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 }
 
                 case "OVEN": {
-                    OvenServiceGrpc.OvenServiceBlockingStub ovenStub = OvenServiceGrpc.newBlockingStub(channel);
-                    OvenTurnOffResponse ovenResp = ovenStub.turnOff(OvenTurnOffRequest.newBuilder().build());
+                    OvenServiceGrpc.OvenServiceBlockingStub ovenStub = OvenServiceGrpc
+                            .newBlockingStub(channel);
+                    OvenTurnOffResponse ovenResp = ovenStub
+                            .turnOff(OvenTurnOffRequest.newBuilder().build());
                     String msg = ovenResp.getSuccess()
                             ? "Oven turned off: " + ovenResp.getMessage()
                             : "Failed to turn off oven: " + ovenResp.getMessage();
@@ -448,7 +468,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .turnOff(WashingMachineTurnOffRequest.newBuilder().build());
                     String msg = washResp.getSuccess()
                             ? "Washing machine turned off: " + washResp.getMessage()
-                            : "Failed to turn off washing machine: " + washResp.getMessage();
+                            : "Failed to turn off washing machine: "
+                                    + washResp.getMessage();
                     log(deviceId, "TurnOff", washResp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
                             washResp.getSuccess() ? null : washResp.getMessage());
                     return msg;
@@ -490,19 +511,37 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     AirConditionerServiceGrpc.AirConditionerServiceBlockingStub stub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
                     AirConditionerGetStatusResponse resp = stub
-                            .getStatus(AirConditionerGetStatusRequest.newBuilder().build());
-                    String out = "Air conditioner status: is_on=" + resp.getIsOn() + ", current_program="
+                    .getStatus(AirConditionerGetStatusRequest.newBuilder().build());
+                    String out = "Air conditioner status: is_on=" + resp.getIsOn()
+                    + ", current_program="
                             + resp.getCurrentProgram();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
-
+                case "BLIND": {
+                    BlindServiceGrpc.BlindServiceBlockingStub stub = BlindServiceGrpc.newBlockingStub(channel);
+                    BlindGetStatusResponse resp = stub.getStatus(BlindGetStatusRequest.newBuilder().build());
+                    String out = "Blind status: is_up=" + resp.getIsUp();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
+                }
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
+                    .newBlockingStub(channel);
+                    DishwasherGetStatusResponse resp = stub
+                    .getStatus(DishwasherGetStatusRequest.newBuilder().build());
+                    String out = "Dishwasher status: program=" + resp.getCurrentProgram()
+                    + ", remainingTime="
+                    + resp.getRemainingTime();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
+                }
+                case "LIGHT": {
+                    LightServiceGrpc.LightServiceBlockingStub stub = LightServiceGrpc
                             .newBlockingStub(channel);
-                    DishwasherGetStatusResponse resp = stub.getStatus(DishwasherGetStatusRequest.newBuilder().build());
-                    String out = "Dishwasher status: program=" + resp.getCurrentProgram() + ", remainingTime="
-                            + resp.getRemainingTime();
+                    GetStatusResponse resp = stub
+                            .getStatus(GetStatusRequest.newBuilder().build());
+                    String out = "Light status: is_on=" + resp.getIsOn();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
@@ -511,14 +550,17 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     MotionSensorGetStatusResponse resp = stub
                             .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-                    String out = "MotionSensor status: motionDetected=" + resp.getMotionDetected() + ", lastMotionTime="
+                    String out = "MotionSensor status: motionDetected=" + resp.getMotionDetected()
+                            + ", lastMotionTime="
                             + resp.getLastMotionTime();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
                 case "OVEN": {
-                    OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
-                    OvenGetStatusResponse resp = stub.getStatus(OvenGetStatusRequest.newBuilder().build());
+                    OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc
+                            .newBlockingStub(channel);
+                    OvenGetStatusResponse resp = stub
+                            .getStatus(OvenGetStatusRequest.newBuilder().build());
                     String out = "Oven status: isOn=" + resp.getIsOn()
                             + ", temp=" + resp.getTemperature()
                             + ", mode=" + resp.getCurrentProgram().name();
@@ -528,7 +570,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "SOLARPANEL": {
                     SolarPanelServiceGrpc.SolarPanelServiceBlockingStub stub = SolarPanelServiceGrpc
                             .newBlockingStub(channel);
-                    SolarPanelGetStatusResponse resp = stub.getStatus(SolarPanelGetStatusRequest.newBuilder().build());
+                    SolarPanelGetStatusResponse resp = stub
+                            .getStatus(SolarPanelGetStatusRequest.newBuilder().build());
                     String out = "SolarPanel status: powerOutput=" + resp.getCurrentPowerOutput()
                             + ", batteryStatus=" + resp.getBatteryStatus();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
@@ -538,7 +581,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "THERMOSTAT": {
                     ThermostatServiceGrpc.ThermostatServiceBlockingStub stub = ThermostatServiceGrpc
                             .newBlockingStub(channel);
-                    ThermostatGetStatusResponse resp = stub.getStatus(ThermostatGetStatusRequest.newBuilder().build());
+                    ThermostatGetStatusResponse resp = stub
+                            .getStatus(ThermostatGetStatusRequest.newBuilder().build());
                     String out = "Thermostat status: temp=" + resp.getCurrentTemperature();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
@@ -549,7 +593,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     WashingMachineGetStatusResponse resp = stub
                             .getStatus(WashingMachineGetStatusRequest.newBuilder().build());
-                    String out = "WashingMachine status: program=" + resp.getCurrentProgram() + ", is_running="
+                    String out = "WashingMachine status: program=" + resp.getCurrentProgram()
+                            + ", is_running="
                             + resp.getIsRunning() + ", is_on=" + resp.getIsOn();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
@@ -586,7 +631,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub stub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
-                    WashingMachineStartResponse resp = stub.start(WashingMachineStartRequest.newBuilder().build());
+                    WashingMachineStartResponse resp = stub
+                            .start(WashingMachineStartRequest.newBuilder().build());
                     String msg = resp.getSuccess() ? "Washing machine started: " + resp.getMessage()
                             : "Failed to start washing machine: " + resp.getMessage();
                     log(deviceId, "Start", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
@@ -596,7 +642,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
-                    DishwasherStartResponse resp = stub.start(DishwasherStartRequest.newBuilder().build());
+                    DishwasherStartResponse resp = stub
+                            .start(DishwasherStartRequest.newBuilder().build());
                     String msg = resp.getSuccess() ? "Dishwasher started: " + resp.getMessage()
                             : "Failed to start dishwasher: " + resp.getMessage();
                     log(deviceId, "Start", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
@@ -634,7 +681,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub stub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
-                    WashingMachineStopResponse resp = stub.stop(WashingMachineStopRequest.newBuilder().build());
+                    WashingMachineStopResponse resp = stub
+                            .stop(WashingMachineStopRequest.newBuilder().build());
                     String msg = resp.getSuccess() ? "Washing machine stopped: " + resp.getMessage()
                             : "Failed to stop washing machine: " + resp.getMessage();
                     log(deviceId, "Stop", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
@@ -644,7 +692,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
-                    DishwasherStopResponse resp = stub.stop(DishwasherStopRequest.newBuilder().build());
+                    DishwasherStopResponse resp = stub
+                            .stop(DishwasherStopRequest.newBuilder().build());
                     String msg = resp.getSuccess() ? "Dishwasher stopped: " + resp.getMessage()
                             : "Failed to stop dishwasher: " + resp.getMessage();
                     log(deviceId, "Stop", resp.getSuccess() ? "SUCCESS" : "FAILURE", "{}",
@@ -682,10 +731,12 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "WASHINGMACHINE": {
                     WashingMachineServiceGrpc.WashingMachineServiceBlockingStub stub = WashingMachineServiceGrpc
                             .newBlockingStub(channel);
-                    WashingMachineSetProgramRequest req = WashingMachineSetProgramRequest.newBuilder()
+                    WashingMachineSetProgramRequest req = WashingMachineSetProgramRequest
+                            .newBuilder()
                             .setProgramValue(program).build();
                     WashingMachineSetProgramResponse resp = stub.setProgram(req);
-                    String msg = resp.getSuccess() ? "Washing machine program set: " + resp.getMessage()
+                    String msg = resp.getSuccess()
+                            ? "Washing machine program set: " + resp.getMessage()
                             : "Failed to set program: " + resp.getMessage();
                     log(deviceId, "SetProgram", resp.getSuccess() ? "SUCCESS" : "FAILURE",
                             String.format("{\"program\":%d}", program),
@@ -695,7 +746,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
-                    SetProgramRequest req = SetProgramRequest.newBuilder().setProgramValue(program).build();
+                    SetProgramRequest req = SetProgramRequest.newBuilder().setProgramValue(program)
+                            .build();
                     SetProgramResponse resp = stub.setProgram(req);
                     String msg = resp.getSuccess() ? "Dishwasher program set: " + resp.getMessage()
                             : "Failed to set program: " + resp.getMessage();
@@ -705,8 +757,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     return msg;
                 }
                 case "OVEN": {
-                    OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
-                    OvenSetProgramRequest req = OvenSetProgramRequest.newBuilder().setProgramValue(program).build();
+                    OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc
+                            .newBlockingStub(channel);
+                    OvenSetProgramRequest req = OvenSetProgramRequest.newBuilder()
+                            .setProgramValue(program).build();
                     OvenSetProgramResponse resp = stub.setProgram(req);
                     String msg = resp.getSuccess() ? "Oven program set: " + resp.getMessage()
                             : "Failed to set oven program: " + resp.getMessage();
@@ -715,24 +769,27 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             resp.getSuccess() ? null : resp.getMessage());
                     return msg;
                 }
-                 case "AIRCONDITIONER": {
+                case "AIRCONDITIONER": {
                     AirConditionerServiceGrpc.AirConditionerServiceBlockingStub stub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
-                    SetAirConditionerProgramRequest req = SetAirConditionerProgramRequest.newBuilder()
+                    SetAirConditionerProgramRequest req = SetAirConditionerProgramRequest
+                            .newBuilder()
                             .setProgramValue(program).build();
                     SetAirConditionerProgramResponse resp = stub.setProgram(req);
                     return resp.getSuccess() ? "Air conditioner program set: " + resp.getMessage()
                             : "Failed to set air conditioner program: " + resp.getMessage();
                 }
                 default:
-                    log(deviceId, "SetProgram", "FAILURE", String.format("{\"program\":%d}", program),
+                    log(deviceId, "SetProgram", "FAILURE",
+                            String.format("{\"program\":%d}", program),
                             "Unsupported type: " + deviceType);
                     return "Set program not supported for device type: " + deviceType;
             }
         } catch (StatusRuntimeException e) {
             log(deviceId, "SetProgram", "FAILURE", String.format("{\"program\":%d}", program),
                     e.getStatus().getDescription());
-            return "gRPC error on setProgram for device " + deviceId + ": " + e.getStatus().getDescription();
+            return "gRPC error on setProgram for device " + deviceId + ": "
+                    + e.getStatus().getDescription();
         } catch (Exception e) {
             log(deviceId, "SetProgram", "FAILURE", String.format("{\"program\":%d}", program),
                     e.getMessage());
@@ -759,7 +816,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         try {
             MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
                     .newBlockingStub(channel);
-            SetSensitivityRequest req = SetSensitivityRequest.newBuilder().setSensitivity(sensitivity).build();
+            SetSensitivityRequest req = SetSensitivityRequest.newBuilder().setSensitivity(sensitivity)
+                    .build();
             SetSensitivityResponse resp = stub.setSensitivity(req);
             String msg = resp.getSuccess() ? "Motion sensor sensitivity set: " + resp.getMessage()
                     : "Failed to set sensitivity: " + resp.getMessage();
@@ -771,7 +829,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
             log(deviceId, "SetSensitivity", "FAILURE",
                     String.format("{\"sensitivity\":%d}", sensitivity),
                     e.getStatus().getDescription());
-            return "gRPC error on setSensitivity for device " + deviceId + ": " + e.getStatus().getDescription();
+            return "gRPC error on setSensitivity for device " + deviceId + ": "
+                    + e.getStatus().getDescription();
         } catch (Exception e) {
             log(deviceId, "SetSensitivity", "FAILURE",
                     String.format("{\"sensitivity\":%d}", sensitivity),
@@ -798,7 +857,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         log(deviceId, "SetTemperature", "PENDING", String.format("{\"temperature\":%d}", temperature), null);
         try {
             OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
-            SetTemperatureRequest req = SetTemperatureRequest.newBuilder().setTemperature(temperature).build();
+            SetTemperatureRequest req = SetTemperatureRequest.newBuilder().setTemperature(temperature)
+                    .build();
             SetTemperatureResponse resp = stub.setTemperature(req);
             String msg = resp.getSuccess() ? "Oven temperature set: " + resp.getMessage()
                     : "Failed to set oven temperature: " + resp.getMessage();
@@ -810,7 +870,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
             log(deviceId, "SetTemperature", "FAILURE",
                     String.format("{\"temperature\":%d}", temperature),
                     e.getStatus().getDescription());
-            return "gRPC error on setTemperature for device " + deviceId + ": " + e.getStatus().getDescription();
+            return "gRPC error on setTemperature for device " + deviceId + ": "
+                    + e.getStatus().getDescription();
         } catch (Exception e) {
             log(deviceId, "SetTemperature", "FAILURE",
                     String.format("{\"temperature\":%d}", temperature),
@@ -819,294 +880,310 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         }
     }
 
-        // campi per l’allarme
-        private boolean alarmActive = false;
-        private boolean alarmTriggered = false;
+    // campi per l’allarme
+    private boolean alarmActive = false;
+    private boolean alarmTriggered = false;
 
-        public synchronized RegisterDeviceResponse registerDeviceHttp(String deviceId, String deviceType,
-                                                              String address, int port) {
+    public synchronized RegisterDeviceResponse registerDeviceHttp(String deviceId, String deviceType,
+            String address, int port) {
         // normalizza tipo (alcune API usano underscore, altre no)
         String normalizedType = deviceType.replace("_", "");
 
-        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, address, port);
+        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, address,
+                port);
         log(deviceId, "Register", "PENDING", payload, null);
 
         // chiudi canale precedente se stai ri-registrando lo stesso id
         ManagedChannel old = channels.remove(deviceId);
         if (old != null && !old.isShutdown()) {
-                try {
+            try {
                 old.shutdownNow();
-                } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
 
         try {
-                // crea device
-                Device device = Device.newBuilder()
-                        .setDeviceId(deviceId)
-                        .setDeviceType(normalizedType)
-                        .setAddress(address)
-                        .setPort(port)
-                        .setOnline(true)
-                        .build();
-                devices.put(deviceId, device);
+            // crea device
+            Device device = Device.newBuilder()
+                    .setDeviceId(deviceId)
+                    .setDeviceType(normalizedType)
+                    .setAddress(address)
+                    .setPort(port)
+                    .setOnline(true)
+                    .build();
+            devices.put(deviceId, device);
 
-                // crea canale gRPC
-                ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
-                        .usePlaintext()
-                        .build();
-                channels.put(deviceId, ch);
+            // crea canale gRPC
+            ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
+                    .usePlaintext()
+                    .build();
+            channels.put(deviceId, ch);
 
-                log(deviceId, "Register", "SUCCESS", payload, null);
+            log(deviceId, "Register", "SUCCESS", payload, null);
 
-                // ritorna RegisterDeviceResponse come nella prima versione
-                return RegisterDeviceResponse.newBuilder()
-                        .setSuccess(true)
-                        .setMessage("Device registered: " + deviceId)
-                        .build();
+            // ritorna RegisterDeviceResponse come nella prima versione
+            return RegisterDeviceResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Device registered: " + deviceId)
+                    .build();
 
         } catch (Exception e) {
-                log(deviceId, "Register", "FAILURE", payload, e.getMessage());
-                throw e;
+            log(deviceId, "Register", "FAILURE", payload, e.getMessage());
+            throw e;
         }
-        }
+    }
 
-        public synchronized String activateAlarm(boolean enable) {
+    public synchronized String activateAlarm(boolean enable) {
         this.alarmActive = enable;
-        this.alarmTriggered = false; 
+        this.alarmTriggered = false;
 
         return "Alarm is now " + (alarmActive ? "active" : "inactive");
+    }
+
+    // Scheduler che controlla i sensori ogni 5 secondi
+    @Scheduled(fixedRate = 5000)
+    public synchronized void scheduledSensorCheck() {
+        if (alarmActive) {
+            System.out.println(
+                    "⏱ Scheduled check: checking all sensors... (alarmActive=" + alarmActive + ")");
+            checkAllSensors();
+            System.out.println("⏱ Scheduled check completed. alarmTriggered=" + alarmTriggered);
         }
+    }
 
-        // Scheduler che controlla i sensori ogni 5 secondi
-        @Scheduled(fixedRate = 5000)
-        public synchronized void scheduledSensorCheck() {
-                if (alarmActive) {
-                System.out.println("⏱ Scheduled check: checking all sensors... (alarmActive=" + alarmActive + ")");
-                checkAllSensors();
-                System.out.println("⏱ Scheduled check completed. alarmTriggered=" + alarmTriggered);
-                }
+    public synchronized void checkAllSensors() {
+        if (devices == null || devices.isEmpty()) {
+            return;
         }
+        for (Device device : devices.values()) {
+            if ("MOTIONSENSOR".equalsIgnoreCase(device.getDeviceType())) {
+                ManagedChannel channel = channels.get(device.getDeviceId());
+                if (channel == null || channel.isShutdown())
+                    continue;
 
-        public synchronized void checkAllSensors() {
-                if (devices == null || devices.isEmpty()) {
-                return;
-                }
-                for (Device device : devices.values()) {
-                        if ("MOTIONSENSOR".equalsIgnoreCase(device.getDeviceType())) {
-                        ManagedChannel channel = channels.get(device.getDeviceId());
-                        if (channel == null || channel.isShutdown())
-                                continue;
-
-                        try {
-                                MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub =
-                                        MotionSensorServiceGrpc.newBlockingStub(channel);
-
-                                MotionSensorGetStatusResponse resp = stub.getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-
-                                if (resp.getMotionDetected() && alarmActive) {
-                                alarmTriggered = true;
-                                }
-
-                        } catch (StatusRuntimeException e) {
-                                System.err.println("❌ gRPC error on " + device.getDeviceId() + ": " + e.getStatus());                        }
-                        }
-                }
-        }
-        //Stato allarme
-        public synchronized String getAlarmStatus() {
-        return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
-        }
-
-        private Set<String> ensureSet(Map<String, Set<String>> map, String key) {
-                return map.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet());
-        }
-
-        private Map<String, String> executeForDevices(Collection<String> ids, Function<String, String> actionPerDevice) {
-        Map<String, String> out = new LinkedHashMap<>();
-                if (ids == null || ids.isEmpty()) return out;
-                for (String id : ids) {
-                        try {
-                        out.put(id, actionPerDevice.apply(id));
-                        } catch (Exception e) {
-                        out.put(id, "ERROR: " + e.getMessage());
-                        }
-                }
-        return out;
-        }
-
-        // ===== Rooms =====
-        public String createRoom(String roomId) {
-        try {
-                rgRepo.createRoom(roomId); // <-- prima era roomGroupRepo
-                rooms.putIfAbsent(roomId, ConcurrentHashMap.newKeySet());
-                return "Room created: " + roomId;
-        } catch (Exception e) {
-                return "ERROR creating room: " + e.getMessage();
-        }
-        }
-
-        public String addDeviceToRoom(String roomId, String deviceId) {
-                if (!devices.containsKey(deviceId)) return "Device not found: " + deviceId;
                 try {
-                        rgRepo.addDeviceToRoom(roomId, deviceId); // <-- prima era roomGroupRepo
-                        rooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
-                        return "Added " + deviceId + " to room " + roomId;
-                } catch (Exception e) {
-                        return "ERROR adding device to room: " + e.getMessage();
+                    MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
+                            .newBlockingStub(channel);
+
+                    MotionSensorGetStatusResponse resp = stub
+                            .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
+
+                    if (resp.getMotionDetected() && alarmActive) {
+                        alarmTriggered = true;
+                    }
+
+                } catch (StatusRuntimeException e) {
+                    System.err.println("❌ gRPC error on " + device.getDeviceId() + ": "
+                            + e.getStatus());
                 }
+            }
         }
+    }
 
-        public String removeDeviceFromRoom(String roomId, String deviceId) {
+    // Stato allarme
+    public synchronized String getAlarmStatus() {
+        return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
+    }
+
+    private Set<String> ensureSet(Map<String, Set<String>> map, String key) {
+        return map.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet());
+    }
+
+    private Map<String, String> executeForDevices(Collection<String> ids,
+            Function<String, String> actionPerDevice) {
+        Map<String, String> out = new LinkedHashMap<>();
+        if (ids == null || ids.isEmpty())
+            return out;
+        for (String id : ids) {
+            try {
+                out.put(id, actionPerDevice.apply(id));
+            } catch (Exception e) {
+                out.put(id, "ERROR: " + e.getMessage());
+            }
+        }
+        return out;
+    }
+
+    // ===== Rooms =====
+    public String createRoom(String roomId) {
         try {
-                rgRepo.removeDeviceFromRoom(roomId, deviceId); // <-- prima era roomGroupRepo
-                Set<String> set = rooms.get(roomId);
-                if (set != null) set.remove(deviceId);
-                return "Removed " + deviceId + " from room " + roomId;
+            rgRepo.createRoom(roomId); // <-- prima era roomGroupRepo
+            rooms.putIfAbsent(roomId, ConcurrentHashMap.newKeySet());
+            return "Room created: " + roomId;
         } catch (Exception e) {
-                return "ERROR removing device from room: " + e.getMessage();
+            return "ERROR creating room: " + e.getMessage();
         }
-        }
+    }
 
-        public Set<String> listRoomDevices(String roomId) {
+    public String addDeviceToRoom(String roomId, String deviceId) {
+        if (!devices.containsKey(deviceId))
+            return "Device not found: " + deviceId;
+        try {
+            rgRepo.addDeviceToRoom(roomId, deviceId); // <-- prima era roomGroupRepo
+            rooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
+            return "Added " + deviceId + " to room " + roomId;
+        } catch (Exception e) {
+            return "ERROR adding device to room: " + e.getMessage();
+        }
+    }
+
+    public String removeDeviceFromRoom(String roomId, String deviceId) {
+        try {
+            rgRepo.removeDeviceFromRoom(roomId, deviceId); // <-- prima era roomGroupRepo
+            Set<String> set = rooms.get(roomId);
+            if (set != null)
+                set.remove(deviceId);
+            return "Removed " + deviceId + " from room " + roomId;
+        } catch (Exception e) {
+            return "ERROR removing device from room: " + e.getMessage();
+        }
+    }
+
+    public Set<String> listRoomDevices(String roomId) {
         return rooms.getOrDefault(roomId, Set.of());
-        }
+    }
 
-        // ===== Groups =====
-        public String createGroup(String groupId) {
+    // ===== Groups =====
+    public String createGroup(String groupId) {
         try {
-                rgRepo.createGroup(groupId); // <-- prima era roomGroupRepo
-                groups.putIfAbsent(groupId, ConcurrentHashMap.newKeySet());
-                return "Group created: " + groupId;
+            rgRepo.createGroup(groupId); // <-- prima era roomGroupRepo
+            groups.putIfAbsent(groupId, ConcurrentHashMap.newKeySet());
+            return "Group created: " + groupId;
         } catch (Exception e) {
-                return "ERROR creating group: " + e.getMessage();
+            return "ERROR creating group: " + e.getMessage();
         }
-        }
+    }
 
-        public String addDeviceToGroup(String groupId, String deviceId) {
-        if (!devices.containsKey(deviceId)) return "Device not found: " + deviceId;
+    public String addDeviceToGroup(String groupId, String deviceId) {
+        if (!devices.containsKey(deviceId))
+            return "Device not found: " + deviceId;
         try {
-                rgRepo.addDeviceToGroup(groupId, deviceId); // <-- prima era roomGroupRepo
-                groups.computeIfAbsent(groupId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
-                return "Added " + deviceId + " to group " + groupId;
+            rgRepo.addDeviceToGroup(groupId, deviceId); // <-- prima era roomGroupRepo
+            groups.computeIfAbsent(groupId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
+            return "Added " + deviceId + " to group " + groupId;
         } catch (Exception e) {
-                return "ERROR adding device to group: " + e.getMessage();
+            return "ERROR adding device to group: " + e.getMessage();
         }
-        }
+    }
 
-        public String removeDeviceFromGroup(String groupId, String deviceId) {
+    public String removeDeviceFromGroup(String groupId, String deviceId) {
         try {
-                rgRepo.removeDeviceFromGroup(groupId, deviceId); // <-- prima era roomGroupRepo
-                Set<String> set = groups.get(groupId);
-                if (set != null) set.remove(deviceId);
-                return "Removed " + deviceId + " from group " + groupId;
+            rgRepo.removeDeviceFromGroup(groupId, deviceId); // <-- prima era roomGroupRepo
+            Set<String> set = groups.get(groupId);
+            if (set != null)
+                set.remove(deviceId);
+            return "Removed " + deviceId + " from group " + groupId;
         } catch (Exception e) {
-                return "ERROR removing device from group: " + e.getMessage();
+            return "ERROR removing device from group: " + e.getMessage();
         }
-        }
+    }
 
-        public Set<String> listGroupDevices(String groupId) {
+    public Set<String> listGroupDevices(String groupId) {
         return groups.getOrDefault(groupId, Set.of());
-        }
+    }
 
-        // broadcast comandi
-        public Map<String, String> turnOnRoom(String roomId) {
+    // broadcast comandi
+    public Map<String, String> turnOnRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::turnOnDevice);
-        }
+    }
 
-        public Map<String, String> turnOffRoom(String roomId) {
+    public Map<String, String> turnOffRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::turnOffDevice);
-        }
+    }
 
-        public Map<String, String> startRoom(String roomId) {
+    public Map<String, String> startRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::startDevice);
-        }
+    }
 
-        public Map<String, String> stopRoom(String roomId) {
+    public Map<String, String> stopRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::stopDevice);
-        }
+    }
 
-        public Map<String, String> setProgramRoom(String roomId, int program) {
+    public Map<String, String> setProgramRoom(String roomId, int program) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, id -> setProgramDevice(id, program));
-        }
+    }
 
-        public Map<String, String> setTemperatureRoom(String roomId, int temperature) {
+    public Map<String, String> setTemperatureRoom(String roomId, int temperature) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, id -> setTemperatureOven(id, temperature));
-        }
+    }
 
-        public Map<String, String> turnOnGroup(String groupId) {
+    public Map<String, String> turnOnGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::turnOnDevice);
-        }
+    }
 
-        public Map<String, String> turnOffGroup(String groupId) {
+    public Map<String, String> turnOffGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::turnOffDevice);
-        }
+    }
 
-        public Map<String, String> startGroup(String groupId) {
+    public Map<String, String> startGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::startDevice);
-        }
+    }
 
-        public Map<String, String> stopGroup(String groupId) {
+    public Map<String, String> stopGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::stopDevice);
-        }
+    }
 
-        public Map<String, String> setProgramGroup(String groupId, int program) {
+    public Map<String, String> setProgramGroup(String groupId, int program) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, id -> setProgramDevice(id, program));
-        }
+    }
 
-        public Map<String, String> setTemperatureGroup(String groupId, int temperature) {
+    public Map<String, String> setTemperatureGroup(String groupId, int temperature) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, id -> setTemperatureOven(id, temperature));
-        }
+    }
 
-        @PostConstruct
-        public void initRoomsAndGroups() {
+    @PostConstruct
+    public void initRoomsAndGroups() {
         try {
-                rooms.clear();
-                groups.clear();
+            rooms.clear();
+            groups.clear();
 
-                // Rooms
-                for (String roomId : rgRepo.listRooms()) {
+            // Rooms
+            for (String roomId : rgRepo.listRooms()) {
                 Set<String> set = ConcurrentHashMap.newKeySet();
                 set.addAll(rgRepo.listDevicesInRoom(roomId));
                 rooms.put(roomId, set);
-                }
+            }
 
-                // Groups
-                for (String groupId : rgRepo.listGroups()) {
+            // Groups
+            for (String groupId : rgRepo.listGroups()) {
                 Set<String> set = ConcurrentHashMap.newKeySet();
                 set.addAll(rgRepo.listDevicesInGroup(groupId));
                 groups.put(groupId, set);
-                }
+            }
 
-                System.out.println("Rooms/Groups loaded from DB: rooms=" + rooms.keySet() + " groups=" + groups.keySet());
+            System.out.println("Rooms/Groups loaded from DB: rooms=" + rooms.keySet() + " groups="
+                    + groups.keySet());
         } catch (Exception e) {
-                System.err.println("Failed loading rooms/groups: " + e.getMessage());
+            System.err.println("Failed loading rooms/groups: " + e.getMessage());
         }
-        }
+    }
 
-        // Passthrough per le API di listing
-        public List<String> listRooms() throws Exception {
+    // Passthrough per le API di listing
+    public List<String> listRooms() throws Exception {
         return rgRepo.listRooms();
-        }
-        public List<String> listGroups() throws Exception {
-        return rgRepo.listGroups();
-        }
-        public Map<String, Set<String>> listAllRooms() {
-        return Collections.unmodifiableMap(rooms);
-        }
+    }
 
-        public Map<String, Set<String>> listAllGroups() {
+    public List<String> listGroups() throws Exception {
+        return rgRepo.listGroups();
+    }
+
+    public Map<String, Set<String>> listAllRooms() {
+        return Collections.unmodifiableMap(rooms);
+    }
+
+    public Map<String, Set<String>> listAllGroups() {
         return Collections.unmodifiableMap(groups);
-        }
+    }
 }
