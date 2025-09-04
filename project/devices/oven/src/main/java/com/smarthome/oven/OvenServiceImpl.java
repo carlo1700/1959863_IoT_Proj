@@ -62,29 +62,22 @@ public class OvenServiceImpl extends OvenServiceGrpc.OvenServiceImplBase {
 
     @Override
     public void setProgram(OvenSetProgramRequest request, StreamObserver<OvenSetProgramResponse> responseObserver) {
-<<<<<<< HEAD
+
         // Aggiorna il programma interno
         currentProgram = request.getProgram();
 
         // Crea la risposta
-=======
         currentProgram = request.getProgram();
 
->>>>>>> 7fa978c2aa0674f6098c37cde6034a25a6de46d4
+
         OvenSetProgramResponse response = OvenSetProgramResponse.newBuilder()
                 .setSuccess(true)
                 .setMessage("Oven program set to " + currentProgram.name())
                 .build();
 
-<<<<<<< HEAD
+
         // Invia la risposta
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
-
-=======
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
->>>>>>> 7fa978c2aa0674f6098c37cde6034a25a6de46d4
 }
