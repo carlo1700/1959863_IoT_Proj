@@ -13,10 +13,9 @@ public final class PgDataSource {
       String pass = System.getenv().getOrDefault("DB_PASS", "smarthome");
 
       PGSimpleDataSource p = new PGSimpleDataSource();
-      p.setURL(url);       // accetta direttamente la JDBC URL
+      p.setURL(url);
       p.setUser(user);
       p.setPassword(pass);
-
       ds = p;
     }
     return ds;

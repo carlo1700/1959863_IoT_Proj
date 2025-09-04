@@ -27,11 +27,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     private void log(String deviceId, String action, String status, String payloadJson, String errorMsg) {
         try {
-            repo.logEvent(deviceId, "DeviceManager", action, status, currentUser(), payloadJson, errorMsg);
-        } catch (Exception ex) {
-            // Il logging non deve mai bloccare il flusso applicativo
-            System.err.println("[LOG][DB] failed: " + ex.getMessage());
-            ex.printStackTrace();
+                repo.insertEvent(deviceId, "DeviceManager", action, status, "system", payloadJson, errorMsg);
+        } catch (Exception e) {
+                // non bloccare il flusso operativo per un problema di logging
+                System.err.println("DB log error [" + action + "@" + deviceId + "]: " + e.getMessage());
         }
     }
 
@@ -42,37 +41,49 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     // =====================
 
     @Override
-    public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
-        Device device = Device.newBuilder()
-                .setDeviceId(request.getDeviceId())
-                .setDeviceType(request.getDeviceType())
-                .setAddress(request.getAddress())
-                .setPort(request.getPort())
-                .setOnline(true)
-                .build();
+        public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
+        String deviceId = request.getDeviceId();
+        String deviceType = request.getDeviceType();
+        String normalizedType = deviceType.replace("_", "");
+        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, request.getAddress(), request.getPort());
+        log(deviceId, "Register", "PENDING", payload, null);
 
-        devices.put(request.getDeviceId(), device);
+        try {
+                Device device = Device.newBuilder()
+                        .setDeviceId(deviceId)
+                        .setDeviceType(normalizedType)
+                        .setAddress(request.getAddress())
+                        .setPort(request.getPort())
+                        .setOnline(true)
+                        .build();
+                devices.put(deviceId, device);
 
-        // Create gRPC channel for the device
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(request.getAddress(), request.getPort())
-                .usePlaintext()
-                .build();
-        channels.put(request.getDeviceId(), channel);
+                ManagedChannel old = channels.remove(deviceId);
+                if (old != null && !old.isShutdown()) {
+                try { old.shutdownNow(); } catch (Exception ignore) {}
+                }
+                ManagedChannel channel = ManagedChannelBuilder.forAddress(request.getAddress(), request.getPort())
+                        .usePlaintext()
+                        .build();
+                channels.put(deviceId, channel);
 
-        RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
-                .setSuccess(true)
-                .setMessage("Device registered: " + request.getDeviceId())
-                .build();
+                RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
+                        .setSuccess(true)
+                        .setMessage("Device registered: " + deviceId)
+                        .build();
+                log(deviceId, "Register", "SUCCESS", payload, null);
 
-        // log
-        log(request.getDeviceId(), "Register", "SUCCESS",
-                String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}",
-                        request.getDeviceType(), request.getAddress(), request.getPort()),
-                null);
-
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+        } catch (Exception e) {
+                log(deviceId, "Register", "FAILURE", payload, e.getMessage());
+                responseObserver.onNext(RegisterDeviceResponse.newBuilder()
+                        .setSuccess(false)
+                        .setMessage("Register failed: " + e.getMessage())
+                        .build());
+                responseObserver.onCompleted();
+        }
+        }
 
     @Override
     public void unregisterDevice(UnregisterDeviceRequest request,
@@ -728,31 +739,38 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     }
 
     public String registerDeviceHttp(String deviceId, String deviceType, String address, int port) {
-    // se esiste già, chiudi il vecchio canale per evitare orphan/leak
+        // normalizza il tipo: la tua lista a volte usa AIR_CONDITIONER ma gli switch usano AIRCONDITIONER
+        String normalizedType = deviceType.replace("_", "");
+
+        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, address, port);
+        log(deviceId, "Register", "PENDING", payload, null);
+
+        // chiudi canale precedente se stai ri-registrando lo stesso id
         ManagedChannel old = channels.remove(deviceId);
         if (old != null && !old.isShutdown()) {
                 try { old.shutdownNow(); } catch (Exception ignore) {}
         }
 
-        Device device = Device.newBuilder()
-                .setDeviceId(deviceId)
-                .setDeviceType(deviceType)
-                .setAddress(address)
-                .setPort(port)
-                .setOnline(true)
-                .build();
+        try {
+                Device device = Device.newBuilder()
+                        .setDeviceId(deviceId)
+                        .setDeviceType(normalizedType)   // <-- importante per gli switch
+                        .setAddress(address)
+                        .setPort(port)
+                        .setOnline(true)
+                        .build();
+                devices.put(deviceId, device);
 
-        devices.put(deviceId, device);
+                ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
+                        .usePlaintext()
+                        .build();
+                channels.put(deviceId, ch);
 
-        ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
-                .usePlaintext()
-                .build();
-        channels.put(deviceId, ch);
-
-        // (opzionale) log nel DB
-        // log(deviceId, "Register", "SUCCESS",
-        //     String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, address, port), null);
-
-        return "Device registered: " + deviceId;
+                log(deviceId, "Register", "SUCCESS", payload, null);
+                return "Device registered: " + deviceId;
+        } catch (Exception e) {
+                log(deviceId, "Register", "FAILURE", payload, e.getMessage());
+                throw e;
+        }
         }
 }
