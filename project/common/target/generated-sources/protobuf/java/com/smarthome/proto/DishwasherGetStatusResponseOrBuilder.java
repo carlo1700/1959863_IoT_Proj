@@ -8,18 +8,24 @@ public interface DishwasherGetStatusResponseOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>bool is_running = 1;</code>
+   * <code>bool is_on = 1;</code>
+   * @return The isOn.
+   */
+  boolean getIsOn();
+
+  /**
+   * <code>bool is_running = 2;</code>
    * @return The isRunning.
    */
   boolean getIsRunning();
 
   /**
-   * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+   * <code>.smarthome.DishwasherProgram current_program = 3;</code>
    * @return The enum numeric value on the wire for currentProgram.
    */
   int getCurrentProgramValue();
   /**
-   * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+   * <code>.smarthome.DishwasherProgram current_program = 3;</code>
    * @return The currentProgram.
    */
   com.smarthome.proto.DishwasherProgram getCurrentProgram();
@@ -29,14 +35,8 @@ public interface DishwasherGetStatusResponseOrBuilder extends
    * in minutes
    * </pre>
    *
-   * <code>int32 remaining_time = 3;</code>
+   * <code>int32 remaining_time = 4;</code>
    * @return The remainingTime.
    */
   int getRemainingTime();
-
-  /**
-   * <code>bool door_open = 4;</code>
-   * @return The doorOpen.
-   */
-  boolean getDoorOpen();
 }

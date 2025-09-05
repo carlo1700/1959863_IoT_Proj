@@ -96,26 +96,26 @@ public final class DishwasherProto {
       "st\022-\n\007program\030\001 \001(\0162\034.smarthome.Dishwash" +
       "erProgram\"6\n\022SetProgramResponse\022\017\n\007succe" +
       "ss\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\"\034\n\032DishwasherG" +
-      "etStatusRequest\"\223\001\n\033DishwasherGetStatusR" +
-      "esponse\022\022\n\nis_running\030\001 \001(\010\0225\n\017current_p" +
-      "rogram\030\002 \001(\0162\034.smarthome.DishwasherProgr" +
-      "am\022\026\n\016remaining_time\030\003 \001(\005\022\021\n\tdoor_open\030" +
-      "\004 \001(\010*B\n\021DishwasherProgram\022\n\n\006NORMAL\020\000\022\007" +
-      "\n\003ECO\020\001\022\r\n\tINTENSIVE\020\002\022\t\n\005QUICK\020\0032\200\004\n\021Di" +
-      "shwasherService\022Q\n\006TurnOn\022\".smarthome.Di" +
-      "shwasherTurnOnRequest\032#.smarthome.Dishwa" +
-      "sherTurnOnResponse\022T\n\007TurnOff\022#.smarthom" +
-      "e.DishwasherTurnOffRequest\032$.smarthome.D" +
-      "ishwasherTurnOffResponse\022N\n\005Start\022!.smar" +
-      "thome.DishwasherStartRequest\032\".smarthome" +
-      ".DishwasherStartResponse\022K\n\004Stop\022 .smart" +
-      "home.DishwasherStopRequest\032!.smarthome.D" +
-      "ishwasherStopResponse\022I\n\nSetProgram\022\034.sm" +
-      "arthome.SetProgramRequest\032\035.smarthome.Se" +
-      "tProgramResponse\022Z\n\tGetStatus\022%.smarthom" +
-      "e.DishwasherGetStatusRequest\032&.smarthome" +
-      ".DishwasherGetStatusResponseB(\n\023com.smar" +
-      "thome.protoB\017DishwasherProtoP\001b\006proto3"
+      "etStatusRequest\"\217\001\n\033DishwasherGetStatusR" +
+      "esponse\022\r\n\005is_on\030\001 \001(\010\022\022\n\nis_running\030\002 \001" +
+      "(\010\0225\n\017current_program\030\003 \001(\0162\034.smarthome." +
+      "DishwasherProgram\022\026\n\016remaining_time\030\004 \001(" +
+      "\005*B\n\021DishwasherProgram\022\n\n\006NORMAL\020\000\022\007\n\003EC" +
+      "O\020\001\022\r\n\tINTENSIVE\020\002\022\t\n\005QUICK\020\0032\200\004\n\021Dishwa" +
+      "sherService\022Q\n\006TurnOn\022\".smarthome.Dishwa" +
+      "sherTurnOnRequest\032#.smarthome.Dishwasher" +
+      "TurnOnResponse\022T\n\007TurnOff\022#.smarthome.Di" +
+      "shwasherTurnOffRequest\032$.smarthome.Dishw" +
+      "asherTurnOffResponse\022N\n\005Start\022!.smarthom" +
+      "e.DishwasherStartRequest\032\".smarthome.Dis" +
+      "hwasherStartResponse\022K\n\004Stop\022 .smarthome" +
+      ".DishwasherStopRequest\032!.smarthome.Dishw" +
+      "asherStopResponse\022I\n\nSetProgram\022\034.smarth" +
+      "ome.SetProgramRequest\032\035.smarthome.SetPro" +
+      "gramResponse\022Z\n\tGetStatus\022%.smarthome.Di" +
+      "shwasherGetStatusRequest\032&.smarthome.Dis" +
+      "hwasherGetStatusResponseB(\n\023com.smarthom" +
+      "e.protoB\017DishwasherProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -192,7 +192,7 @@ public final class DishwasherProto {
     internal_static_smarthome_DishwasherGetStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_DishwasherGetStatusResponse_descriptor,
-        new java.lang.String[] { "IsRunning", "CurrentProgram", "RemainingTime", "DoorOpen", });
+        new java.lang.String[] { "IsOn", "IsRunning", "CurrentProgram", "RemainingTime", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

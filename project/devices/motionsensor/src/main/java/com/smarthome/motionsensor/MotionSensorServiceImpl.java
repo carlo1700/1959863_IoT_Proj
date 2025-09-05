@@ -4,9 +4,11 @@ import com.smarthome.proto.*;
 import io.grpc.stub.StreamObserver;
 
 public class MotionSensorServiceImpl extends MotionSensorServiceGrpc.MotionSensorServiceImplBase {
-    
+    private boolean isOn = false;
+
     @Override
     public void turnOn(MotionSensorTurnOnRequest request, StreamObserver<MotionSensorTurnOnResponse> responseObserver) {
+        isOn = true;
         MotionSensorTurnOnResponse response = MotionSensorTurnOnResponse.newBuilder()
                 .setSuccess(true)
                 .setMessage("Motion sensor turned on")
@@ -18,6 +20,7 @@ public class MotionSensorServiceImpl extends MotionSensorServiceGrpc.MotionSenso
     
     @Override
     public void turnOff(MotionSensorTurnOffRequest request, StreamObserver<MotionSensorTurnOffResponse> responseObserver) {
+        isOn = false;
         MotionSensorTurnOffResponse response = MotionSensorTurnOffResponse.newBuilder()
                 .setSuccess(true)
                 .setMessage("Motion sensor turned off")
@@ -31,12 +34,10 @@ public class MotionSensorServiceImpl extends MotionSensorServiceGrpc.MotionSenso
     public void getStatus(MotionSensorGetStatusRequest request, StreamObserver<MotionSensorGetStatusResponse> responseObserver) {
         boolean motionDetected = Math.random() < 0.5;
         MotionSensorGetStatusResponse response = MotionSensorGetStatusResponse.newBuilder()
-                .setMotionDetected(motionDetected)
-                .setLastMotionTime(System.currentTimeMillis())
-                .setSensitivity(5)
+                //.setIsOn(isOn)
                 .build();
         
-        System.out.println("📡 MotionSensor status: motionDetected=" + motionDetected);
+        System.out.println("📡 MotionSensor status: isOn=" + isOn + ", motionDetected=" + motionDetected);
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

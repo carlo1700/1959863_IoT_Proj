@@ -39,10 +39,21 @@ private static final long serialVersionUID = 0L;
             com.smarthome.proto.DishwasherGetStatusResponse.class, com.smarthome.proto.DishwasherGetStatusResponse.Builder.class);
   }
 
-  public static final int IS_RUNNING_FIELD_NUMBER = 1;
+  public static final int IS_ON_FIELD_NUMBER = 1;
+  private boolean isOn_ = false;
+  /**
+   * <code>bool is_on = 1;</code>
+   * @return The isOn.
+   */
+  @java.lang.Override
+  public boolean getIsOn() {
+    return isOn_;
+  }
+
+  public static final int IS_RUNNING_FIELD_NUMBER = 2;
   private boolean isRunning_ = false;
   /**
-   * <code>bool is_running = 1;</code>
+   * <code>bool is_running = 2;</code>
    * @return The isRunning.
    */
   @java.lang.Override
@@ -50,17 +61,17 @@ private static final long serialVersionUID = 0L;
     return isRunning_;
   }
 
-  public static final int CURRENT_PROGRAM_FIELD_NUMBER = 2;
+  public static final int CURRENT_PROGRAM_FIELD_NUMBER = 3;
   private int currentProgram_ = 0;
   /**
-   * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+   * <code>.smarthome.DishwasherProgram current_program = 3;</code>
    * @return The enum numeric value on the wire for currentProgram.
    */
   @java.lang.Override public int getCurrentProgramValue() {
     return currentProgram_;
   }
   /**
-   * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+   * <code>.smarthome.DishwasherProgram current_program = 3;</code>
    * @return The currentProgram.
    */
   @java.lang.Override public com.smarthome.proto.DishwasherProgram getCurrentProgram() {
@@ -68,30 +79,19 @@ private static final long serialVersionUID = 0L;
     return result == null ? com.smarthome.proto.DishwasherProgram.UNRECOGNIZED : result;
   }
 
-  public static final int REMAINING_TIME_FIELD_NUMBER = 3;
+  public static final int REMAINING_TIME_FIELD_NUMBER = 4;
   private int remainingTime_ = 0;
   /**
    * <pre>
    * in minutes
    * </pre>
    *
-   * <code>int32 remaining_time = 3;</code>
+   * <code>int32 remaining_time = 4;</code>
    * @return The remainingTime.
    */
   @java.lang.Override
   public int getRemainingTime() {
     return remainingTime_;
-  }
-
-  public static final int DOOR_OPEN_FIELD_NUMBER = 4;
-  private boolean doorOpen_ = false;
-  /**
-   * <code>bool door_open = 4;</code>
-   * @return The doorOpen.
-   */
-  @java.lang.Override
-  public boolean getDoorOpen() {
-    return doorOpen_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -108,17 +108,17 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
+    if (isOn_ != false) {
+      output.writeBool(1, isOn_);
+    }
     if (isRunning_ != false) {
-      output.writeBool(1, isRunning_);
+      output.writeBool(2, isRunning_);
     }
     if (currentProgram_ != com.smarthome.proto.DishwasherProgram.NORMAL.getNumber()) {
-      output.writeEnum(2, currentProgram_);
+      output.writeEnum(3, currentProgram_);
     }
     if (remainingTime_ != 0) {
-      output.writeInt32(3, remainingTime_);
-    }
-    if (doorOpen_ != false) {
-      output.writeBool(4, doorOpen_);
+      output.writeInt32(4, remainingTime_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -129,21 +129,21 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
+    if (isOn_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(1, isOn_);
+    }
     if (isRunning_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(1, isRunning_);
+        .computeBoolSize(2, isRunning_);
     }
     if (currentProgram_ != com.smarthome.proto.DishwasherProgram.NORMAL.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
-        .computeEnumSize(2, currentProgram_);
+        .computeEnumSize(3, currentProgram_);
     }
     if (remainingTime_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(3, remainingTime_);
-    }
-    if (doorOpen_ != false) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(4, doorOpen_);
+        .computeInt32Size(4, remainingTime_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -160,13 +160,13 @@ private static final long serialVersionUID = 0L;
     }
     com.smarthome.proto.DishwasherGetStatusResponse other = (com.smarthome.proto.DishwasherGetStatusResponse) obj;
 
+    if (getIsOn()
+        != other.getIsOn()) return false;
     if (getIsRunning()
         != other.getIsRunning()) return false;
     if (currentProgram_ != other.currentProgram_) return false;
     if (getRemainingTime()
         != other.getRemainingTime()) return false;
-    if (getDoorOpen()
-        != other.getDoorOpen()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -178,6 +178,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + IS_ON_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getIsOn());
     hash = (37 * hash) + IS_RUNNING_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getIsRunning());
@@ -185,9 +188,6 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + currentProgram_;
     hash = (37 * hash) + REMAINING_TIME_FIELD_NUMBER;
     hash = (53 * hash) + getRemainingTime();
-    hash = (37 * hash) + DOOR_OPEN_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getDoorOpen());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -319,10 +319,10 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
+      isOn_ = false;
       isRunning_ = false;
       currentProgram_ = 0;
       remainingTime_ = 0;
-      doorOpen_ = false;
       return this;
     }
 
@@ -357,16 +357,16 @@ private static final long serialVersionUID = 0L;
     private void buildPartial0(com.smarthome.proto.DishwasherGetStatusResponse result) {
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.isRunning_ = isRunning_;
+        result.isOn_ = isOn_;
       }
       if (((from_bitField0_ & 0x00000002) != 0)) {
-        result.currentProgram_ = currentProgram_;
+        result.isRunning_ = isRunning_;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.remainingTime_ = remainingTime_;
+        result.currentProgram_ = currentProgram_;
       }
       if (((from_bitField0_ & 0x00000008) != 0)) {
-        result.doorOpen_ = doorOpen_;
+        result.remainingTime_ = remainingTime_;
       }
     }
 
@@ -414,6 +414,9 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.smarthome.proto.DishwasherGetStatusResponse other) {
       if (other == com.smarthome.proto.DishwasherGetStatusResponse.getDefaultInstance()) return this;
+      if (other.getIsOn() != false) {
+        setIsOn(other.getIsOn());
+      }
       if (other.getIsRunning() != false) {
         setIsRunning(other.getIsRunning());
       }
@@ -422,9 +425,6 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getRemainingTime() != 0) {
         setRemainingTime(other.getRemainingTime());
-      }
-      if (other.getDoorOpen() != false) {
-        setDoorOpen(other.getDoorOpen());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -453,22 +453,22 @@ private static final long serialVersionUID = 0L;
               done = true;
               break;
             case 8: {
-              isRunning_ = input.readBool();
+              isOn_ = input.readBool();
               bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
-              currentProgram_ = input.readEnum();
+              isRunning_ = input.readBool();
               bitField0_ |= 0x00000002;
               break;
             } // case 16
             case 24: {
-              remainingTime_ = input.readInt32();
+              currentProgram_ = input.readEnum();
               bitField0_ |= 0x00000004;
               break;
             } // case 24
             case 32: {
-              doorOpen_ = input.readBool();
+              remainingTime_ = input.readInt32();
               bitField0_ |= 0x00000008;
               break;
             } // case 32
@@ -489,9 +489,41 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
+    private boolean isOn_ ;
+    /**
+     * <code>bool is_on = 1;</code>
+     * @return The isOn.
+     */
+    @java.lang.Override
+    public boolean getIsOn() {
+      return isOn_;
+    }
+    /**
+     * <code>bool is_on = 1;</code>
+     * @param value The isOn to set.
+     * @return This builder for chaining.
+     */
+    public Builder setIsOn(boolean value) {
+
+      isOn_ = value;
+      bitField0_ |= 0x00000001;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool is_on = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearIsOn() {
+      bitField0_ = (bitField0_ & ~0x00000001);
+      isOn_ = false;
+      onChanged();
+      return this;
+    }
+
     private boolean isRunning_ ;
     /**
-     * <code>bool is_running = 1;</code>
+     * <code>bool is_running = 2;</code>
      * @return The isRunning.
      */
     @java.lang.Override
@@ -499,23 +531,23 @@ private static final long serialVersionUID = 0L;
       return isRunning_;
     }
     /**
-     * <code>bool is_running = 1;</code>
+     * <code>bool is_running = 2;</code>
      * @param value The isRunning to set.
      * @return This builder for chaining.
      */
     public Builder setIsRunning(boolean value) {
 
       isRunning_ = value;
-      bitField0_ |= 0x00000001;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
     /**
-     * <code>bool is_running = 1;</code>
+     * <code>bool is_running = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearIsRunning() {
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000002);
       isRunning_ = false;
       onChanged();
       return this;
@@ -523,25 +555,25 @@ private static final long serialVersionUID = 0L;
 
     private int currentProgram_ = 0;
     /**
-     * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+     * <code>.smarthome.DishwasherProgram current_program = 3;</code>
      * @return The enum numeric value on the wire for currentProgram.
      */
     @java.lang.Override public int getCurrentProgramValue() {
       return currentProgram_;
     }
     /**
-     * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+     * <code>.smarthome.DishwasherProgram current_program = 3;</code>
      * @param value The enum numeric value on the wire for currentProgram to set.
      * @return This builder for chaining.
      */
     public Builder setCurrentProgramValue(int value) {
       currentProgram_ = value;
-      bitField0_ |= 0x00000002;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
-     * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+     * <code>.smarthome.DishwasherProgram current_program = 3;</code>
      * @return The currentProgram.
      */
     @java.lang.Override
@@ -550,7 +582,7 @@ private static final long serialVersionUID = 0L;
       return result == null ? com.smarthome.proto.DishwasherProgram.UNRECOGNIZED : result;
     }
     /**
-     * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+     * <code>.smarthome.DishwasherProgram current_program = 3;</code>
      * @param value The currentProgram to set.
      * @return This builder for chaining.
      */
@@ -558,17 +590,17 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      bitField0_ |= 0x00000002;
+      bitField0_ |= 0x00000004;
       currentProgram_ = value.getNumber();
       onChanged();
       return this;
     }
     /**
-     * <code>.smarthome.DishwasherProgram current_program = 2;</code>
+     * <code>.smarthome.DishwasherProgram current_program = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearCurrentProgram() {
-      bitField0_ = (bitField0_ & ~0x00000002);
+      bitField0_ = (bitField0_ & ~0x00000004);
       currentProgram_ = 0;
       onChanged();
       return this;
@@ -580,7 +612,7 @@ private static final long serialVersionUID = 0L;
      * in minutes
      * </pre>
      *
-     * <code>int32 remaining_time = 3;</code>
+     * <code>int32 remaining_time = 4;</code>
      * @return The remainingTime.
      */
     @java.lang.Override
@@ -592,14 +624,14 @@ private static final long serialVersionUID = 0L;
      * in minutes
      * </pre>
      *
-     * <code>int32 remaining_time = 3;</code>
+     * <code>int32 remaining_time = 4;</code>
      * @param value The remainingTime to set.
      * @return This builder for chaining.
      */
     public Builder setRemainingTime(int value) {
 
       remainingTime_ = value;
-      bitField0_ |= 0x00000004;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -608,44 +640,12 @@ private static final long serialVersionUID = 0L;
      * in minutes
      * </pre>
      *
-     * <code>int32 remaining_time = 3;</code>
+     * <code>int32 remaining_time = 4;</code>
      * @return This builder for chaining.
      */
     public Builder clearRemainingTime() {
-      bitField0_ = (bitField0_ & ~0x00000004);
-      remainingTime_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private boolean doorOpen_ ;
-    /**
-     * <code>bool door_open = 4;</code>
-     * @return The doorOpen.
-     */
-    @java.lang.Override
-    public boolean getDoorOpen() {
-      return doorOpen_;
-    }
-    /**
-     * <code>bool door_open = 4;</code>
-     * @param value The doorOpen to set.
-     * @return This builder for chaining.
-     */
-    public Builder setDoorOpen(boolean value) {
-
-      doorOpen_ = value;
-      bitField0_ |= 0x00000008;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool door_open = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearDoorOpen() {
       bitField0_ = (bitField0_ & ~0x00000008);
-      doorOpen_ = false;
+      remainingTime_ = 0;
       onChanged();
       return this;
     }

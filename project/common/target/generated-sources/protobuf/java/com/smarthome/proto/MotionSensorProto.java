@@ -69,23 +69,23 @@ public final class MotionSensorProto {
       " \001(\t\"\034\n\032MotionSensorTurnOffRequest\"?\n\033Mo" +
       "tionSensorTurnOffResponse\022\017\n\007success\030\001 \001" +
       "(\010\022\017\n\007message\030\002 \001(\t\"\036\n\034MotionSensorGetSt" +
-      "atusRequest\"g\n\035MotionSensorGetStatusResp" +
+      "atusRequest\"v\n\035MotionSensorGetStatusResp" +
       "onse\022\027\n\017motion_detected\030\001 \001(\010\022\030\n\020last_mo" +
-      "tion_time\030\002 \001(\003\022\023\n\013sensitivity\030\003 \001(\005\",\n\025" +
-      "SetSensitivityRequest\022\023\n\013sensitivity\030\001 \001" +
-      "(\005\":\n\026SetSensitivityResponse\022\017\n\007success\030" +
-      "\001 \001(\010\022\017\n\007message\030\002 \001(\t2\375\002\n\023MotionSensorS" +
-      "ervice\022U\n\006TurnOn\022$.smarthome.MotionSenso" +
-      "rTurnOnRequest\032%.smarthome.MotionSensorT" +
-      "urnOnResponse\022X\n\007TurnOff\022%.smarthome.Mot" +
-      "ionSensorTurnOffRequest\032&.smarthome.Moti" +
-      "onSensorTurnOffResponse\022^\n\tGetStatus\022\'.s" +
-      "marthome.MotionSensorGetStatusRequest\032(." +
-      "smarthome.MotionSensorGetStatusResponse\022" +
-      "U\n\016SetSensitivity\022 .smarthome.SetSensiti" +
-      "vityRequest\032!.smarthome.SetSensitivityRe" +
-      "sponseB*\n\023com.smarthome.protoB\021MotionSen" +
-      "sorProtoP\001b\006proto3"
+      "tion_time\030\002 \001(\003\022\023\n\013sensitivity\030\003 \001(\005\022\r\n\005" +
+      "is_on\030\004 \001(\010\",\n\025SetSensitivityRequest\022\023\n\013" +
+      "sensitivity\030\001 \001(\005\":\n\026SetSensitivityRespo" +
+      "nse\022\017\n\007success\030\001 \001(\010\022\017\n\007message\030\002 \001(\t2\375\002" +
+      "\n\023MotionSensorService\022U\n\006TurnOn\022$.smarth" +
+      "ome.MotionSensorTurnOnRequest\032%.smarthom" +
+      "e.MotionSensorTurnOnResponse\022X\n\007TurnOff\022" +
+      "%.smarthome.MotionSensorTurnOffRequest\032&" +
+      ".smarthome.MotionSensorTurnOffResponse\022^" +
+      "\n\tGetStatus\022\'.smarthome.MotionSensorGetS" +
+      "tatusRequest\032(.smarthome.MotionSensorGet" +
+      "StatusResponse\022U\n\016SetSensitivity\022 .smart" +
+      "home.SetSensitivityRequest\032!.smarthome.S" +
+      "etSensitivityResponseB*\n\023com.smarthome.p" +
+      "rotoB\021MotionSensorProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -126,7 +126,7 @@ public final class MotionSensorProto {
     internal_static_smarthome_MotionSensorGetStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_smarthome_MotionSensorGetStatusResponse_descriptor,
-        new java.lang.String[] { "MotionDetected", "LastMotionTime", "Sensitivity", });
+        new java.lang.String[] { "MotionDetected", "LastMotionTime", "Sensitivity", "IsOn", });
     internal_static_smarthome_SetSensitivityRequest_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_smarthome_SetSensitivityRequest_fieldAccessorTable = new

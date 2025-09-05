@@ -32,4 +32,10 @@ public interface MotionSensorGetStatusResponseOrBuilder extends
    * @return The sensitivity.
    */
   int getSensitivity();
+
+  /**
+   * <code>bool is_on = 4;</code>
+   * @return The isOn.
+   */
+  boolean getIsOn();
 }

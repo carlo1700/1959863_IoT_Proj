@@ -515,8 +515,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
                     DishwasherGetStatusResponse resp = stub.getStatus(DishwasherGetStatusRequest.newBuilder().build());
-                    String out = "Dishwasher status: program=" + resp.getCurrentProgram() + ", remainingTime="
-                            + resp.getRemainingTime();
+                    String out = "Dishwasher status: is_on=" + resp.getIsOn()
+                            + ", is_running=" + resp.getIsRunning()
+                            + ", program=" + resp.getCurrentProgram()
+                            + ", remainingTime=" + resp.getRemainingTime();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
@@ -535,8 +537,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     MotionSensorGetStatusResponse resp = stub
                             .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-                    String out = "MotionSensor status: motionDetected=" + resp.getMotionDetected() + ", lastMotionTime="
-                            + resp.getLastMotionTime();
+                    String out = "MotionSensor status: " +
+                            "is_on=" +
+                            // resp.getIsOn() +
+                            ", motionDetected=" + resp.getMotionDetected();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
