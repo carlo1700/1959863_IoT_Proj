@@ -511,9 +511,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     AirConditionerServiceGrpc.AirConditionerServiceBlockingStub stub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
                     AirConditionerGetStatusResponse resp = stub
-                    .getStatus(AirConditionerGetStatusRequest.newBuilder().build());
+                            .getStatus(AirConditionerGetStatusRequest.newBuilder().build());
                     String out = "Air conditioner status: is_on=" + resp.getIsOn()
-                    + ", current_program="
+                            + ", current_program="
                             + resp.getCurrentProgram();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
@@ -527,15 +527,20 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 }
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
-                    .newBlockingStub(channel);
-                    DishwasherGetStatusResponse resp = stub
-                    .getStatus(DishwasherGetStatusRequest.newBuilder().build());
-                    String out = "Dishwasher status: program=" + resp.getCurrentProgram()
-                    + ", remainingTime="
-                    + resp.getRemainingTime();
+                            .newBlockingStub(channel);
+
+                    DishwasherGetStatusResponse resp = stub.getStatus(
+                            DishwasherGetStatusRequest.newBuilder().build());
+
+                    String out = "Dishwasher status: is_on=" + resp.getIsOn()
+                            + ", is_running=" + resp.getIsRunning()
+                            + ", program=" + resp.getCurrentProgram()
+                            + ", remainingTime=" + resp.getRemainingTime();
+
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
+
                 case "LIGHT": {
                     LightServiceGrpc.LightServiceBlockingStub stub = LightServiceGrpc
                             .newBlockingStub(channel);
@@ -550,9 +555,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     MotionSensorGetStatusResponse resp = stub
                             .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-                    String out = "MotionSensor status: motionDetected=" + resp.getMotionDetected()
-                            + ", lastMotionTime="
-                            + resp.getLastMotionTime();
+                    String out = "MotionSensor status: " +
+                            "is_on=" + resp.getIsOn() +
+                            ", motionDetected=" + resp.getMotionDetected();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }

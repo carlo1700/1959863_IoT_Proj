@@ -63,8 +63,8 @@ message SetProgramResponse {
 message DishwasherGetStatusRequest {}
 
 message DishwasherGetStatusResponse {
-  bool is_running = 1;
-  DishwasherProgram current_program = 2;
-  int32 remaining_time = 3; // in minutes
-  bool door_open = 4;
+  bool is_on = 1;
+  bool is_running = 2;
+  DishwasherProgram current_program = 3;
+  int32 remaining_time = 4; // in minutes
 }

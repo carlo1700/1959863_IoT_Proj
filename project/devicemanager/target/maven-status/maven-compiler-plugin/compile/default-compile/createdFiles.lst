@@ -1,4 +1,5 @@
 com\smarthome\logging\PgDataSource.class
+com\smarthome\devicemanager\api\AlarmApiController.class
 com\smarthome\devicemanager\config\CorsConfig$1.class
 com\smarthome\logging\RoomGroupRepository.class
 com\smarthome\devicemanager\DeviceManagerServiceImpl.class
