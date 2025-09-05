@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.Set;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.function.Function;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +27,7 @@ import io.grpc.stub.StreamObserver;
 import com.smarthome.logging.DeviceEventRepository;
 import com.smarthome.logging.PgDataSource;
 import com.smarthome.logging.RoomGroupRepository;
+import com.smarthome.logging.DeviceAliasRepository;
 
 import jakarta.annotation.PostConstruct;
 
@@ -43,6 +45,10 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     // ====== LOGGING ======
     private final DeviceEventRepository repo = new DeviceEventRepository(PgDataSource.get());
+
+    private final DeviceAliasRepository aliasRepo = new DeviceAliasRepository(PgDataSource.get());
+
+    private final ConcurrentHashMap<String, String> displayNames = new ConcurrentHashMap<>();
 
     private void log(String deviceId, String action, String status, String payloadJson, String errorMsg) {
         try {
@@ -1108,8 +1114,12 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                 }
 
                 System.out.println("Rooms/Groups loaded from DB: rooms=" + rooms.keySet() + " groups=" + groups.keySet());
+        
+                displayNames.clear();
+                displayNames.putAll(aliasRepo.loadAll());
+                System.out.println("Device aliases loaded: " + displayNames);
         } catch (Exception e) {
-                System.err.println("Failed loading rooms/groups: " + e.getMessage());
+                System.err.println("Failed loading rooms/groups/aliases: " + e.getMessage());
         }
         }
 
@@ -1134,6 +1144,162 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
         public List<DeviceEventRepository.DeviceEvent> getLogsByDevice(String deviceId, int limit) throws Exception {
         return repo.listByDevice(deviceId, limit);
+        }
+
+        /** Rinomina stanza: DB + cache in-memory + log */
+        public synchronized String renameRoom(String oldId, String newId) {
+        if (oldId.equals(newId)) return "No-op: same room id.";
+
+        try {
+                // DB
+                rgRepo.renameRoom(oldId, newId);
+
+                // Cache in-memory
+                Set<String> devs = rooms.remove(oldId);
+                if (devs == null) devs = ConcurrentHashMap.newKeySet();
+                rooms.put(newId, devs);
+
+                log(newId, "RenameRoom", "SUCCESS",
+                String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
+                return "Room renamed: " + oldId + " → " + newId;
+        } catch (Exception e) {
+                log(oldId, "RenameRoom", "FAILURE", "{}", e.getMessage());
+                return "ERROR renaming room: " + e.getMessage();
+        }
+        }
+
+        /** Elimina stanza: DB + cache + log */
+        public synchronized String deleteRoom(String roomId) {
+        try {
+                rgRepo.deleteRoom(roomId);
+                rooms.remove(roomId);
+                log(roomId, "DeleteRoom", "SUCCESS", "{}", null);
+                return "Room deleted: " + roomId;
+        } catch (Exception e) {
+                log(roomId, "DeleteRoom", "FAILURE", "{}", e.getMessage());
+                return "ERROR deleting room: " + e.getMessage();
+        }
+        }
+
+        /** Rinomina gruppo: DB + cache + log */
+        public synchronized String renameGroup(String oldId, String newId) {
+        if (oldId.equals(newId)) return "No-op: same group id.";
+        try {
+                rgRepo.renameGroup(oldId, newId);
+                Set<String> devs = groups.remove(oldId);
+                if (devs == null) devs = ConcurrentHashMap.newKeySet();
+                groups.put(newId, devs);
+
+                log(newId, "RenameGroup", "SUCCESS",
+                String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
+                return "Group renamed: " + oldId + " → " + newId;
+        } catch (Exception e) {
+                log(oldId, "RenameGroup", "FAILURE", "{}", e.getMessage());
+                return "ERROR renaming group: " + e.getMessage();
+        }
+        }
+
+        /** Elimina gruppo: DB + cache + log */
+        public synchronized String deleteGroup(String groupId) {
+        try {
+                rgRepo.deleteGroup(groupId);
+                groups.remove(groupId);
+                log(groupId, "DeleteGroup", "SUCCESS", "{}", null);
+                return "Group deleted: " + groupId;
+        } catch (Exception e) {
+                log(groupId, "DeleteGroup", "FAILURE", "{}", e.getMessage());
+                return "ERROR deleting group: " + e.getMessage();
+        }
+        }
+
+        /**
+         * Rinomina un device (cambia il suo "deviceId").
+         * Nota: il device remoto rimane connesso sul canale già aperto; qui re-indicizziamo le mappe,
+         * aggiorniamo i riferimenti in rooms/groups e in DB per i link. 
+         */
+        public synchronized String renameDevice(String oldId, String newId) {
+                if (oldId.equals(newId)) return "No-op: same device id.";
+                        Device dev = devices.get(oldId);
+                if (dev == null) return "Device not found: " + oldId;
+                if (devices.containsKey(newId)) return "Device id already exists: " + newId;
+
+                try {
+                        // DB: aggiorna le tabelle di linking (room_devices / group_devices)
+                        rgRepo.renameDeviceEverywhere(oldId, newId);
+
+                        // Canale gRPC: re-key
+                        ManagedChannel ch = channels.remove(oldId);
+                        if (ch != null) channels.put(newId, ch);
+
+                        // Device proto aggiornato e re-key nella mappa
+                        Device updated = Device.newBuilder(dev)
+                                .setDeviceId(newId)
+                                .build();
+                        devices.remove(oldId);
+                        devices.put(newId, updated);
+
+                        // Rooms cache
+                        rooms.forEach((room, set) -> {
+                        if (set.remove(oldId)) set.add(newId);
+                        });
+
+                        // Groups cache
+                        groups.forEach((grp, set) -> {
+                        if (set.remove(oldId)) set.add(newId);
+                        });
+
+                        log(newId, "RenameDevice", "SUCCESS",
+                        String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
+                        return "Device renamed: " + oldId + " → " + newId;
+                } catch (Exception e) {
+                        log(oldId, "RenameDevice", "FAILURE", "{}", e.getMessage());
+                        return "ERROR renaming device: " + e.getMessage();
+                }
+        }
+
+        /** Imposta/aggiorna il display name (alias) di un device – persistente in DB e in cache. */
+        public synchronized String setDeviceDisplayName(String deviceId, String displayName) {
+                if (!devices.containsKey(deviceId)) {
+                        return "Device not found: " + deviceId;
+                }
+                try {
+                        aliasRepo.upsertAlias(deviceId, displayName);
+                        displayNames.put(deviceId, displayName);
+                        log(deviceId, "SetDisplayName", "SUCCESS",
+                                String.format("{\"display_name\":\"%s\"}", displayName), null);
+                        return "Display name set for " + deviceId + ": " + displayName;
+                        } catch (Exception e) {
+                                log(deviceId, "SetDisplayName", "FAILURE",
+                                        String.format("{\"display_name\":\"%s\"}", displayName), e.getMessage());
+                                return "ERROR setting display name: " + e.getMessage();
+                }
+        }
+
+        /** Rimuove l’alias del device (torna al deviceId come nome “visuale”). */
+        public synchronized String clearDeviceDisplayName(String deviceId) {
+                if (!devices.containsKey(deviceId)) {
+                        return "Device not found: " + deviceId;
+                }
+                try {
+                        aliasRepo.deleteAlias(deviceId);
+                        displayNames.remove(deviceId);
+                        log(deviceId, "ClearDisplayName", "SUCCESS", "{}", null);
+                        return "Display name cleared for " + deviceId;
+                } catch (Exception e) {
+                        log(deviceId, "ClearDisplayName", "FAILURE", "{}", e.getMessage());
+                        return "ERROR clearing display name: " + e.getMessage();
+                }
+        }
+
+        /** Recupera il display name se presente, altrimenti il deviceId. */
+        public String getDisplayNameOrId(String deviceId) {
+                String dn = displayNames.get(deviceId);
+                return (dn == null || dn.isBlank()) ? deviceId : dn;
+        }
+
+        /** Opzionale: ritorna la mappa completa deviceId -> displayName (solo quelli che hanno alias). */
+        public Map<String,String> listDisplayNames() {
+                return new HashMap<>(displayNames);
         }
 
 }

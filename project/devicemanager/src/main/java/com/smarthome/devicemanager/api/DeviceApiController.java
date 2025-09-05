@@ -266,4 +266,55 @@ public class DeviceApiController {
         try { return ResponseEntity.ok(service.getLogsByDevice(deviceId, limit)); }
         catch (Exception e) { return ResponseEntity.status(500).body("ERROR listing logs for device: " + e.getMessage()); }
     }
+    
+    // ---- Rename/Delete Rooms ----
+    @PatchMapping("/rooms/{oldId}/rename")
+    public ResponseEntity<String> renameRoom(@PathVariable String oldId,
+                                            @RequestParam("newId") String newId) {
+        return ResponseEntity.ok(service.renameRoom(oldId, newId));
+    }
+
+    @DeleteMapping("/rooms/{roomId}")
+    public ResponseEntity<String> deleteRoom(@PathVariable String roomId) {
+        return ResponseEntity.ok(service.deleteRoom(roomId));
+    }
+
+    // ---- Rename/Delete Groups ----
+    @PatchMapping("/groups/{oldId}/rename")
+    public ResponseEntity<String> renameGroup(@PathVariable String oldId,
+                                            @RequestParam("newId") String newId) {
+        return ResponseEntity.ok(service.renameGroup(oldId, newId));
+    }
+
+    @DeleteMapping("/groups/{groupId}")
+    public ResponseEntity<String> deleteGroup(@PathVariable String groupId) {
+        return ResponseEntity.ok(service.deleteGroup(groupId));
+    }
+
+    // ---- Rename Device ----
+    @PatchMapping("/devices/{oldId}/rename")
+    public ResponseEntity<String> renameDevice(@PathVariable String oldId,
+                                            @RequestParam("newId") String newId) {
+        return ResponseEntity.ok(service.renameDevice(oldId, newId));
+    }
+
+    // Imposta/aggiorna display name
+    @PatchMapping("/devices/{deviceId}/displayName")
+    public ResponseEntity<String> setDisplayName(@PathVariable String deviceId,
+                                                @RequestParam("name") String name) {
+        return ResponseEntity.ok(service.setDeviceDisplayName(deviceId, name));
+    }
+
+    // Cancella display name
+    @DeleteMapping("/devices/{deviceId}/displayName")
+    public ResponseEntity<String> clearDisplayName(@PathVariable String deviceId) {
+        return ResponseEntity.ok(service.clearDeviceDisplayName(deviceId));
+    }
+
+    // Elenco alias (solo quelli impostati)
+    @GetMapping("/devices/displayNames")
+    public ResponseEntity<Map<String,String>> listDisplayNames() {
+        return ResponseEntity.ok(service.listDisplayNames());
+    }
+
 }
