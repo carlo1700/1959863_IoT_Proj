@@ -329,35 +329,37 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         }
     }
 
-    public String SetDownBlind(String deviceId) {
-        Device device = devices.get(deviceId);
-        if (device == null) {
-            return "Device not found: " + deviceId;
-        }
+        public String SetDownBlind(String deviceId) {
+                Device device = devices.get(deviceId);
+                if (device == null) {
+                log(deviceId, "TurnOff", "FAILURE", "{}", "Device not found");
+                return "Device not found: " + deviceId;
+                }
 
-        ManagedChannel channel = channels.get(deviceId);
-        if (channel == null || channel.isShutdown()) {
-            return "gRPC channel non disponibile per device: " + deviceId;
-        }
+                ManagedChannel channel = channels.get(deviceId);
+                if (channel == null || channel.isShutdown()) {
+                log(deviceId, "TurnOff", "FAILURE", "{}", "Channel unavailable");
+                return "gRPC channel non disponibile per device: " + deviceId;
+                }
 
-        if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
-            return "Device is not a blind: " + deviceId;
-        }
+                if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
+                return "Device is not a blind: " + deviceId;
+                }
 
-        BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
-        BlindSetDownRequest request = BlindSetDownRequest.newBuilder().build();
+                BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
+                BlindSetDownRequest request = BlindSetDownRequest.newBuilder().build();
 
-        try {
-            BlindSetDownResponse resp = blindStub.setDown(request);
-            if (resp.getSuccess()) {
-                return "Blind moved down for device " + deviceId + ": " + resp.getMessage();
-            } else {
-                return "Failed to move down blind for device " + deviceId + ": " + resp.getMessage();
-            }
-        } catch (StatusRuntimeException e) {
-            return "gRPC error on setDown for device " + deviceId + ": " + e.getStatus().getDescription();
+                try {
+                BlindSetDownResponse resp = blindStub.setDown(request);
+                if (resp.getSuccess()) {
+                        return "Blind moved down for device " + deviceId + ": " + resp.getMessage();
+                } else {
+                        return "Failed to move down blind for device " + deviceId + ": " + resp.getMessage();
+                }
+                } catch (StatusRuntimeException e) {
+                return "gRPC error on setDown for device " + deviceId + ": " + e.getStatus().getDescription();
+                }
         }
-    }
 
     public String turnOffDevice(String deviceId) {
         Device device = devices.get(deviceId);
@@ -495,6 +497,14 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     return out;
                 }
 
+                case "BLIND": {
+                    BlindServiceGrpc.BlindServiceBlockingStub stub = BlindServiceGrpc.newBlockingStub(channel);
+                    BlindGetStatusResponse resp = stub.getStatus(BlindGetStatusRequest.newBuilder().build());
+                    String out = "Blind status: is_up=" + resp.getIsUp();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
+                }
+
                 case "DISHWASHER": {
                     DishwasherServiceGrpc.DishwasherServiceBlockingStub stub = DishwasherServiceGrpc
                             .newBlockingStub(channel);
@@ -504,6 +514,16 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
+
+                case "LIGHT": {
+                    LightServiceGrpc.LightServiceBlockingStub stub = LightServiceGrpc
+                            .newBlockingStub(channel);
+                    GetStatusResponse resp = stub.getStatus(GetStatusRequest.newBuilder().build());
+                    String out = "Light status: is_on=" + resp.getIsOn();
+                    log(deviceId, "GetStatus", "SUCCESS", "{}", null);
+                    return out;
+                }
+
                 case "MOTIONSENSOR": {
                     MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
                             .newBlockingStub(channel);
@@ -1107,4 +1127,13 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         public Map<String, Set<String>> listAllGroups() {
         return Collections.unmodifiableMap(groups);
         }
+        // in DeviceManagerServiceImpl
+        public List<DeviceEventRepository.DeviceEvent> getRecentLogs(int limit) throws Exception {
+        return repo.listRecent(limit);
+        }
+
+        public List<DeviceEventRepository.DeviceEvent> getLogsByDevice(String deviceId, int limit) throws Exception {
+        return repo.listByDevice(deviceId, limit);
+        }
+
 }

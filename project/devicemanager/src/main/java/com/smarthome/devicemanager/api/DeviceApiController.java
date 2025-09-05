@@ -252,4 +252,18 @@ public class DeviceApiController {
         }
         return ResponseEntity.ok(devices);
     }
+    
+    // in DeviceApiController.java (o nuovo LogApiController)
+    @GetMapping("/logs/recent")
+    public ResponseEntity<?> recentLogs(@RequestParam(defaultValue = "50") int limit) {
+        try { return ResponseEntity.ok(service.getRecentLogs(limit)); }
+        catch (Exception e) { return ResponseEntity.status(500).body("ERROR listing logs: " + e.getMessage()); }
+    }
+
+    @GetMapping("/logs/byDevice/{deviceId}")
+    public ResponseEntity<?> logsByDevice(@PathVariable String deviceId,
+                                        @RequestParam(defaultValue = "50") int limit) {
+        try { return ResponseEntity.ok(service.getLogsByDevice(deviceId, limit)); }
+        catch (Exception e) { return ResponseEntity.status(500).body("ERROR listing logs for device: " + e.getMessage()); }
+    }
 }
