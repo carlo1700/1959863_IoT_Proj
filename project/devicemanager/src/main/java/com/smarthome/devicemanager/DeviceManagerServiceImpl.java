@@ -917,6 +917,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     // --- TOKEN MANAGEMENT ---
     public synchronized void saveToken(String token) {
+        // loggare
+        System.out.println("💾 Saving token: " + token);
         tokens.add(token);
     }
 
@@ -988,6 +990,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     }
 
     private void sendPushNotification(String expoPushToken, String message) {
+        // do logging
+        System.out.println("📲 Sending notification to " + expoPushToken + ": " + 
+                message);
         Map<String, Object> body = Map.of(
                 "to", expoPushToken,
                 "sound", "default",
