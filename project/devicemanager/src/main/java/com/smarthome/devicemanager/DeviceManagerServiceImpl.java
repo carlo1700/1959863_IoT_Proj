@@ -537,10 +537,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     MotionSensorGetStatusResponse resp = stub
                             .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-                    String out = "MotionSensor status: " +
-                            "is_on=" +
-                            // resp.getIsOn() +
-                            ", motionDetected=" + resp.getMotionDetected();
+                    String out = "MotionSensor status: " 
+                                + "is_on=" + resp.getIsOn() 
+                                + ", motionDetected=" + resp.getMotionDetected();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }

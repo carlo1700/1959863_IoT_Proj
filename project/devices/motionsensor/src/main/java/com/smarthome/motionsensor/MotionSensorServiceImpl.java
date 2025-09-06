@@ -34,7 +34,7 @@ public class MotionSensorServiceImpl extends MotionSensorServiceGrpc.MotionSenso
     public void getStatus(MotionSensorGetStatusRequest request, StreamObserver<MotionSensorGetStatusResponse> responseObserver) {
         boolean motionDetected = Math.random() < 0.5;
         MotionSensorGetStatusResponse response = MotionSensorGetStatusResponse.newBuilder()
-                //.setIsOn(isOn)
+                .setIsOn(isOn)
                 .build();
         
         System.out.println("📡 MotionSensor status: isOn=" + isOn + ", motionDetected=" + motionDetected);
