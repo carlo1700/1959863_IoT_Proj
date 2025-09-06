@@ -883,9 +883,19 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
             devices.put(deviceId, device);
 
             // crea canale gRPC
-            ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
-                    .usePlaintext()
-                    .build();
+            ManagedChannel ch = io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
+                .forAddress(new java.net.InetSocketAddress(address, port))
+                .usePlaintext()
+                .keepAliveTime(30, java.util.concurrent.TimeUnit.SECONDS)
+                .keepAliveTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
+
+            // logga i cambi di stato (come fai nell’altra)
+            ch.notifyWhenStateChanged(ch.getState(true), () -> {
+                io.grpc.ConnectivityState s = ch.getState(false);
+                System.out.println("🔌 Channel state for device " + deviceId + ": " + s);
+            });
+
             channels.put(deviceId, ch);
 
             log(deviceId, "Register", "SUCCESS", payload, null);
