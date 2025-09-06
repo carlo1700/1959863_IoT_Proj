@@ -53,14 +53,6 @@ public class RoomGroupRepository {
         }
     }
 
-    public void deleteRoom(String roomId) throws Exception {
-        try (Connection c = ds.getConnection();
-             PreparedStatement ps = c.prepareStatement("DELETE FROM rooms WHERE room_id = ?")) {
-            ps.setString(1, roomId);
-            ps.executeUpdate();
-        }
-    }
-
     public void addDeviceToRoom(String roomId, String deviceId) throws Exception {
         String sql = "INSERT INTO room_devices(room_id, device_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
         try (Connection c = ds.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
@@ -110,14 +102,6 @@ public class RoomGroupRepository {
         }
     }
 
-    public void deleteGroup(String groupId) throws Exception {
-        try (Connection c = ds.getConnection();
-             PreparedStatement ps = c.prepareStatement("DELETE FROM device_groups WHERE group_id = ?")) {
-            ps.setString(1, groupId);
-            ps.executeUpdate();
-        }
-    }
-
     public void addDeviceToGroup(String groupId, String deviceId) throws Exception {
         String sql = "INSERT INTO group_devices(group_id, device_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
         try (Connection c = ds.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
@@ -156,5 +140,124 @@ public class RoomGroupRepository {
             }
         }
         return out;
+    }
+
+    public void renameRoom(String oldId, String newId) throws Exception {
+        final String updRooms = "UPDATE rooms SET room_id=? WHERE room_id=?";
+        final String updRoomDevices = "UPDATE room_devices SET room_id=? WHERE room_id=?";
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
+            try (PreparedStatement p1 = c.prepareStatement(updRooms);
+                PreparedStatement p2 = c.prepareStatement(updRoomDevices)) {
+                p1.setString(1, newId);
+                p1.setString(2, oldId);
+                p1.executeUpdate();
+
+                p2.setString(1, newId);
+                p2.setString(2, oldId);
+                p2.executeUpdate();
+
+                c.commit();
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
+            }
+        }
+    }
+
+    public void deleteRoom(String roomId) throws Exception {
+        // se non hai ON DELETE CASCADE:
+        final String delLinks = "DELETE FROM room_devices WHERE room_id=?";
+        final String delRoom  = "DELETE FROM rooms WHERE room_id=?";
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
+            try (PreparedStatement p1 = c.prepareStatement(delLinks);
+                PreparedStatement p2 = c.prepareStatement(delRoom)) {
+                p1.setString(1, roomId);
+                p1.executeUpdate();
+                p2.setString(1, roomId);
+                p2.executeUpdate();
+                c.commit();
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
+            }
+        }
+    }
+
+    public void renameGroup(String oldId, String newId) throws Exception {
+        final String updGroups = "UPDATE device_groups SET group_id=? WHERE group_id=?";
+        final String updGroupDevices = "UPDATE group_devices SET group_id=? WHERE group_id=?";
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
+            try (PreparedStatement p1 = c.prepareStatement(updGroups);
+                PreparedStatement p2 = c.prepareStatement(updGroupDevices)) {
+                p1.setString(1, newId);
+                p1.setString(2, oldId);
+                p1.executeUpdate();
+
+                p2.setString(1, newId);
+                p2.setString(2, oldId);
+                p2.executeUpdate();
+
+                c.commit();
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
+            }
+        }
+    }
+
+    public void deleteGroup(String groupId) throws Exception {
+        final String delLinks = "DELETE FROM group_devices WHERE group_id=?";
+        final String delGroup = "DELETE FROM device_groups WHERE group_id=?";
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
+            try (PreparedStatement p1 = c.prepareStatement(delLinks);
+                PreparedStatement p2 = c.prepareStatement(delGroup)) {
+                p1.setString(1, groupId);
+                p1.executeUpdate();
+                p2.setString(1, groupId);
+                p2.executeUpdate();
+                c.commit();
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
+            }
+        }
+    }
+
+    /** Aggiorna le occorrenze del deviceId in tutte le tabelle di linking. */
+    public void renameDeviceEverywhere(String oldId, String newId) throws Exception {
+        final String updRoomLinks  = "UPDATE room_devices  SET device_id=? WHERE device_id=?";
+        final String updGroupLinks = "UPDATE group_devices SET device_id=? WHERE device_id=?";
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
+            try (PreparedStatement p1 = c.prepareStatement(updRoomLinks);
+                PreparedStatement p2 = c.prepareStatement(updGroupLinks)) {
+                p1.setString(1, newId);
+                p1.setString(2, oldId);
+                p1.executeUpdate();
+
+                p2.setString(1, newId);
+                p2.setString(2, oldId);
+                p2.executeUpdate();
+
+                c.commit();
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
+            }
+        }
     }
 }

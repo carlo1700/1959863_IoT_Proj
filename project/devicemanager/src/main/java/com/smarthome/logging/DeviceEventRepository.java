@@ -4,6 +4,9 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceEventRepository {
 
@@ -68,6 +71,90 @@ public class DeviceEventRepository {
             ps.setString(6, payloadJson); 
             ps.setString(7, errorMsg);
             ps.executeUpdate();
+        }
+    }
+
+    public static final class DeviceEvent {
+        public long   id;
+        public String ts;           // String invece di OffsetDateTime
+        public String deviceId;
+        public String source;
+        public String action;
+        public String status;
+        public String userName;
+        public String payloadJson;  // assicurati sia String, non PGobject
+        public String errorMsg;
+    }
+
+    private DeviceEvent mapRow(ResultSet rs) throws Exception {
+        DeviceEvent e = new DeviceEvent();
+        e.id         = rs.getLong("id");
+
+        // Leggi TIMESTAMPTZ come OffsetDateTime e poi toString() (ISO-8601)
+        java.time.OffsetDateTime odt = rs.getObject("ts", java.time.OffsetDateTime.class);
+        e.ts         = odt != null ? odt.toString() : null;
+
+        e.deviceId   = rs.getString("device_id");
+        e.source     = rs.getString("source");
+        e.action     = rs.getString("action");
+        e.status     = rs.getString("status");
+        e.userName   = rs.getString("user_name");
+
+        // jsonb come String, NON PGobject
+        e.payloadJson = rs.getString("payload_json");
+        e.errorMsg    = rs.getString("error_msg");
+        return e;
+    }
+
+    /** Ultimi N eventi globali */
+    public List<DeviceEvent> listRecent(int limit) throws Exception {
+        String sql = "SELECT id, ts, device_id, source, action, status, user_name, payload_json, error_msg " +
+                    "FROM device_events ORDER BY ts DESC LIMIT ?";
+        try (Connection c = ds.getConnection();
+            PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<DeviceEvent> out = new ArrayList<>();
+                while (rs.next()) out.add(mapRow(rs));
+                return out;
+            }
+        }
+    }
+
+    public List<DeviceEvent> listByDevice(String deviceId, int limit) throws Exception {
+        String sql = "SELECT id, ts, device_id, source, action, status, user_name, payload_json, error_msg " +
+                    "FROM device_events WHERE device_id = ? ORDER BY ts DESC LIMIT ?";
+        try (Connection c = ds.getConnection();
+            PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, deviceId);
+            ps.setInt(2, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<DeviceEvent> out = new ArrayList<>();
+                while (rs.next()) out.add(mapRow(rs));
+                return out;
+            }
+        }
+    }
+
+    /** Ricerca semplice per azione/stato (opzionale) */
+    public List<DeviceEvent> search(String actionLike, String statusEq, int limit) throws Exception {
+        final String sql =
+            "SELECT id, ts, device_id, source, action, status, user_name, payload_json::text, error_msg " +
+            "FROM device_events " +
+            "WHERE (? IS NULL OR action ILIKE ?) AND (? IS NULL OR status = ?) " +
+            "ORDER BY ts DESC LIMIT ?";
+        try (Connection c = ds.getConnection();
+            PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, actionLike == null ? null : actionLike);
+            ps.setString(2, actionLike == null ? null : "%" + actionLike + "%");
+            ps.setString(3, statusEq);
+            ps.setString(4, statusEq);
+            ps.setInt(5, Math.max(1, limit));
+            try (ResultSet rs = ps.executeQuery()) {
+                List<DeviceEvent> out = new ArrayList<>();
+                while (rs.next()) out.add(mapRow(rs));
+                return out;
+            }
         }
     }
 }
