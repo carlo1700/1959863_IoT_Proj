@@ -3,22 +3,46 @@ node_modules
 
 **/target/
 
-# Maven / Java
+# ---- Maven ----
 target/
-*.class
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# ---- Gradle (se mai lo usi) ----
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ---- Logs ----
 *.log
 *.out
 *.tmp
 
-# IntelliJ / Eclipse / VSCode
+# ---- IntelliJ IDEA ----
 .idea/
+*.iws
 *.iml
 *.ipr
-*.iws
+
+# ---- Eclipse ----
 .project
 .classpath
 .settings/
+bin/
 
-# OS
+# ---- VS Code ----
+.vscode/
+
+# ---- OS files ----
 .DS_Store
 Thumbs.db
+
+# ---- Others ----
+*.swp
+*.swo
+*.bak
