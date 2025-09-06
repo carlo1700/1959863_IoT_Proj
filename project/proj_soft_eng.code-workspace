@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "proj_soft_eng",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "disabled"
+	}
+}
