@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "WashingMachineProto";
+
+// Washing Machine Service
+service WashingMachineService {
+  rpc TurnOn(WashingMachineTurnOnRequest) returns (WashingMachineTurnOnResponse);
+  rpc TurnOff(WashingMachineTurnOffRequest) returns (WashingMachineTurnOffResponse);
+  rpc Start(WashingMachineStartRequest) returns (WashingMachineStartResponse);
+  rpc Stop(WashingMachineStopRequest) returns (WashingMachineStopResponse);
+  rpc SetProgram(WashingMachineSetProgramRequest) returns (WashingMachineSetProgramResponse);
+  rpc GetStatus(WashingMachineGetStatusRequest) returns (WashingMachineGetStatusResponse);
+}
+
+enum WashingMachineProgram {
+  DELICATE = 0;
+  QUICK_WASH = 1;
+}
+
+message WashingMachineTurnOnRequest {}
+
+message WashingMachineTurnOnResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message WashingMachineTurnOffRequest {}
+
+message WashingMachineTurnOffResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message WashingMachineStartRequest {}
+
+message WashingMachineStartResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message WashingMachineStopRequest {}
+
+message WashingMachineStopResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message WashingMachineSetProgramRequest {
+  WashingMachineProgram program = 1;
+  int32 temperature = 2; // in Celsius
+  int32 spin_speed = 3;  // RPM
+}
+
+message WashingMachineSetProgramResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message WashingMachineGetStatusRequest {}
+
+message WashingMachineGetStatusResponse {
+  bool is_running = 1;
+  WashingMachineProgram current_program = 2;
+  bool is_on = 3;
+}

@@ -1,0 +1,175 @@
+services:
+  db:
+    image: postgres:16
+    container_name: smart-home-db
+    environment:
+      POSTGRES_USER: smarthome
+      POSTGRES_PASSWORD: smarthome
+      POSTGRES_DB: logs
+    ports:
+      - "5432:5432"
+    networks:
+      - smart-home-network
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/db-init:/docker-entrypoint-initdb.d:ro 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smarthome -d logs"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  adminer:
+    image: adminer
+    container_name: smart-home-adminer
+    ports:
+      - "8081:8080"
+    networks:
+      - smart-home-network
+    depends_on:
+      db:
+        condition: service_healthy
+  devicemanager:
+    build:
+      context: .
+      dockerfile: devicemanager/Dockerfile
+    ports:
+      - "50051:50051"
+      - "8080:8080"
+    container_name: smart-home-devicemanager
+    networks:
+      smart-home-network:
+        aliases:
+          - devicemanager
+    healthcheck:
+      test: ["CMD", "grpc-health-probe", "-addr=:50051"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    environment:
+      - DB_URL=jdbc:postgresql://smart-home-db:5432/logs
+      - DB_USER=smarthome
+      - DB_PASS=smarthome
+    depends_on:
+      db:
+        condition: service_healthy
+
+  light:
+    build:
+      context: .
+      dockerfile: devices/light/Dockerfile
+    ports:
+      - "50052:50052"
+    container_name: light
+    networks:
+      - smart-home-network
+    depends_on:
+      - devicemanager
+
+  oven:
+    build:
+      context: .
+      dockerfile: devices/oven/Dockerfile
+    ports:
+      - "50053:50053"
+    container_name: oven
+    networks:
+      - smart-home-network
+    depends_on:
+      - devicemanager
+
+  thermostat:
+    build:
+      context: .
+      dockerfile: devices/thermostat/Dockerfile
+    ports:
+      - "50054:50054"
+    container_name: thermostat
+    networks:
+      - smart-home-network
+    depends_on:
+      - devicemanager
+
+  blind:
+    build:
+      context: .
+      dockerfile: devices/blind/Dockerfile
+    ports:
+      - "50055:50055"
+    container_name: blind
+    networks:
+      - smart-home-network
+    depends_on:
+      - devicemanager
+
+  motionsensor:
+    build:
+      context: .
+      dockerfile: devices/motionsensor/Dockerfile
+    ports:
+      - "50056:50056"
+    container_name: motionsensor
+    networks:
+      - smart-home-network
+    depends_on:
+      - devicemanager
+
+  solarpanel:
+    build:
+      context: .
+      dockerfile: devices/solarpanel/Dockerfile
+    ports:
+      - "50057:50057"
+    container_name: solarpanel
+    networks:
+      - smart-home-network
+    depends_on:
+      - devicemanager
+
+  airconditioner:
+    build:
+      context: .
+      dockerfile: devices/airconditioner/Dockerfile
+    ports:
+      - "50058:50058"
+    container_name: airconditioner
+    networks:
+      smart-home-network:
+        aliases:
+          - airconditioner
+    depends_on:
+      devicemanager:
+        condition: service_healthy
+
+  dishwasher:
+    build:
+      context: .
+      dockerfile: devices/dishwasher/Dockerfile
+    ports:
+      - "50059:50059"
+    container_name: dishwasher
+    networks:
+      - smart-home-network
+    depends_on:
+      devicemanager:
+        condition: service_healthy
+
+  washingmachine:
+    build:
+      context: .
+      dockerfile: devices/washingmachine/Dockerfile
+    ports:
+      - "51000:51000"
+    container_name: washingmachine
+    networks:
+      - smart-home-network
+    depends_on:
+      - devicemanager
+
+volumes:
+  pgdata: {}
+
+networks:
+  smart-home-network:
+    driver: bridge
+    enable_ipv6: false

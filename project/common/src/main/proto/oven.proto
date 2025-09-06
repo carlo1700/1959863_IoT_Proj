@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package smarthome;
+
+option java_multiple_files = true;
+option java_package = "com.smarthome.proto";
+option java_outer_classname = "OvenProto";
+
+// Oven Service
+service OvenService {
+  rpc TurnOn(OvenTurnOnRequest) returns (OvenTurnOnResponse);
+  rpc TurnOff(OvenTurnOffRequest) returns (OvenTurnOffResponse);
+  rpc SetTemperature(SetTemperatureRequest) returns (SetTemperatureResponse);
+  rpc GetStatus(OvenGetStatusRequest) returns (OvenGetStatusResponse);
+  rpc SetProgram(OvenSetProgramRequest) returns (OvenSetProgramResponse);
+}
+
+message OvenTurnOnRequest {}
+
+message OvenTurnOnResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message OvenTurnOffRequest {}
+
+message OvenTurnOffResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SetTemperatureRequest {
+  int32 temperature = 1; // in Celsius
+}
+
+message SetTemperatureResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message OvenGetStatusRequest {}
+
+message OvenGetStatusResponse {
+  bool is_on = 1;
+  int32 temperature = 2;
+  OvenProgram current_program = 3; // modalità attiva: statico o ventilato
+}
+
+
+// Enum dei programmi disponibili per il forno
+enum OvenProgram {
+  OVEN_PROGRAM_UNSPECIFIED = 0;
+  OVEN_PROGRAM_STATIC = 1;
+  OVEN_PROGRAM_CONVECTION = 2; // "ventilato"
+}
+
+message OvenSetProgramRequest {
+  OvenProgram program = 1;
+  int32 temperature = 2; // in Celsius
+  int32 duration = 3;    // in minutes
+}
+
+message OvenSetProgramResponse {
+  bool success = 1;
+  string message = 2;
+}
