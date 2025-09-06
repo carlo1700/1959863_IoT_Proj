@@ -100,8 +100,10 @@ public class DishwasherServiceImpl extends DishwasherServiceGrpc.DishwasherServi
     }
 
     @Override
-    public void getStatus(DishwasherGetStatusRequest request, StreamObserver<DishwasherGetStatusResponse> responseObserver) {
+    public synchronized void getStatus(DishwasherGetStatusRequest request,
+            StreamObserver<DishwasherGetStatusResponse> responseObserver) {
         DishwasherGetStatusResponse response = DishwasherGetStatusResponse.newBuilder()
+                .setIsOn(isOn)
                 .setIsRunning(isRunning)
                 .setCurrentProgram(currentProgram)
                 .setRemainingTime(remainingTime)

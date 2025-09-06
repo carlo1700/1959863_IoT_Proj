@@ -555,11 +555,12 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     OvenServiceGrpc.OvenServiceBlockingStub stub = OvenServiceGrpc.newBlockingStub(channel);
                     OvenGetStatusResponse resp = stub.getStatus(OvenGetStatusRequest.newBuilder().build());
                     String out = "Oven status: isOn=" + resp.getIsOn()
-                            + ", temp=" + resp.getTemperature()
+                            + ", temp=" + resp.getTemperature() // qui ottieni la temperatura attuale
                             + ", mode=" + resp.getCurrentProgram().name();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
+
                 case "SOLARPANEL": {
                     SolarPanelServiceGrpc.SolarPanelServiceBlockingStub stub = SolarPanelServiceGrpc
                             .newBlockingStub(channel);
@@ -884,11 +885,11 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
             // crea canale gRPC
             ManagedChannel ch = io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
-                .forAddress(new java.net.InetSocketAddress(address, port))
-                .usePlaintext()
-                .keepAliveTime(30, java.util.concurrent.TimeUnit.SECONDS)
-                .keepAliveTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .build();
+                    .forAddress(new java.net.InetSocketAddress(address, port))
+                    .usePlaintext()
+                    .keepAliveTime(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .keepAliveTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                    .build();
 
             // logga i cambi di stato (come fai nell’altra)
             ch.notifyWhenStateChanged(ch.getState(true), () -> {
@@ -1001,7 +1002,7 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     private void sendPushNotification(String expoPushToken, String message) {
         // do logging
-        System.out.println("📲 Sending notification to " + expoPushToken + ": " + 
+        System.out.println("📲 Sending notification to " + expoPushToken + ": " +
                 message);
         Map<String, Object> body = Map.of(
                 "to", expoPushToken,
