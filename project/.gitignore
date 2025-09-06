@@ -1,7 +1,10 @@
 node_modules
 .env
 
+# Build artifacts
 **/target/
+*.class
+*.jar
 
 # ---- Maven ----
 target/
