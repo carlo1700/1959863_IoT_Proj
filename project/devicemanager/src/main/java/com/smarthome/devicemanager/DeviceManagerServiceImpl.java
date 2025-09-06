@@ -10,10 +10,14 @@ import java.util.Set;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.function.Function;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.smarthome.proto.*;
 
@@ -37,7 +41,7 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     private final RoomGroupRepository rgRepo = new RoomGroupRepository(PgDataSource.get());
 
     // cache in-memory persistita
-    private final ConcurrentHashMap<String, Set<String>> rooms  = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Set<String>> rooms = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> groups = new ConcurrentHashMap<>();
 
     private final Map<String, Device> devices = new ConcurrentHashMap<>();
@@ -52,17 +56,17 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
 
     private void log(String deviceId, String action, String status, String payloadJson, String errorMsg) {
         try {
-                repo.insertEvent(
-                deviceId,                         // device_id
-                "DeviceManager",                  // source
-                action,                           // action (es. "TurnOn")
-                status,                           // status (PENDING/SUCCESS/FAILURE)
-                currentUser(),                    // user_name
-                (payloadJson == null || payloadJson.isBlank()) ? null : payloadJson, // JSONB
-                errorMsg                          // error_msg
-                );
+            repo.insertEvent(
+                    deviceId, // device_id
+                    "DeviceManager", // source
+                    action, // action (es. "TurnOn")
+                    status, // status (PENDING/SUCCESS/FAILURE)
+                    currentUser(), // user_name
+                    (payloadJson == null || payloadJson.isBlank()) ? null : payloadJson, // JSONB
+                    errorMsg // error_msg
+            );
         } catch (Exception e) {
-                System.err.println("DB log error [" + action + "@" + deviceId + "]: " + e.getMessage());
+            System.err.println("DB log error [" + action + "@" + deviceId + "]: " + e.getMessage());
         }
     }
 
@@ -72,64 +76,68 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
     }
 
     @Override
-        public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
+    public void registerDevice(RegisterDeviceRequest request, StreamObserver<RegisterDeviceResponse> responseObserver) {
         String address = request.getAddress();
         int port = request.getPort();
         String deviceId = request.getDeviceId();
         String deviceType = request.getDeviceType();
         String normalizedType = deviceType.replace("_", "");
-        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType, request.getAddress(), request.getPort());
+        String payload = String.format("{\"type\":\"%s\",\"address\":\"%s\",\"port\":%d}", deviceType,
+                request.getAddress(), request.getPort());
         log(deviceId, "Register", "PENDING", payload, null);
 
         try {
-                Device device = Device.newBuilder()
-                        .setDeviceId(deviceId)
-                        .setDeviceType(normalizedType)
-                        .setAddress(request.getAddress())
-                        .setPort(request.getPort())
-                        .setOnline(true)
-                        .build();
-                devices.put(deviceId, device);
+            Device device = Device.newBuilder()
+                    .setDeviceId(deviceId)
+                    .setDeviceType(normalizedType)
+                    .setAddress(request.getAddress())
+                    .setPort(request.getPort())
+                    .setOnline(true)
+                    .build();
+            devices.put(deviceId, device);
 
-                ManagedChannel old = channels.remove(deviceId);
-                if (old != null && !old.isShutdown()) {
-                try { old.shutdownNow(); } catch (Exception ignore) {}
+            ManagedChannel old = channels.remove(deviceId);
+            if (old != null && !old.isShutdown()) {
+                try {
+                    old.shutdownNow();
+                } catch (Exception ignore) {
                 }
-                InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+            }
+            InetSocketAddress socketAddress = new InetSocketAddress(address, port);
 
-                // Creazione canale gRPC con Netty
-                ManagedChannel channel = NettyChannelBuilder.forAddress(socketAddress)
-                        .usePlaintext()
-                        .keepAliveTime(30, TimeUnit.SECONDS)
-                        .keepAliveTimeout(10, TimeUnit.SECONDS)
-                        .build();
-                // Aggiungi un watcher per tracciare lo stato della connessione
-                channel.notifyWhenStateChanged(channel.getState(true), () -> {
-                        ConnectivityState newState = channel.getState(false);
-                        System.out.println("🔌 Channel state for device " + request.getDeviceId() + ": " + newState);
-                        });
-                channels.put(request.getDeviceId(), channel);
+            // Creazione canale gRPC con Netty
+            ManagedChannel channel = NettyChannelBuilder.forAddress(socketAddress)
+                    .usePlaintext()
+                    .keepAliveTime(30, TimeUnit.SECONDS)
+                    .keepAliveTimeout(10, TimeUnit.SECONDS)
+                    .build();
+            // Aggiungi un watcher per tracciare lo stato della connessione
+            channel.notifyWhenStateChanged(channel.getState(true), () -> {
+                ConnectivityState newState = channel.getState(false);
+                System.out.println("🔌 Channel state for device " + request.getDeviceId() + ": " + newState);
+            });
+            channels.put(request.getDeviceId(), channel);
 
-                RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
-                        .setSuccess(true)
-                        .setMessage("Device registered: " + deviceId)
-                        .build();
-                log(deviceId, "Register", "SUCCESS", payload, null);
+            RegisterDeviceResponse response = RegisterDeviceResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Device registered: " + deviceId)
+                    .build();
+            log(deviceId, "Register", "SUCCESS", payload, null);
 
-                responseObserver.onNext(response);
-                responseObserver.onCompleted();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
 
-                System.out.println("✅ Device " + request.getDeviceId() +
-                " registered at " + request.getAddress() + ":" + request.getPort());
+            System.out.println("✅ Device " + request.getDeviceId() +
+                    " registered at " + request.getAddress() + ":" + request.getPort());
         } catch (Exception e) {
-                log(deviceId, "Register", "FAILURE", payload, e.getMessage());
-                responseObserver.onNext(RegisterDeviceResponse.newBuilder()
-                        .setSuccess(false)
-                        .setMessage("Register failed: " + e.getMessage())
-                        .build());
-                responseObserver.onCompleted();
+            log(deviceId, "Register", "FAILURE", payload, e.getMessage());
+            responseObserver.onNext(RegisterDeviceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setMessage("Register failed: " + e.getMessage())
+                    .build());
+            responseObserver.onCompleted();
         }
-        }
+    }
 
     @Override
     public void unregisterDevice(UnregisterDeviceRequest request,
@@ -335,37 +343,37 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         }
     }
 
-        public String SetDownBlind(String deviceId) {
-                Device device = devices.get(deviceId);
-                if (device == null) {
-                log(deviceId, "TurnOff", "FAILURE", "{}", "Device not found");
-                return "Device not found: " + deviceId;
-                }
-
-                ManagedChannel channel = channels.get(deviceId);
-                if (channel == null || channel.isShutdown()) {
-                log(deviceId, "TurnOff", "FAILURE", "{}", "Channel unavailable");
-                return "gRPC channel non disponibile per device: " + deviceId;
-                }
-
-                if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
-                return "Device is not a blind: " + deviceId;
-                }
-
-                BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
-                BlindSetDownRequest request = BlindSetDownRequest.newBuilder().build();
-
-                try {
-                BlindSetDownResponse resp = blindStub.setDown(request);
-                if (resp.getSuccess()) {
-                        return "Blind moved down for device " + deviceId + ": " + resp.getMessage();
-                } else {
-                        return "Failed to move down blind for device " + deviceId + ": " + resp.getMessage();
-                }
-                } catch (StatusRuntimeException e) {
-                return "gRPC error on setDown for device " + deviceId + ": " + e.getStatus().getDescription();
-                }
+    public String SetDownBlind(String deviceId) {
+        Device device = devices.get(deviceId);
+        if (device == null) {
+            log(deviceId, "TurnOff", "FAILURE", "{}", "Device not found");
+            return "Device not found: " + deviceId;
         }
+
+        ManagedChannel channel = channels.get(deviceId);
+        if (channel == null || channel.isShutdown()) {
+            log(deviceId, "TurnOff", "FAILURE", "{}", "Channel unavailable");
+            return "gRPC channel non disponibile per device: " + deviceId;
+        }
+
+        if (!device.getDeviceType().equalsIgnoreCase("BLIND")) {
+            return "Device is not a blind: " + deviceId;
+        }
+
+        BlindServiceGrpc.BlindServiceBlockingStub blindStub = BlindServiceGrpc.newBlockingStub(channel);
+        BlindSetDownRequest request = BlindSetDownRequest.newBuilder().build();
+
+        try {
+            BlindSetDownResponse resp = blindStub.setDown(request);
+            if (resp.getSuccess()) {
+                return "Blind moved down for device " + deviceId + ": " + resp.getMessage();
+            } else {
+                return "Failed to move down blind for device " + deviceId + ": " + resp.getMessage();
+            }
+        } catch (StatusRuntimeException e) {
+            return "gRPC error on setDown for device " + deviceId + ": " + e.getStatus().getDescription();
+        }
+    }
 
     public String turnOffDevice(String deviceId) {
         Device device = devices.get(deviceId);
@@ -537,9 +545,9 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             .newBlockingStub(channel);
                     MotionSensorGetStatusResponse resp = stub
                             .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-                    String out = "MotionSensor status: " 
-                                + "is_on=" + resp.getIsOn() 
-                                + ", motionDetected=" + resp.getMotionDetected();
+                    String out = "MotionSensor status: "
+                            + "is_on=" + resp.getIsOn()
+                            + ", motionDetected=" + resp.getMotionDetected();
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }
@@ -742,7 +750,7 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                             resp.getSuccess() ? null : resp.getMessage());
                     return msg;
                 }
-                 case "AIRCONDITIONER": {
+                case "AIRCONDITIONER": {
                     AirConditionerServiceGrpc.AirConditionerServiceBlockingStub stub = AirConditionerServiceGrpc
                             .newBlockingStub(channel);
                     SetAirConditionerProgramRequest req = SetAirConditionerProgramRequest.newBuilder()
@@ -846,12 +854,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         }
     }
 
-        // campi per l’allarme
-        private boolean alarmActive = false;
-        private boolean alarmTriggered = false;
-
-        public synchronized RegisterDeviceResponse registerDeviceHttp(String deviceId, String deviceType,
-                                                              String address, int port) {
+    public synchronized RegisterDeviceResponse registerDeviceHttp(String deviceId, String deviceType,
+            String address, int port) {
         // normalizza tipo (alcune API usano underscore, altre no)
         String normalizedType = deviceType.replace("_", "");
 
@@ -861,448 +865,527 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
         // chiudi canale precedente se stai ri-registrando lo stesso id
         ManagedChannel old = channels.remove(deviceId);
         if (old != null && !old.isShutdown()) {
-                try {
+            try {
                 old.shutdownNow();
-                } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
 
         try {
-                // crea device
-                Device device = Device.newBuilder()
-                        .setDeviceId(deviceId)
-                        .setDeviceType(normalizedType)
-                        .setAddress(address)
-                        .setPort(port)
-                        .setOnline(true)
-                        .build();
-                devices.put(deviceId, device);
+            // crea device
+            Device device = Device.newBuilder()
+                    .setDeviceId(deviceId)
+                    .setDeviceType(normalizedType)
+                    .setAddress(address)
+                    .setPort(port)
+                    .setOnline(true)
+                    .build();
+            devices.put(deviceId, device);
 
-                // crea canale gRPC
-                ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
-                        .usePlaintext()
-                        .build();
-                channels.put(deviceId, ch);
+            // crea canale gRPC
+            ManagedChannel ch = ManagedChannelBuilder.forAddress(address, port)
+                    .usePlaintext()
+                    .build();
+            channels.put(deviceId, ch);
 
-                log(deviceId, "Register", "SUCCESS", payload, null);
+            log(deviceId, "Register", "SUCCESS", payload, null);
 
-                // ritorna RegisterDeviceResponse come nella prima versione
-                return RegisterDeviceResponse.newBuilder()
-                        .setSuccess(true)
-                        .setMessage("Device registered: " + deviceId)
-                        .build();
+            // ritorna RegisterDeviceResponse come nella prima versione
+            return RegisterDeviceResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Device registered: " + deviceId)
+                    .build();
 
         } catch (Exception e) {
-                log(deviceId, "Register", "FAILURE", payload, e.getMessage());
-                throw e;
+            log(deviceId, "Register", "FAILURE", payload, e.getMessage());
+            throw e;
         }
-        }
+    }
 
-        public synchronized String activateAlarm(boolean enable) {
+    private final Set<String> tokens = new HashSet<>();
+    private final RestTemplate restTemplate;
+
+    private boolean alarmActive;
+    private boolean alarmTriggered;
+
+    private static final String EXPO_URL = "https://exp.host/--/api/v2/push/send";
+
+    @Autowired
+    public DeviceManagerServiceImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    // --- TOKEN MANAGEMENT ---
+    public synchronized void saveToken(String token) {
+        tokens.add(token);
+    }
+
+    public synchronized Set<String> getAllTokens() {
+        return tokens;
+    }
+
+    // --- ALARM MANAGEMENT ---
+    public synchronized String activateAlarm(boolean enable) {
         this.alarmActive = enable;
-        this.alarmTriggered = false; 
-
+        this.alarmTriggered = false;
         return "Alarm is now " + (alarmActive ? "active" : "inactive");
+    }
+
+    @Scheduled(fixedRate = 5000)
+    public synchronized void scheduledSensorCheck() {
+        if (alarmActive) {
+            System.out.println("⏱ Scheduled check: checking all sensors... (alarmActive=" + alarmActive + ")");
+            checkAllSensors();
+            System.out.println("⏱ Scheduled check completed. alarmTriggered=" + alarmTriggered);
         }
+    }
 
-        // Scheduler che controlla i sensori ogni 5 secondi
-        @Scheduled(fixedRate = 5000)
-        public synchronized void scheduledSensorCheck() {
-                if (alarmActive) {
-                System.out.println("⏱ Scheduled check: checking all sensors... (alarmActive=" + alarmActive + ")");
-                checkAllSensors();
-                System.out.println("⏱ Scheduled check completed. alarmTriggered=" + alarmTriggered);
-                }
+    public synchronized void checkAllSensors() {
+        if (devices == null || devices.isEmpty()) {
+            return;
         }
+        for (Device device : devices.values()) {
+            if ("MOTIONSENSOR".equalsIgnoreCase(device.getDeviceType())) {
+                ManagedChannel channel = channels.get(device.getDeviceId());
+                if (channel == null || channel.isShutdown())
+                    continue;
 
-        public synchronized void checkAllSensors() {
-                if (devices == null || devices.isEmpty()) {
-                return;
-                }
-                for (Device device : devices.values()) {
-                        if ("MOTIONSENSOR".equalsIgnoreCase(device.getDeviceType())) {
-                        ManagedChannel channel = channels.get(device.getDeviceId());
-                        if (channel == null || channel.isShutdown())
-                                continue;
-
-                        try {
-                                MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub =
-                                        MotionSensorServiceGrpc.newBlockingStub(channel);
-
-                                MotionSensorGetStatusResponse resp = stub.getStatus(MotionSensorGetStatusRequest.newBuilder().build());
-
-                                if (resp.getMotionDetected() && alarmActive) {
-                                alarmTriggered = true;
-                                }
-
-                        } catch (StatusRuntimeException e) {
-                                System.err.println("❌ gRPC error on " + device.getDeviceId() + ": " + e.getStatus());                        }
-                        }
-                }
-        }
-        //Stato allarme
-        public synchronized String getAlarmStatus() {
-        return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
-        }
-
-        private Set<String> ensureSet(Map<String, Set<String>> map, String key) {
-                return map.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet());
-        }
-
-        private Map<String, String> executeForDevices(Collection<String> ids, Function<String, String> actionPerDevice) {
-        Map<String, String> out = new LinkedHashMap<>();
-                if (ids == null || ids.isEmpty()) return out;
-                for (String id : ids) {
-                        try {
-                        out.put(id, actionPerDevice.apply(id));
-                        } catch (Exception e) {
-                        out.put(id, "ERROR: " + e.getMessage());
-                        }
-                }
-        return out;
-        }
-
-        // ===== Rooms =====
-        public String createRoom(String roomId) {
-        try {
-                rgRepo.createRoom(roomId); // <-- prima era roomGroupRepo
-                rooms.putIfAbsent(roomId, ConcurrentHashMap.newKeySet());
-                return "Room created: " + roomId;
-        } catch (Exception e) {
-                return "ERROR creating room: " + e.getMessage();
-        }
-        }
-
-        public String addDeviceToRoom(String roomId, String deviceId) {
-                if (!devices.containsKey(deviceId)) return "Device not found: " + deviceId;
                 try {
-                        rgRepo.addDeviceToRoom(roomId, deviceId); // <-- prima era roomGroupRepo
-                        rooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
-                        return "Added " + deviceId + " to room " + roomId;
-                } catch (Exception e) {
-                        return "ERROR adding device to room: " + e.getMessage();
+                    MotionSensorServiceGrpc.MotionSensorServiceBlockingStub stub = MotionSensorServiceGrpc
+                            .newBlockingStub(channel);
+
+                    MotionSensorGetStatusResponse resp = stub
+                            .getStatus(MotionSensorGetStatusRequest.newBuilder().build());
+
+                    if (resp.getMotionDetected() && alarmActive) {
+                        if (!alarmTriggered) {
+                            alarmTriggered = true;
+                            notifyAllUsers();
+                        }
+                    }
+
+                } catch (StatusRuntimeException e) {
+                    System.err.println("❌ gRPC error on " + device.getDeviceId() + ": " + e.getStatus());
                 }
+            }
         }
+    }
 
-        public String removeDeviceFromRoom(String roomId, String deviceId) {
+    public synchronized String getAlarmStatus() {
+        return alarmTriggered ? "Alarm triggered!" : "Alarm not triggered";
+    }
+
+    public synchronized void forceTriggerAlarm() {
+        this.alarmTriggered = true;
+        notifyAllUsers();
+    }
+
+    // --- NOTIFICATION MANAGEMENT ---
+    private void notifyAllUsers() {
+        for (String token : tokens) {
+            sendPushNotification(token, "🚨 Movimento rilevato! L'allarme è scattato!");
+        }
+    }
+
+    private void sendPushNotification(String expoPushToken, String message) {
+        Map<String, Object> body = Map.of(
+                "to", expoPushToken,
+                "sound", "default",
+                "title", "Allarme",
+                "body", message);
+
         try {
-                rgRepo.removeDeviceFromRoom(roomId, deviceId); // <-- prima era roomGroupRepo
-                Set<String> set = rooms.get(roomId);
-                if (set != null) set.remove(deviceId);
-                return "Removed " + deviceId + " from room " + roomId;
+            restTemplate.postForObject(EXPO_URL, body, String.class);
+            System.out.println("✅ Notifica inviata a " + expoPushToken);
         } catch (Exception e) {
-                return "ERROR removing device from room: " + e.getMessage();
+            System.err.println("❌ Errore invio notifica a " + expoPushToken + ": " + e.getMessage());
         }
-        }
+    }
 
-        public Set<String> listRoomDevices(String roomId) {
+    private Set<String> ensureSet(Map<String, Set<String>> map, String key) {
+        return map.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet());
+    }
+
+    private Map<String, String> executeForDevices(Collection<String> ids, Function<String, String> actionPerDevice) {
+        Map<String, String> out = new LinkedHashMap<>();
+        if (ids == null || ids.isEmpty())
+            return out;
+        for (String id : ids) {
+            try {
+                out.put(id, actionPerDevice.apply(id));
+            } catch (Exception e) {
+                out.put(id, "ERROR: " + e.getMessage());
+            }
+        }
+        return out;
+    }
+
+    // ===== Rooms =====
+    public String createRoom(String roomId) {
+        try {
+            rgRepo.createRoom(roomId); // <-- prima era roomGroupRepo
+            rooms.putIfAbsent(roomId, ConcurrentHashMap.newKeySet());
+            return "Room created: " + roomId;
+        } catch (Exception e) {
+            return "ERROR creating room: " + e.getMessage();
+        }
+    }
+
+    public String addDeviceToRoom(String roomId, String deviceId) {
+        if (!devices.containsKey(deviceId))
+            return "Device not found: " + deviceId;
+        try {
+            rgRepo.addDeviceToRoom(roomId, deviceId); // <-- prima era roomGroupRepo
+            rooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
+            return "Added " + deviceId + " to room " + roomId;
+        } catch (Exception e) {
+            return "ERROR adding device to room: " + e.getMessage();
+        }
+    }
+
+    public String removeDeviceFromRoom(String roomId, String deviceId) {
+        try {
+            rgRepo.removeDeviceFromRoom(roomId, deviceId); // <-- prima era roomGroupRepo
+            Set<String> set = rooms.get(roomId);
+            if (set != null)
+                set.remove(deviceId);
+            return "Removed " + deviceId + " from room " + roomId;
+        } catch (Exception e) {
+            return "ERROR removing device from room: " + e.getMessage();
+        }
+    }
+
+    public Set<String> listRoomDevices(String roomId) {
         return rooms.getOrDefault(roomId, Set.of());
-        }
+    }
 
-        // ===== Groups =====
-        public String createGroup(String groupId) {
+    // ===== Groups =====
+    public String createGroup(String groupId) {
         try {
-                rgRepo.createGroup(groupId); // <-- prima era roomGroupRepo
-                groups.putIfAbsent(groupId, ConcurrentHashMap.newKeySet());
-                return "Group created: " + groupId;
+            rgRepo.createGroup(groupId); // <-- prima era roomGroupRepo
+            groups.putIfAbsent(groupId, ConcurrentHashMap.newKeySet());
+            return "Group created: " + groupId;
         } catch (Exception e) {
-                return "ERROR creating group: " + e.getMessage();
+            return "ERROR creating group: " + e.getMessage();
         }
-        }
+    }
 
-        public String addDeviceToGroup(String groupId, String deviceId) {
-        if (!devices.containsKey(deviceId)) return "Device not found: " + deviceId;
+    public String addDeviceToGroup(String groupId, String deviceId) {
+        if (!devices.containsKey(deviceId))
+            return "Device not found: " + deviceId;
         try {
-                rgRepo.addDeviceToGroup(groupId, deviceId); // <-- prima era roomGroupRepo
-                groups.computeIfAbsent(groupId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
-                return "Added " + deviceId + " to group " + groupId;
+            rgRepo.addDeviceToGroup(groupId, deviceId); // <-- prima era roomGroupRepo
+            groups.computeIfAbsent(groupId, k -> ConcurrentHashMap.newKeySet()).add(deviceId);
+            return "Added " + deviceId + " to group " + groupId;
         } catch (Exception e) {
-                return "ERROR adding device to group: " + e.getMessage();
+            return "ERROR adding device to group: " + e.getMessage();
         }
-        }
+    }
 
-        public String removeDeviceFromGroup(String groupId, String deviceId) {
+    public String removeDeviceFromGroup(String groupId, String deviceId) {
         try {
-                rgRepo.removeDeviceFromGroup(groupId, deviceId); // <-- prima era roomGroupRepo
-                Set<String> set = groups.get(groupId);
-                if (set != null) set.remove(deviceId);
-                return "Removed " + deviceId + " from group " + groupId;
+            rgRepo.removeDeviceFromGroup(groupId, deviceId); // <-- prima era roomGroupRepo
+            Set<String> set = groups.get(groupId);
+            if (set != null)
+                set.remove(deviceId);
+            return "Removed " + deviceId + " from group " + groupId;
         } catch (Exception e) {
-                return "ERROR removing device from group: " + e.getMessage();
+            return "ERROR removing device from group: " + e.getMessage();
         }
-        }
+    }
 
-        public Set<String> listGroupDevices(String groupId) {
+    public Set<String> listGroupDevices(String groupId) {
         return groups.getOrDefault(groupId, Set.of());
-        }
+    }
 
-        // broadcast comandi
-        public Map<String, String> turnOnRoom(String roomId) {
+    // broadcast comandi
+    public Map<String, String> turnOnRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::turnOnDevice);
-        }
+    }
 
-        public Map<String, String> turnOffRoom(String roomId) {
+    public Map<String, String> turnOffRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::turnOffDevice);
-        }
+    }
 
-        public Map<String, String> startRoom(String roomId) {
+    public Map<String, String> startRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::startDevice);
-        }
+    }
 
-        public Map<String, String> stopRoom(String roomId) {
+    public Map<String, String> stopRoom(String roomId) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, this::stopDevice);
-        }
+    }
 
-        public Map<String, String> setProgramRoom(String roomId, int program) {
+    public Map<String, String> setProgramRoom(String roomId, int program) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, id -> setProgramDevice(id, program));
-        }
+    }
 
-        public Map<String, String> setTemperatureRoom(String roomId, int temperature) {
+    public Map<String, String> setTemperatureRoom(String roomId, int temperature) {
         Set<String> ids = listRoomDevices(roomId);
         return executeForDevices(ids, id -> setTemperatureOven(id, temperature));
-        }
+    }
 
-        public Map<String, String> turnOnGroup(String groupId) {
+    public Map<String, String> turnOnGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::turnOnDevice);
-        }
+    }
 
-        public Map<String, String> turnOffGroup(String groupId) {
+    public Map<String, String> turnOffGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::turnOffDevice);
-        }
+    }
 
-        public Map<String, String> startGroup(String groupId) {
+    public Map<String, String> startGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::startDevice);
-        }
+    }
 
-        public Map<String, String> stopGroup(String groupId) {
+    public Map<String, String> stopGroup(String groupId) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, this::stopDevice);
-        }
+    }
 
-        public Map<String, String> setProgramGroup(String groupId, int program) {
+    public Map<String, String> setProgramGroup(String groupId, int program) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, id -> setProgramDevice(id, program));
-        }
+    }
 
-        public Map<String, String> setTemperatureGroup(String groupId, int temperature) {
+    public Map<String, String> setTemperatureGroup(String groupId, int temperature) {
         Set<String> ids = listGroupDevices(groupId);
         return executeForDevices(ids, id -> setTemperatureOven(id, temperature));
-        }
+    }
 
-        @PostConstruct
-        public void initRoomsAndGroups() {
+    @PostConstruct
+    public void initRoomsAndGroups() {
         try {
-                rooms.clear();
-                groups.clear();
+            rooms.clear();
+            groups.clear();
 
-                // Rooms
-                for (String roomId : rgRepo.listRooms()) {
+            // Rooms
+            for (String roomId : rgRepo.listRooms()) {
                 Set<String> set = ConcurrentHashMap.newKeySet();
                 set.addAll(rgRepo.listDevicesInRoom(roomId));
                 rooms.put(roomId, set);
-                }
+            }
 
-                // Groups
-                for (String groupId : rgRepo.listGroups()) {
+            // Groups
+            for (String groupId : rgRepo.listGroups()) {
                 Set<String> set = ConcurrentHashMap.newKeySet();
                 set.addAll(rgRepo.listDevicesInGroup(groupId));
                 groups.put(groupId, set);
-                }
+            }
 
-                System.out.println("Rooms/Groups loaded from DB: rooms=" + rooms.keySet() + " groups=" + groups.keySet());
-        
-                displayNames.clear();
-                displayNames.putAll(aliasRepo.loadAll());
-                System.out.println("Device aliases loaded: " + displayNames);
+            System.out.println("Rooms/Groups loaded from DB: rooms=" + rooms.keySet() + " groups=" + groups.keySet());
+
+            displayNames.clear();
+            displayNames.putAll(aliasRepo.loadAll());
+            System.out.println("Device aliases loaded: " + displayNames);
         } catch (Exception e) {
-                System.err.println("Failed loading rooms/groups/aliases: " + e.getMessage());
+            System.err.println("Failed loading rooms/groups/aliases: " + e.getMessage());
         }
-        }
+    }
 
-        // Passthrough per le API di listing
-        public List<String> listRooms() throws Exception {
+    // Passthrough per le API di listing
+    public List<String> listRooms() throws Exception {
         return rgRepo.listRooms();
-        }
-        public List<String> listGroups() throws Exception {
+    }
+
+    public List<String> listGroups() throws Exception {
         return rgRepo.listGroups();
-        }
-        public Map<String, Set<String>> listAllRooms() {
+    }
+
+    public Map<String, Set<String>> listAllRooms() {
         return Collections.unmodifiableMap(rooms);
-        }
+    }
 
-        public Map<String, Set<String>> listAllGroups() {
+    public Map<String, Set<String>> listAllGroups() {
         return Collections.unmodifiableMap(groups);
-        }
-        // in DeviceManagerServiceImpl
-        public List<DeviceEventRepository.DeviceEvent> getRecentLogs(int limit) throws Exception {
+    }
+
+    // in DeviceManagerServiceImpl
+    public List<DeviceEventRepository.DeviceEvent> getRecentLogs(int limit) throws Exception {
         return repo.listRecent(limit);
-        }
+    }
 
-        public List<DeviceEventRepository.DeviceEvent> getLogsByDevice(String deviceId, int limit) throws Exception {
+    public List<DeviceEventRepository.DeviceEvent> getLogsByDevice(String deviceId, int limit) throws Exception {
         return repo.listByDevice(deviceId, limit);
-        }
+    }
 
-        /** Rinomina stanza: DB + cache in-memory + log */
-        public synchronized String renameRoom(String oldId, String newId) {
-        if (oldId.equals(newId)) return "No-op: same room id.";
+    /** Rinomina stanza: DB + cache in-memory + log */
+    public synchronized String renameRoom(String oldId, String newId) {
+        if (oldId.equals(newId))
+            return "No-op: same room id.";
 
         try {
-                // DB
-                rgRepo.renameRoom(oldId, newId);
+            // DB
+            rgRepo.renameRoom(oldId, newId);
 
-                // Cache in-memory
-                Set<String> devs = rooms.remove(oldId);
-                if (devs == null) devs = ConcurrentHashMap.newKeySet();
-                rooms.put(newId, devs);
+            // Cache in-memory
+            Set<String> devs = rooms.remove(oldId);
+            if (devs == null)
+                devs = ConcurrentHashMap.newKeySet();
+            rooms.put(newId, devs);
 
-                log(newId, "RenameRoom", "SUCCESS",
-                String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
-                return "Room renamed: " + oldId + " → " + newId;
+            log(newId, "RenameRoom", "SUCCESS",
+                    String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
+            return "Room renamed: " + oldId + " → " + newId;
         } catch (Exception e) {
-                log(oldId, "RenameRoom", "FAILURE", "{}", e.getMessage());
-                return "ERROR renaming room: " + e.getMessage();
+            log(oldId, "RenameRoom", "FAILURE", "{}", e.getMessage());
+            return "ERROR renaming room: " + e.getMessage();
         }
-        }
+    }
 
-        /** Elimina stanza: DB + cache + log */
-        public synchronized String deleteRoom(String roomId) {
+    /** Elimina stanza: DB + cache + log */
+    public synchronized String deleteRoom(String roomId) {
         try {
-                rgRepo.deleteRoom(roomId);
-                rooms.remove(roomId);
-                log(roomId, "DeleteRoom", "SUCCESS", "{}", null);
-                return "Room deleted: " + roomId;
+            rgRepo.deleteRoom(roomId);
+            rooms.remove(roomId);
+            log(roomId, "DeleteRoom", "SUCCESS", "{}", null);
+            return "Room deleted: " + roomId;
         } catch (Exception e) {
-                log(roomId, "DeleteRoom", "FAILURE", "{}", e.getMessage());
-                return "ERROR deleting room: " + e.getMessage();
+            log(roomId, "DeleteRoom", "FAILURE", "{}", e.getMessage());
+            return "ERROR deleting room: " + e.getMessage();
         }
-        }
+    }
 
-        /** Rinomina gruppo: DB + cache + log */
-        public synchronized String renameGroup(String oldId, String newId) {
-        if (oldId.equals(newId)) return "No-op: same group id.";
+    /** Rinomina gruppo: DB + cache + log */
+    public synchronized String renameGroup(String oldId, String newId) {
+        if (oldId.equals(newId))
+            return "No-op: same group id.";
         try {
-                rgRepo.renameGroup(oldId, newId);
-                Set<String> devs = groups.remove(oldId);
-                if (devs == null) devs = ConcurrentHashMap.newKeySet();
-                groups.put(newId, devs);
+            rgRepo.renameGroup(oldId, newId);
+            Set<String> devs = groups.remove(oldId);
+            if (devs == null)
+                devs = ConcurrentHashMap.newKeySet();
+            groups.put(newId, devs);
 
-                log(newId, "RenameGroup", "SUCCESS",
-                String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
-                return "Group renamed: " + oldId + " → " + newId;
+            log(newId, "RenameGroup", "SUCCESS",
+                    String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
+            return "Group renamed: " + oldId + " → " + newId;
         } catch (Exception e) {
-                log(oldId, "RenameGroup", "FAILURE", "{}", e.getMessage());
-                return "ERROR renaming group: " + e.getMessage();
+            log(oldId, "RenameGroup", "FAILURE", "{}", e.getMessage());
+            return "ERROR renaming group: " + e.getMessage();
         }
-        }
+    }
 
-        /** Elimina gruppo: DB + cache + log */
-        public synchronized String deleteGroup(String groupId) {
+    /** Elimina gruppo: DB + cache + log */
+    public synchronized String deleteGroup(String groupId) {
         try {
-                rgRepo.deleteGroup(groupId);
-                groups.remove(groupId);
-                log(groupId, "DeleteGroup", "SUCCESS", "{}", null);
-                return "Group deleted: " + groupId;
+            rgRepo.deleteGroup(groupId);
+            groups.remove(groupId);
+            log(groupId, "DeleteGroup", "SUCCESS", "{}", null);
+            return "Group deleted: " + groupId;
         } catch (Exception e) {
-                log(groupId, "DeleteGroup", "FAILURE", "{}", e.getMessage());
-                return "ERROR deleting group: " + e.getMessage();
+            log(groupId, "DeleteGroup", "FAILURE", "{}", e.getMessage());
+            return "ERROR deleting group: " + e.getMessage();
         }
+    }
+
+    /**
+     * Rinomina un device (cambia il suo "deviceId").
+     * Nota: il device remoto rimane connesso sul canale già aperto; qui
+     * re-indicizziamo le mappe,
+     * aggiorniamo i riferimenti in rooms/groups e in DB per i link.
+     */
+    public synchronized String renameDevice(String oldId, String newId) {
+        if (oldId.equals(newId))
+            return "No-op: same device id.";
+        Device dev = devices.get(oldId);
+        if (dev == null)
+            return "Device not found: " + oldId;
+        if (devices.containsKey(newId))
+            return "Device id already exists: " + newId;
+
+        try {
+            // DB: aggiorna le tabelle di linking (room_devices / group_devices)
+            rgRepo.renameDeviceEverywhere(oldId, newId);
+
+            // Canale gRPC: re-key
+            ManagedChannel ch = channels.remove(oldId);
+            if (ch != null)
+                channels.put(newId, ch);
+
+            // Device proto aggiornato e re-key nella mappa
+            Device updated = Device.newBuilder(dev)
+                    .setDeviceId(newId)
+                    .build();
+            devices.remove(oldId);
+            devices.put(newId, updated);
+
+            // Rooms cache
+            rooms.forEach((room, set) -> {
+                if (set.remove(oldId))
+                    set.add(newId);
+            });
+
+            // Groups cache
+            groups.forEach((grp, set) -> {
+                if (set.remove(oldId))
+                    set.add(newId);
+            });
+
+            log(newId, "RenameDevice", "SUCCESS",
+                    String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
+            return "Device renamed: " + oldId + " → " + newId;
+        } catch (Exception e) {
+            log(oldId, "RenameDevice", "FAILURE", "{}", e.getMessage());
+            return "ERROR renaming device: " + e.getMessage();
         }
+    }
 
-        /**
-         * Rinomina un device (cambia il suo "deviceId").
-         * Nota: il device remoto rimane connesso sul canale già aperto; qui re-indicizziamo le mappe,
-         * aggiorniamo i riferimenti in rooms/groups e in DB per i link. 
-         */
-        public synchronized String renameDevice(String oldId, String newId) {
-                if (oldId.equals(newId)) return "No-op: same device id.";
-                        Device dev = devices.get(oldId);
-                if (dev == null) return "Device not found: " + oldId;
-                if (devices.containsKey(newId)) return "Device id already exists: " + newId;
-
-                try {
-                        // DB: aggiorna le tabelle di linking (room_devices / group_devices)
-                        rgRepo.renameDeviceEverywhere(oldId, newId);
-
-                        // Canale gRPC: re-key
-                        ManagedChannel ch = channels.remove(oldId);
-                        if (ch != null) channels.put(newId, ch);
-
-                        // Device proto aggiornato e re-key nella mappa
-                        Device updated = Device.newBuilder(dev)
-                                .setDeviceId(newId)
-                                .build();
-                        devices.remove(oldId);
-                        devices.put(newId, updated);
-
-                        // Rooms cache
-                        rooms.forEach((room, set) -> {
-                        if (set.remove(oldId)) set.add(newId);
-                        });
-
-                        // Groups cache
-                        groups.forEach((grp, set) -> {
-                        if (set.remove(oldId)) set.add(newId);
-                        });
-
-                        log(newId, "RenameDevice", "SUCCESS",
-                        String.format("{\"from\":\"%s\",\"to\":\"%s\"}", oldId, newId), null);
-                        return "Device renamed: " + oldId + " → " + newId;
-                } catch (Exception e) {
-                        log(oldId, "RenameDevice", "FAILURE", "{}", e.getMessage());
-                        return "ERROR renaming device: " + e.getMessage();
-                }
+    /**
+     * Imposta/aggiorna il display name (alias) di un device – persistente in DB e
+     * in cache.
+     */
+    public synchronized String setDeviceDisplayName(String deviceId, String displayName) {
+        if (!devices.containsKey(deviceId)) {
+            return "Device not found: " + deviceId;
         }
-
-        /** Imposta/aggiorna il display name (alias) di un device – persistente in DB e in cache. */
-        public synchronized String setDeviceDisplayName(String deviceId, String displayName) {
-                if (!devices.containsKey(deviceId)) {
-                        return "Device not found: " + deviceId;
-                }
-                try {
-                        aliasRepo.upsertAlias(deviceId, displayName);
-                        displayNames.put(deviceId, displayName);
-                        log(deviceId, "SetDisplayName", "SUCCESS",
-                                String.format("{\"display_name\":\"%s\"}", displayName), null);
-                        return "Display name set for " + deviceId + ": " + displayName;
-                        } catch (Exception e) {
-                                log(deviceId, "SetDisplayName", "FAILURE",
-                                        String.format("{\"display_name\":\"%s\"}", displayName), e.getMessage());
-                                return "ERROR setting display name: " + e.getMessage();
-                }
+        try {
+            aliasRepo.upsertAlias(deviceId, displayName);
+            displayNames.put(deviceId, displayName);
+            log(deviceId, "SetDisplayName", "SUCCESS",
+                    String.format("{\"display_name\":\"%s\"}", displayName), null);
+            return "Display name set for " + deviceId + ": " + displayName;
+        } catch (Exception e) {
+            log(deviceId, "SetDisplayName", "FAILURE",
+                    String.format("{\"display_name\":\"%s\"}", displayName), e.getMessage());
+            return "ERROR setting display name: " + e.getMessage();
         }
+    }
 
-        /** Rimuove l’alias del device (torna al deviceId come nome “visuale”). */
-        public synchronized String clearDeviceDisplayName(String deviceId) {
-                if (!devices.containsKey(deviceId)) {
-                        return "Device not found: " + deviceId;
-                }
-                try {
-                        aliasRepo.deleteAlias(deviceId);
-                        displayNames.remove(deviceId);
-                        log(deviceId, "ClearDisplayName", "SUCCESS", "{}", null);
-                        return "Display name cleared for " + deviceId;
-                } catch (Exception e) {
-                        log(deviceId, "ClearDisplayName", "FAILURE", "{}", e.getMessage());
-                        return "ERROR clearing display name: " + e.getMessage();
-                }
+    /** Rimuove l’alias del device (torna al deviceId come nome “visuale”). */
+    public synchronized String clearDeviceDisplayName(String deviceId) {
+        if (!devices.containsKey(deviceId)) {
+            return "Device not found: " + deviceId;
         }
+        try {
+            aliasRepo.deleteAlias(deviceId);
+            displayNames.remove(deviceId);
+            log(deviceId, "ClearDisplayName", "SUCCESS", "{}", null);
+            return "Display name cleared for " + deviceId;
+        } catch (Exception e) {
+            log(deviceId, "ClearDisplayName", "FAILURE", "{}", e.getMessage());
+            return "ERROR clearing display name: " + e.getMessage();
+        }
+    }
 
-        /** Recupera il display name se presente, altrimenti il deviceId. */
-        public String getDisplayNameOrId(String deviceId) {
-                String dn = displayNames.get(deviceId);
-                return (dn == null || dn.isBlank()) ? deviceId : dn;
-        }
+    /** Recupera il display name se presente, altrimenti il deviceId. */
+    public String getDisplayNameOrId(String deviceId) {
+        String dn = displayNames.get(deviceId);
+        return (dn == null || dn.isBlank()) ? deviceId : dn;
+    }
 
-        /** Opzionale: ritorna la mappa completa deviceId -> displayName (solo quelli che hanno alias). */
-        public Map<String,String> listDisplayNames() {
-                return new HashMap<>(displayNames);
-        }
+    /**
+     * Opzionale: ritorna la mappa completa deviceId -> displayName (solo quelli che
+     * hanno alias).
+     */
+    public Map<String, String> listDisplayNames() {
+        return new HashMap<>(displayNames);
+    }
 
 }

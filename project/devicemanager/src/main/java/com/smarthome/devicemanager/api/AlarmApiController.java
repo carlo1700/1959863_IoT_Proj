@@ -1,9 +1,10 @@
 package com.smarthome.devicemanager.api;
 
 import com.smarthome.devicemanager.DeviceManagerServiceImpl;
-
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/alarm")
@@ -34,6 +35,31 @@ public class AlarmApiController {
         try {
             String status = service.getAlarmStatus();
             return ResponseEntity.ok(status);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body("Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+    }
+
+    // POST per registrare un token push
+    @PostMapping("/register-token")
+    public ResponseEntity<String> registerToken(@RequestBody Map<String, String> body) {
+        try {
+            String token = body.get("token");
+            service.saveToken(token);   // ora chiami direttamente il DeviceManagerServiceImpl
+            return ResponseEntity.ok("Token registrato");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Errore: " + e.getMessage());
+        }
+    }
+
+    // POST per forzare lo scatto dell’allarme (utile nei test)
+    @PostMapping("/trigger")
+    public ResponseEntity<String> triggerAlarm() {
+        try {
+            service.forceTriggerAlarm();
+            return ResponseEntity.ok("Alarm triggered manually and notifications sent.");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500)
