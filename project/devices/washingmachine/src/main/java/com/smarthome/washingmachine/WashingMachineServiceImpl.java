@@ -45,7 +45,6 @@ public class WashingMachineServiceImpl extends WashingMachineServiceGrpc.Washing
             StreamObserver<WashingMachineStartResponse> responseObserver) {
 
         if (!isOn) {
-            isRunning = true;
             WashingMachineStartResponse response = WashingMachineStartResponse.newBuilder()
                     .setSuccess(false)
                     .setMessage("Washing machine is not turned on")
@@ -54,6 +53,15 @@ public class WashingMachineServiceImpl extends WashingMachineServiceGrpc.Washing
             responseObserver.onCompleted();
             return;
         }
+        isRunning = true;
+
+        WashingMachineStartResponse response = WashingMachineStartResponse.newBuilder()
+                .setSuccess(true)
+                .setMessage("Washing machine started")
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override

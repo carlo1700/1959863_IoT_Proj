@@ -37,12 +37,25 @@ public class MotionSensorServiceImpl extends MotionSensorServiceGrpc.MotionSenso
     @Override
     public void getStatus(MotionSensorGetStatusRequest request,
                           StreamObserver<MotionSensorGetStatusResponse> responseObserver) {
+        
+        if (isOn == false) {
+            MotionSensorGetStatusResponse response = MotionSensorGetStatusResponse.newBuilder()
+                    .setMotionDetected(false)
+                    .setIsOn(false) // ✅ sensore spento
+                    .build();
+
+            System.out.println("📡 MotionSensor status: isOn=false, motionDetected=false");
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
 
         boolean motionDetected = Math.random() < 0.5;
 
         MotionSensorGetStatusResponse response = MotionSensorGetStatusResponse.newBuilder()
                 .setMotionDetected(motionDetected)
-                .setIsOn(isOn) // ✅ ora prende lo stato reale del sensore
+                .setIsOn(isOn)
                 .build();
 
         System.out.println("📡 MotionSensor status: isOn=" + isOn + ", motionDetected=" + motionDetected);
