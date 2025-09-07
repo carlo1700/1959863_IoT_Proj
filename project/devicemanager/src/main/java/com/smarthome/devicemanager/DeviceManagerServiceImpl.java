@@ -556,7 +556,8 @@ public class DeviceManagerServiceImpl extends DeviceManagerServiceGrpc.DeviceMan
                     OvenGetStatusResponse resp = stub.getStatus(OvenGetStatusRequest.newBuilder().build());
                     String out = "Oven status: isOn=" + resp.getIsOn()
                             + ", temp=" + resp.getTemperature() // qui ottieni la temperatura attuale
-                            + ", mode=" + resp.getCurrentProgram().name();
+                            + ", mode=" + resp.getCurrentProgram().name()
+                            + ", targetTemp=" + resp.getTargetTemperature(); // qui ottieni la temperatura target
                     log(deviceId, "GetStatus", "SUCCESS", "{}", null);
                     return out;
                 }

@@ -34,6 +34,21 @@ public class OvenServiceImpl extends OvenServiceGrpc.OvenServiceImplBase {
             heatingThread.interrupt();
         }
 
+        targetTemperature = 0;
+        currentProgram = OvenProgram.OVEN_PROGRAM_UNSPECIFIED;
+
+        // avvia un thread per raffreddare gradualmente
+        new Thread(() -> {
+            try {
+                while (temperature > 0) {
+                    temperature--;
+                    Thread.sleep(5000); // 5 secondi per ogni grado
+                }
+            } catch (InterruptedException e) {
+                // Thread interrotto, non fare nulla
+            }
+        }).start();
+
         OvenTurnOffResponse response = OvenTurnOffResponse.newBuilder()
                 .setSuccess(true)
                 .setMessage("Oven turned off")
@@ -81,6 +96,7 @@ public class OvenServiceImpl extends OvenServiceGrpc.OvenServiceImplBase {
                 .setIsOn(isOn)
                 .setTemperature(temperature)
                 .setCurrentProgram(currentProgram)
+                .setTargetTemperature(targetTemperature)
                 .build();
 
         responseObserver.onNext(response);

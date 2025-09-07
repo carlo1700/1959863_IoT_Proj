@@ -44,6 +44,7 @@ message OvenGetStatusResponse {
   bool is_on = 1;
   int32 temperature = 2;
   OvenProgram current_program = 3; // modalità attiva: statico o ventilato
+  int32 target_temperature = 4;
 }
 
 
